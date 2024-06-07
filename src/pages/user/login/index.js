@@ -17,8 +17,8 @@ import { GoogleLogin } from "@react-oauth/google";
 import { LoginSocialFacebook } from "reactjs-social-login";
 import { FacebookLoginButton } from "react-social-login-buttons";
 import { ROUTERS } from "utils/router";
-import { FacebookAuthProvider } from "firebase/auth";
-// import { auth } from "./firebase"
+import { FacebookAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "firebase.js"
 
 const Login = () => {
   const [password, setPassword] = useState("");
@@ -169,7 +169,7 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          // body: { token }, // Gửi token này tới server của bạn thông qua API
+          // body: { token }, 
         }
       );
 
@@ -179,7 +179,7 @@ const Login = () => {
         console.log("Login successful:", data);
         toast.success("Login Successfully");
         navigate(ROUTERS.USER.HOME);
-        // Tiếp tục xử lý tại đây sau khi đăng nhập thành công
+       
       } else {
         console.error("Backend error:", data);
         toast.error("Login Failed");
@@ -188,43 +188,44 @@ const Login = () => {
     } catch (error) {
       console.error("Error during login:", error);
       toast.error("Login Failed");
-      // Xử lý lỗi nếu có
     }
   };
 
+  
   const loginFacebook = async (response) => {
-    var token = response.data.accessToken; 
-    console.log("Facebook Token:", token);
-
     try {
-      const res = await fetch(
-        "https://courtcaller.azurewebsites.net/api/authentication/facebook-login?token=" +
-          token,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          // body: { token }, // Gửi token này tới server của bạn thông qua API
-        }
-      );
-
+      const provider = new FacebookAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+  
+      // Extract the access token from Firebase's stsTokenManager
+      const accessToken = result.user.stsTokenManager.accessToken;
+  
+      // Log the user info and token
+      console.log('Login successfully', result.user);
+      console.log('Access Token:', accessToken);
+  
+      // Send the access token to the back-end
+      const res = await fetch("https://courtcaller.azurewebsites.net/api/authentication/facebook-login?token=" + accessToken, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // body: JSON.stringify({ token: accessToken }),
+      });
+  
       const data = await res.json();
-
+  
       if (res.ok) {
         console.log("Login successful:", data);
         toast.success("Login Successfully");
         navigate(ROUTERS.USER.HOME);
-        // Tiếp tục xử lý tại đây sau khi đăng nhập thành công
       } else {
         console.error("Backend error:", data);
         toast.error("Login Failed");
-        throw new Error(data.message || "Facebook login failed");
       }
     } catch (error) {
-      console.error("Error during login:", error);
-      toast.error("Login Failed");
-      // Xử lý lỗi nếu có
+      console.error("Error:", error.message);
+      toast.error('Facebook login failed');
     }
   };
 
@@ -243,30 +244,10 @@ const Login = () => {
                     toast.error("Google login failed");
                   }}
                 />
-                <div>
-                  {!profile ? (
-                    <LoginSocialFacebook
-                      appId="471772832093989"
-                      onResolve={(response) => {
-                        console.log(response);
-                        setProfile(response.data);
-                        loginFacebook(response);
-                        toast.success('Login successfully')
-                      }}
-                      onReject={(error) => {
-                        console.log(error);
-                        toast.error('Login failed')
-                      }}
-                    >
-                      <FacebookLoginButton />
-                    </LoginSocialFacebook>
-                  ) : (
-                    ""
-                  )}
-                </div>
-                {/* <a href="#" className="icon" style={{ color: "blue" }}>
+                
+                <a onClick={loginFacebook} className="icon" style={{ color: "blue" }}>
                   <FaFacebookF />
-                </a> */}
+                </a> 
               </div>
               <span>or use your account for login</span>
               <input
