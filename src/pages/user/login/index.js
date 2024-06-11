@@ -177,6 +177,7 @@ const Login = () => {
 
       if (res.ok) {
         console.log("Login successful:", data);
+        localStorage.setItem("token", token);
         toast.success("Login Successfully");
         navigate(ROUTERS.USER.HOME);
        
@@ -217,6 +218,7 @@ const Login = () => {
   
       if (res.ok) {
         console.log("Login successful:", data);
+        localStorage.setItem("token", accessToken);
         toast.success("Login Successfully");
         navigate(ROUTERS.USER.HOME);
       } else {
