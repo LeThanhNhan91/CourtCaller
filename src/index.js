@@ -9,7 +9,7 @@ import { AuthProvider } from './AuthContext';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
-    <GoogleOAuthProvider clientId="272426862639-p6t7drbhrh22rep6bqrm3barul1b6f9l.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="1067794504090-5uaclt9g715islhrped711o814um4e7b.apps.googleusercontent.com">
       <AuthProvider>
         <RouterCustom />
       </AuthProvider>
