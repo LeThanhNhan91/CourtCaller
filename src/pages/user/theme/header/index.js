@@ -1,6 +1,10 @@
 import { memo, useState } from "react";
 import "./style.scss";
+import "./styleHeader.scss"
 import { AiOutlineUser } from "react-icons/ai";
+import { MdOutlineGridView } from "react-icons/md";
+import { LuHeartHandshake } from "react-icons/lu";
+import { RiLogoutBoxRFill } from "react-icons/ri";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { ROUTERS } from "utils/router";
@@ -21,26 +25,15 @@ const Header = () => {
     {
       name: "Schedule Booking",
       path: ROUTERS.USER.SCHEDULEPAGE,
-      isShowSubmenu: false,
-      child: [
-        {
-          name: "Fixed Schedule",
-          path: "",
-        },
-        {
-          name: "Flexible Schedule",
-          path: "",
-        },
-        {
-          name: "Schedule By Day",
-          path: "",
-        },
-      ],
     },
     {
-      name: "About",
+      name: "News",
       path: ROUTERS.USER.PROFILE,
     },
+    {
+      name: "Booked",
+      path: ROUTERS.USER.PROFILE,
+    }
   ]);
 
   const handleLogout = () => {
@@ -89,24 +82,27 @@ const Header = () => {
                 {user ? (
                   <li className="profile-section">
                     <div className="profile-button" >
-                      <button onClick={toggleProfilePopup}>Profile</button>
+                      <button className="button2" onClick={toggleProfilePopup}>Profile</button>
                     </div>
                     <div className={`profile-popup ${showProfilePopup ? 'active' : ''}`}>
                       <div className="profile-info">
                         <div className="profile-pic">
-                          <img src="/path-to-user-avatar.jpg" alt="User Avatar" />
+                          <img src="/path-to-user-avatar.jpg" alt="Avatar" />
                          
                         </div>
                         <p>{user.email}</p>
                       </div>
                       <ul className="profile-actions">
                         <li>
-                          <Link to="/profile">View profile</Link>
+                        <MdOutlineGridView style={{fontSize: 20}} />
+                        <Link to="/profile">View profile</Link>
                         </li>
                         <li>
-                          <Link to="/assign-member">Assign member (flexible time)</Link>
+                        <LuHeartHandshake style={{fontSize: 20}} />
+                        <Link to="/assign-member">Assign member (flexible time)</Link>
                         </li>
                         <li onClick={handleLogout}>
+                        <RiLogoutBoxRFill style={{fontSize: 20}} />
                           <a>Log out</a>
                         </li>
                       </ul>
