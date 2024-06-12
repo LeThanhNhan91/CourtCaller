@@ -144,15 +144,6 @@ const HomePage = () => {
                 </select>
                 <button onClick={handleSearch}>Tìm kiếm</button>
 
-                <div className="select_bar_phone">
-                    <div className="select_bar_phone_icon">
-                        <AiOutlinePhone />
-                    </div>
-                    <div className="select_bar_phone_text">
-                        <p>123.465.463</p>
-                        <span>Hỗ trợ 24/7</span>
-                    </div>
-                </div>
             </div>
 
             

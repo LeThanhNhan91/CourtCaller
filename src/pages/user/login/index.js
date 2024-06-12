@@ -19,9 +19,8 @@ import { FacebookLoginButton } from "react-social-login-buttons";
 import { ROUTERS } from "utils/router";
 import { FacebookAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "firebase.js";
-import { useAuth } from 'AuthContext.js';
+import { useAuth } from "AuthContext.js";
 import { jwtDecode } from "jwt-decode";
-
 
 const Login = () => {
   const [password, setPassword] = useState("");
@@ -111,7 +110,7 @@ const Login = () => {
       setLoading(false);
     }
   };
-  
+
   const handleRegister = async (e) => {
     e.preventDefault();
 
@@ -190,6 +189,14 @@ const Login = () => {
       if (res.ok) {
         console.log("Login successful:", data);
         localStorage.setItem("token", token);
+        var decode = jwtDecode(token);
+
+        const userData = {
+          email: decode.email,
+          // profilePic: res.profilePic, // Add actual profile pic if available
+          // userName: res.userName,
+        };
+        login(userData); // Lưu thông tin người dùng vào context
         toast.success("Login Successfully");
         navigate(ROUTERS.USER.HOME);
       } else {
@@ -233,6 +240,14 @@ const Login = () => {
       if (res.ok) {
         console.log("Login successful:", data);
         localStorage.setItem("token", accessToken);
+        var decode = jwtDecode(accessToken);
+
+        const userData = {
+          email: decode.email,
+          // profilePic: res.profilePic, // Add actual profile pic if available
+          // userName: res.userName,
+        };
+        login(userData); // Lưu thông tin người dùng vào context
         toast.success("Login Successfully");
         navigate(ROUTERS.USER.HOME);
       } else {
@@ -264,9 +279,9 @@ const Login = () => {
                 <a
                   onClick={loginFacebook}
                   className="icon"
-                  style={{ color: "blue" }}
+                  style={{ color: "white" }}
                 >
-                  <FaFacebookF />
+                  <FaFacebookF />  <span style={{marginLeft: 5}}>Login with Facebook</span>
                 </a>
               </div>
               <span>or use your account for login</span>
@@ -301,11 +316,20 @@ const Login = () => {
             <form onSubmit={handleRegister}>
               <h1>Create Account</h1>
               <div className="social-icons">
-                <a href="#" className="icon" style={{ color: "red" }}>
-                  <FaGoogle />
-                </a>
-                <a href="#" className="icon" style={{ color: "blue" }}>
-                  <FaFacebookF />
+                <GoogleLogin
+                  onSuccess={loginGoogle}
+                  onError={() => {
+                    console.log("Login Failed");
+                    toast.error("Google login failed");
+                  }}
+                />
+
+                <a
+                  onClick={loginFacebook}
+                  className="icon"
+                  style={{ color: "white" }}
+                >
+                  <FaFacebookF /> <span style={{marginLeft: 5}}>Login with Facebook</span>
                 </a>
               </div>
               <span>or use your email for registration</span>
