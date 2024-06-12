@@ -2,11 +2,17 @@ import { memo, useState } from "react";
 import "./style.scss";
 import { AiOutlineUser } from "react-icons/ai";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ROUTERS } from "utils/router";
-import { Slide, ToastContainer } from 'react-toastify';
+import { Slide, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from 'AuthContext';
+
 const Header = () => {
-  // const [isShowCategories, setShowCategories] = useState(true);
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+
   const [menus] = useState([
     {
       name: "Home",
@@ -36,6 +42,16 @@ const Header = () => {
       path: ROUTERS.USER.PROFILE,
     },
   ]);
+
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully!");
+    navigate(ROUTERS.USER.LOGIN);
+  };
+
+  const toggleProfilePopup = () => {
+    setShowProfilePopup(!showProfilePopup);
+  };
 
   return (
     <>
@@ -70,7 +86,33 @@ const Header = () => {
           <div className="col-xl-3">
             <div className="header_login">
               <ul>
-                <div className="login_link">
+                {user ? (
+                  <li className="profile-section">
+                    <div className="profile-button" >
+                      <button onClick={toggleProfilePopup}>Profile</button>
+                    </div>
+                    <div className={`profile-popup ${showProfilePopup ? 'active' : ''}`}>
+                      <div className="profile-info">
+                        <div className="profile-pic">
+                          <img src="/path-to-user-avatar.jpg" alt="User Avatar" />
+                         
+                        </div>
+                        <p>{user.email}</p>
+                      </div>
+                      <ul className="profile-actions">
+                        <li>
+                          <Link to="/profile">View profile</Link>
+                        </li>
+                        <li>
+                          <Link to="/assign-member">Assign member (flexible time)</Link>
+                        </li>
+                        <li onClick={handleLogout}>
+                          <a>Log out</a>
+                        </li>
+                      </ul>
+                    </div>
+                  </li>
+                ) : (
                   <li>
                     <ToastContainer
                       transition={Slide}
@@ -85,7 +127,7 @@ const Header = () => {
                       <span>Đăng Nhập</span>
                     </Link>
                   </li>
-                </div>
+                )}
               </ul>
             </div>
           </div>

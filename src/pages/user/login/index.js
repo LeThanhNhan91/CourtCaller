@@ -18,7 +18,10 @@ import { LoginSocialFacebook } from "reactjs-social-login";
 import { FacebookLoginButton } from "react-social-login-buttons";
 import { ROUTERS } from "utils/router";
 import { FacebookAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "firebase.js"
+import { auth } from "firebase.js";
+import { useAuth } from 'AuthContext.js';
+import { jwtDecode } from "jwt-decode";
+
 
 const Login = () => {
   const [password, setPassword] = useState("");
@@ -49,6 +52,7 @@ const Login = () => {
   });
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   useEffect(() => {
     const container = document.getElementById("container");
@@ -84,8 +88,16 @@ const Login = () => {
       const res = await loginApi(email, password);
       if (res && res.token) {
         localStorage.setItem("token", res.token);
+        var decode = jwtDecode(res.token);
+
+        const userData = {
+          email: decode.email,
+          // profilePic: res.profilePic, // Add actual profile pic if available
+          // userName: res.userName,
+        };
+        login(userData); // Lưu thông tin người dùng vào context
         toast.success("Login successful!");
-        navigate(ROUTERS.USER.HOME); // Navigate to home page
+        navigate(ROUTERS.USER.HOME);
       } else if (res && res.status === 401) {
         toast.error(res.error);
         setMessage("Login failed!");
@@ -99,7 +111,7 @@ const Login = () => {
       setLoading(false);
     }
   };
-
+  
   const handleRegister = async (e) => {
     e.preventDefault();
 
@@ -169,7 +181,7 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          // body: { token }, 
+          // body: { token },
         }
       );
 
@@ -180,7 +192,6 @@ const Login = () => {
         localStorage.setItem("token", token);
         toast.success("Login Successfully");
         navigate(ROUTERS.USER.HOME);
-       
       } else {
         console.error("Backend error:", data);
         toast.error("Login Failed");
@@ -192,30 +203,33 @@ const Login = () => {
     }
   };
 
-  
   const loginFacebook = async (response) => {
     try {
       const provider = new FacebookAuthProvider();
       const result = await signInWithPopup(auth, provider);
-  
+
       // Extract the access token from Firebase's stsTokenManager
       const accessToken = result.user.stsTokenManager.accessToken;
-  
+
       // Log the user info and token
-      console.log('Login successfully', result.user);
-      console.log('Access Token:', accessToken);
-  
+      console.log("Login successfully", result.user);
+      console.log("Access Token:", accessToken);
+
       // Send the access token to the back-end
-      const res = await fetch("https://courtcaller.azurewebsites.net/api/authentication/facebook-login?token=" + accessToken, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // body: JSON.stringify({ token: accessToken }),
-      });
-  
+      const res = await fetch(
+        "https://courtcaller.azurewebsites.net/api/authentication/facebook-login?token=" +
+          accessToken,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // body: JSON.stringify({ token: accessToken }),
+        }
+      );
+
       const data = await res.json();
-  
+
       if (res.ok) {
         console.log("Login successful:", data);
         localStorage.setItem("token", accessToken);
@@ -227,7 +241,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Error:", error.message);
-      toast.error('Facebook login failed');
+      toast.error("Facebook login failed");
     }
   };
 
@@ -246,10 +260,14 @@ const Login = () => {
                     toast.error("Google login failed");
                   }}
                 />
-                
-                <a onClick={loginFacebook} className="icon" style={{ color: "blue" }}>
+
+                <a
+                  onClick={loginFacebook}
+                  className="icon"
+                  style={{ color: "blue" }}
+                >
                   <FaFacebookF />
-                </a> 
+                </a>
               </div>
               <span>or use your account for login</span>
               <input
