@@ -16,6 +16,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { GoogleLogin } from "@react-oauth/google";
 import { LoginSocialFacebook } from "reactjs-social-login";
 import { FacebookLoginButton } from "react-social-login-buttons";
+import ClipLoader from "react-spinners/ClipLoader";
 import { ROUTERS } from "utils/router";
 import { FacebookAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "firebase.js";
@@ -281,7 +282,8 @@ const Login = () => {
                   className="icon"
                   style={{ color: "white" }}
                 >
-                  <FaFacebookF />  <span style={{marginLeft: 5}}>Login with Facebook</span>
+                  <FaFacebookF />{" "}
+                  <span style={{ marginLeft: 5 }}>Login with Facebook</span>
                 </a>
               </div>
               <span>or use your account for login</span>
@@ -300,9 +302,8 @@ const Login = () => {
                 required
               />
               <a href="#">Forgot Password</a>
-              <button type="submit" className="signInBtn">
-                {loading && <i className="fas fa-sync fa-spin"></i>}
-                Sign In
+              <button type="submit" className="signInBtn" disabled={loading}>
+                {loading ? <ClipLoader size={15} color="#fff" /> : "Sign In"}
               </button>
               {message && (
                 <p className={messageType === "error" ? "error-message" : ""}>
@@ -329,7 +330,8 @@ const Login = () => {
                   className="icon"
                   style={{ color: "white" }}
                 >
-                  <FaFacebookF /> <span style={{marginLeft: 5}}>Login with Facebook</span>
+                  <FaFacebookF />{" "}
+                  <span style={{ marginLeft: 5 }}>Login with Facebook</span>
                 </a>
               </div>
               <span>or use your email for registration</span>
@@ -379,9 +381,8 @@ const Login = () => {
               {confirmPasswordValidation.message && (
                 <p className="errorVal">{confirmPasswordValidation.message}</p>
               )}
-              <button type="submit" className="signUpBtn">
-                {loading && <i className="fas fa-sync fa-spin"></i>}
-                Sign Up
+              <button type="submit" className="signUpBtn" disabled={loading}>
+                {loading ? <ClipLoader size={15} color="#fff" /> : "Sign Up"}
               </button>
               {message && (
                 <p className={messageType === "error" ? "error-message" : ""}>
