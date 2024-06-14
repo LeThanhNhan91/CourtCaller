@@ -5,6 +5,7 @@ import MasterLayout from "./pages/user/theme/masterLayout";
 import ProfilePage from "./pages/user/profilePage";
 import SchedulePage from "pages/user/schedulePage";
 import Login from "pages/user/login";
+import NewsPage from "pages/user/newsPage";
 
 
 const renderUserRouter = () => {
@@ -21,6 +22,10 @@ const renderUserRouter = () => {
             path: ROUTERS.USER.PROFILE,
             component: <ProfilePage/>
         },
+        {
+            path: ROUTERS.USER.NEWS,
+            component: <NewsPage/>
+        }
     ]
 
     return(

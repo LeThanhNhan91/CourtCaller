@@ -28,11 +28,11 @@ const Header = () => {
     },
     {
       name: "News",
-      path: ROUTERS.USER.PROFILE,
+      path: ROUTERS.USER.NEWS,
     },
     {
       name: "Booked",
-      path: ROUTERS.USER.PROFILE,
+      path: ROUTERS.USER.BOOKED,
     }
   ]);
 
