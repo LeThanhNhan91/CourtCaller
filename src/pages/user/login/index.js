@@ -92,8 +92,6 @@ const Login = () => {
 
         const userData = {
           email: decode.email,
-          // profilePic: res.profilePic, // Add actual profile pic if available
-          // userName: res.userName,
         };
         login(userData); // Lưu thông tin người dùng vào context
         toast.success("Login successful!");
@@ -116,7 +114,7 @@ const Login = () => {
     e.preventDefault();
 
     const fullNameValidation = validateFullName(fullName);
-    const emailValidation = validateEmail(email);
+    const emailValidation = await validateEmail(email);
     const passwordValidation = validatePassword(password);
     const confirmPasswordValidation = validateConfirmPassword(
       password,
@@ -181,7 +179,6 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          // body: { token },
         }
       );
 
@@ -194,8 +191,6 @@ const Login = () => {
 
         const userData = {
           email: decode.email,
-          // profilePic: res.profilePic, // Add actual profile pic if available
-          // userName: res.userName,
         };
         login(userData); // Lưu thông tin người dùng vào context
         toast.success("Login Successfully");
@@ -216,14 +211,11 @@ const Login = () => {
       const provider = new FacebookAuthProvider();
       const result = await signInWithPopup(auth, provider);
 
-      // Extract the access token from Firebase's stsTokenManager
       const accessToken = result.user.stsTokenManager.accessToken;
 
-      // Log the user info and token
       console.log("Login successfully", result.user);
       console.log("Access Token:", accessToken);
 
-      // Send the access token to the back-end
       const res = await fetch(
         "https://courtcaller.azurewebsites.net/api/authentication/facebook-login?token=" +
           accessToken,
@@ -232,7 +224,6 @@ const Login = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          // body: JSON.stringify({ token: accessToken }),
         }
       );
 
@@ -245,8 +236,6 @@ const Login = () => {
 
         const userData = {
           email: decode.email,
-          // profilePic: res.profilePic, // Add actual profile pic if available
-          // userName: res.userName,
         };
         login(userData); // Lưu thông tin người dùng vào context
         toast.success("Login Successfully");
@@ -276,14 +265,13 @@ const Login = () => {
                     toast.error("Google login failed");
                   }}
                 />
-
                 <a
                   onClick={loginFacebook}
                   className="icon"
                   style={{ color: "white" }}
                 >
                   <FaFacebookF />{" "}
-                  <span style={{ marginLeft: 5 }}>Login with Facebook</span>
+                  <span style={{ marginLeft: 5 }}> With Facebook</span>
                 </a>
               </div>
               <span>or use your account for login</span>
@@ -293,14 +281,22 @@ const Login = () => {
                 placeholder="Email"
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className={emailValidation.isValid ? "" : "error-input"}
               />
+              {emailValidation.message && (
+                <p className="errorVal">{emailValidation.message}</p>
+              )}
               <input
                 type="password"
                 value={password}
                 placeholder="Password"
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className={passwordValidation.isValid ? "" : "error-input"}
               />
+              {passwordValidation.message && (
+                <p className="errorVal">{passwordValidation.message}</p>
+              )}
               <a href="#">Forgot Password</a>
               <button type="submit" className="signInBtn" disabled={loading}>
                 {loading ? <ClipLoader size={15} color="#fff" /> : "Sign In"}
@@ -324,7 +320,6 @@ const Login = () => {
                     toast.error("Google login failed");
                   }}
                 />
-
                 <a
                   onClick={loginFacebook}
                   className="icon"
