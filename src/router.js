@@ -6,6 +6,7 @@ import ProfilePage from "./pages/user/profilePage";
 import SchedulePage from "pages/user/schedulePage";
 import Login from "pages/user/login";
 import NewsPage from "pages/user/newsPage";
+import BookedPage from "pages/user/bookedPage"
 
 
 const renderUserRouter = () => {
@@ -25,6 +26,10 @@ const renderUserRouter = () => {
         {
             path: ROUTERS.USER.NEWS,
             component: <NewsPage/>
+        },
+        {
+            path: ROUTERS.USER.BOOKED,
+            component: <BookedPage/>
         }
     ]
 
