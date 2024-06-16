@@ -162,6 +162,7 @@ $bannerImg: "/assets/users/images/hero/banner.jpg";
     row-gap: 40px;
 
     .booking_branch_detail {
+        background-color: #fff;
         flex: 1 1 calc(25% - 20px); /* Adjust width to 25% minus gap */
         max-width: calc(25% - 20px); /* Ensure max-width matches */
         padding: 20px;

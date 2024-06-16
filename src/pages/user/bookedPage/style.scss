@@ -1,3 +1,41 @@
+$bannerImg: "/assets/users/images/hero/banner.jpg";
+
+.hero_banner_container {
+    .hero_banner {
+        background-image: url($bannerImg);
+        background-image: no-repeat;
+        background-size: cover;
+        height: 600px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        
+        .hero_text {
+            padding-left: 75px;
+
+            span {
+                font-size: 14px;
+                text-transform: uppercase;
+                font-weight: 700;
+                letter-spacing: 4px;
+                color: #008874;
+            }
+
+            h2 {
+                font-size: 45px;
+                text-transform: uppercase;
+                font-weight: 700;
+                letter-spacing: 4px;
+                line-height: 52px;
+                color: #000;
+                margin: 10px 0;
+            }
+
+        }
+    }
+}
+
 main {
     padding: 20px;
     background-color: #fff;

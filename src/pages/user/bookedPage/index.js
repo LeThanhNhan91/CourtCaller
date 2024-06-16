@@ -42,7 +42,23 @@ const BookedPage = () =>{
 
     return ( 
     <>
-    <h1>Booked Page</h1>
+    <div className="container">
+        <div className="hero_banner_container">
+          <div className="hero_banner">
+            <div className="hero_text">
+            <span>WELCOME TO</span>
+              <h2>
+                {" "}
+                COURT CALLER
+                <br />
+                HAVE FUN
+              </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+    <h1 style={{textAlign: "center"}}>Booked Page</h1>
     <main>
         <h2>List of scheduled appointments</h2>
         <table>

@@ -103,6 +103,7 @@ const HomePage = () => {
 
   return (
     <>
+    <div style={{backgroundColor: "#EAECEE"}}>
       <div className="container">
         <div className="hero_banner_container">
           <div className="hero_banner">
@@ -118,7 +119,7 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Search Begin */}
       <div className="select_bar container">
         <select value={city} onChange={(e) => setCity(e.target.value)}>
@@ -229,6 +230,7 @@ const HomePage = () => {
         <button onClick={() => alert("Fixed Schedule Selected")}>Fixed Schedule</button>
         <button onClick={handleScheduleByDay}>Schedule by Day</button>
       </Modal>
+      </div>
     </>
   );
 };

@@ -67,8 +67,24 @@ const NewsPage = () => {
   );
   return (
     <>
+    <div style={{backgroundColor: "#EAECEE"}}>
+      <div className="container">
+        <div className="hero_banner_container">
+          <div className="hero_banner">
+            <div className="hero_text">
+              <h2>
+                {" "}
+                UPDATE
+                <br />
+                THE LATEST NEWS
+              </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="view_news">
-      <h1>News Page</h1>
+        <h1>News Page</h1>
         <div className="row news_container">
           {displayNews.map((news, index) => (
             <div className="news_details col-lg-3 col-md-4 col-sm-6" key={index}>
@@ -91,6 +107,7 @@ const NewsPage = () => {
             </button>
           ))}
         </div>
+      </div>
       </div>
     </>
   );

@@ -22,6 +22,7 @@ body {
     box-sizing: border-box;
 
     .brief-info{
+        margin: 20px;
         h1{
             font-size: 24px;
             font-weight: 700;
@@ -31,6 +32,7 @@ body {
 
     .header-info{
         display: flex;
+        margin: 20px;
     }
 
     .branch-img{
@@ -43,7 +45,7 @@ body {
         grid-template-rows: repeat(11, 8fr);
         grid-template-columns: repeat(12, 8fr);
         grid-gap: 10px;
-        max-height: 400PX;
+        max-height: 425px;
     }
 
     .images .inner-image:nth-child(1){
@@ -87,6 +89,7 @@ body {
 }
 
 .service{
+    background-color: #fff;
     padding: 15px;
     border-radius: 10px;
     box-shadow: inset 2px 2px 2px 0px rgba(255,255,255,.5),

@@ -22,10 +22,10 @@ const Header = () => {
       name: "Home",
       path: ROUTERS.USER.HOME,
     },
-    {
-      name: "Schedule Booking",
-      path: ROUTERS.USER.SCHEDULEPAGE,
-    },
+    // {
+    //   name: "Schedule Booking",
+    //   path: ROUTERS.USER.SCHEDULEPAGE,
+    // },
     {
       name: "News",
       path: ROUTERS.USER.NEWS,

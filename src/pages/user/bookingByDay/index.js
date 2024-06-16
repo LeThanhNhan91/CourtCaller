@@ -19,6 +19,7 @@ const BookByDay = () => {
 
   return (
     <>
+      <div style={{backgroundColor: "#EAECEE"}}>
       <div className="header-container">
         <div className="brief-info">
           <h1>{branch.branchName}</h1>
@@ -108,6 +109,7 @@ const BookByDay = () => {
           </div>
           <button type="button">Rating</button>
         </div>
+      </div>
       </div>
     </>
   );
