@@ -1,0 +1,239 @@
+@use "sass:map";
+@import "style/pages/_all.scss";
+
+
+
+body {
+    margin: 0;
+    // font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.6;
+    background: #F6F6F6;
+    color: #142239;
+}
+
+.header-container{
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+
+    .brief-info{
+        h1{
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+    }
+
+    .header-info{
+        display: flex;
+    }
+
+    .branch-img{
+        width:1200px;
+        margin-right: 20px;
+    }
+
+    .images{
+        display: grid;
+        grid-template-rows: repeat(11, 8fr);
+        grid-template-columns: repeat(12, 8fr);
+        grid-gap: 10px;
+        max-height: 400PX;
+    }
+
+    .images .inner-image:nth-child(1){
+        grid-row: span 7;
+        grid-column: span 8;
+        position: relative;
+    }
+
+    .images .inner-image img{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .img-fluid{
+        width: 100%;
+        height: auto;
+    }
+
+    .images .inner-image:nth-child(2){
+        grid-row: span 5;
+        grid-column: span 4;
+        position: relative;
+    }
+    .images .inner-image:nth-child(3){
+        grid-row: span 6;
+        grid-column: span 4;
+        position: relative;
+    }
+    .images .inner-image:nth-child(4){
+        grid-row: span 4;
+        grid-column: span 3;
+        position: relative;
+    }
+    .images .inner-image:nth-child(5){
+        grid-row: span 4;
+        grid-column: span 5;
+        position: relative;
+    }
+}
+
+.service{
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: inset 2px 2px 2px 0px rgba(255,255,255,.5),
+                    7px 7px 20px 0px rgba(0,0,0,.1),
+                    4px 4px 5px 0px rgba(0,0,0,.1);
+
+    .title{
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        position: relative;
+        padding-left: 15px;
+
+        &::before{
+            width: 4px;
+            background: #008874;
+            content: '';
+            height: 20px;
+            display: inline-block;
+            position: absolute;
+            top: 3px;
+            left: 0;
+        }
+    }
+
+    .info .item{
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 13px;
+
+        span{
+            font-size: large;
+        }
+    }
+
+    .services-info{
+        border-radius: 8px;
+        background: #dbdbdb;
+        padding: 10px 15px;
+
+        .service-title{
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .service-list{
+            display: flex;
+            flex-wrap: wrap;
+
+            .service-item{
+                flex: 0 0 50%;
+                max-width: 50%;
+                margin-top: 10px;
+                display: flex;
+                align-items: center;
+
+                .icon{
+                    font-size: 20px;
+                    margin-right: 5px;
+                }
+            }
+        }
+    }
+}
+
+.rating{
+    display: flex;
+    justify-content: center;
+
+}
+
+.rating-container {
+    margin: 80px 0;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 1000px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    resize: none;
+    font-size: 1em;
+}
+
+.rating-stars {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.stars {
+    display: flex;
+    justify-content: space-between;
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.0em;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+label span {
+    margin-top: 5px;
+}
+
+input[type="radio"] + span::before {
+    content: '★';
+    font-size: 2em;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+input[type="radio"]:checked + span::before,
+input[type="radio"]:checked ~ label span::before {
+    color: #f39c12;
+}
+
+button {
+    background-color: #008874;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #16a085;
+}
+

@@ -7,6 +7,7 @@ import SchedulePage from "pages/user/schedulePage";
 import Login from "pages/user/login";
 import NewsPage from "pages/user/newsPage";
 import BookedPage from "pages/user/bookedPage"
+import BookByDay from "pages/user/bookingByDay"
 
 
 const renderUserRouter = () => {
@@ -30,6 +31,10 @@ const renderUserRouter = () => {
         {
             path: ROUTERS.USER.BOOKED,
             component: <BookedPage/>
+        },
+        {
+            path: ROUTERS.USER.BYDAY,
+            component: <BookByDay/>
         }
     ]
 

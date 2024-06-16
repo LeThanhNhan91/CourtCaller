@@ -120,26 +120,11 @@ const Header = () => {
                     />
                     <Link to={ROUTERS.USER.LOGIN}>
                       <AiOutlineUser />
-                      <span>Đăng Nhập</span>
+                      <span>Log In</span>
                     </Link>
                   </li>
                 )}
               </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="container">
-        <div className="hero_banner_container">
-          <div className="hero_banner">
-            <div className="hero_text">
-              <span>WELCOME TO</span>
-              <h2>
-                {" "}
-                COURT CALLER
-                <br />
-                HAVE FUN
-              </h2>
             </div>
           </div>
         </div>
