@@ -10,6 +10,7 @@ import cat3Img from "assets/users/images/categories/cat-3.png";
 import cat4Img from "assets/users/images/categories/cat-4.png";
 import { AiOutlineSearch } from "react-icons/ai";
 import "./style.scss";
+import { fetchPrice } from "api/priceApi"; 
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
 
@@ -54,18 +55,8 @@ const HomePage = () => {
     const pricesData = {};
     for (const branch of branchData) {
       try {
-        const response = await fetch(
-          `https://courtcaller.azurewebsites.net/api/Prices/showprice`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ branchId: branch.branchId }),
-          }
-        );
-        const data = await response.json();
-        pricesData[branch.branchId] = data.price;
+        const { weekdayPrice, weekendPrice } = await fetchPrice(branch.branchId);
+        pricesData[branch.branchId] = { weekdayPrice, weekendPrice };
       } catch (err) {
         console.error(`Failed to fetch price for branch ${branch.branchId}`);
       }
@@ -165,7 +156,16 @@ const HomePage = () => {
               {/* <p>Số sân trống: {branch.availableBranchs}</p> */}
               <p>Number of courts: 4</p>
               <p>Address: {branch.branchAddress}</p>
-              <p>Price per hour: {prices[branch.branchId] || 'Loading...'} VND</p>
+              <p>
+                {prices[branch.branchId]
+                  ? `Weekday: ${prices[branch.branchId].weekdayPrice} VND`
+                  : 'Loading...'}
+              </p>
+              <p>
+                {prices[branch.branchId]
+                  ? `Weekend: ${prices[branch.branchId].weekendPrice} VND`
+                  : 'Loading...'}
+              </p>
               <button onClick={() => handleBookNow(branch)}>Book now</button>
             </div>
           ))}

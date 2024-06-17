@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { Container, Row, Col, Card,CardGroup, Button } from 'react-bootstrap';
@@ -99,6 +100,9 @@ const EditName = () => {
                           </div>
                         </Col>
                       </Row>
+                      <Link to="/profile">
+          <button className="btn-edit">Back</button>
+        </Link>
                       <Button type="submit" className="mt-3">Cập nhật</Button>
                     </Form>
                   )}
