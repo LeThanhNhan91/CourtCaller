@@ -7,6 +7,7 @@ export const ROUTERS = {
         LOGIN: "/login",
         NEWS: "/news",
         BOOKED: "/booked",
-        BYDAY: "/bookbyday"
+        BYDAY: "/bookbyday",
+        EDIT_PROFILE: "profile/edit-name",
     }
 }

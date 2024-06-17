@@ -8,6 +8,7 @@ import Login from "pages/user/login";
 import NewsPage from "pages/user/newsPage";
 import BookedPage from "pages/user/bookedPage"
 import BookByDay from "pages/user/bookingByDay"
+import EditName from "pages/user/EditName/edit_name";
 
 
 const renderUserRouter = () => {
@@ -35,7 +36,11 @@ const renderUserRouter = () => {
         {
             path: ROUTERS.USER.BYDAY,
             component: <BookByDay/>
-        }
+        },
+        {
+            path: ROUTERS.USER.EDIT_PROFILE,
+            component: <EditName/>
+        },
     ]
 
     return(

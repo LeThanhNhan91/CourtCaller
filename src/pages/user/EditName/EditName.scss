@@ -1,0 +1,111 @@
+.edit-name-container {
+    width: 500px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .full-header-name{
+    margin: 15px;
+    height: 56px;
+    background-color: #fff;
+    display: flex;
+    border-bottom: 1px solid #ccc ;
+    
+    z-index: 985;
+    transition: height .2s ease-in-out;
+  }
+.in-header-name {
+ margin: 0px 430px;
+display: flex;
+align-self: center;
+}
+
+
+.material-symbols-outlined {
+  margin: 5px 25px;
+  align-self: center;
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24,
+  
+
+}
+
+  .header-name {
+    text-align: center;
+    font-family: "Google Sans", Roboto, Arial, sans-serif;
+        line-height: 2.25rem;
+        font-size: 1.75rem;
+        letter-spacing: 0;
+        font-weight: 400;
+        align-self: center;
+  }
+  
+  .name-section {
+    display: flex;
+  justify-content: space-between;
+  // margin-bottom: 10px;
+  // padding-top: 15px;
+  // padding-bottom: 16px;
+ 
+  // padding-left: 12px;
+  // flex-basis: 156px;
+  align-items: center;
+  padding: 17.5px 10px;
+  
+  border-bottom: 1px solid #ccc;
+  transition: background-color 0.3s;
+  }
+  
+  .field {
+    margin-bottom: 20px;
+  }
+  
+  .field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .value {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .value span {
+    font-size: 16px;
+  }
+  
+  .edit-button1 {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
+  .info p {
+    margin: 10px 0;
+  }
+  
+  .info a {
+    color: #1a73e8;
+    text-decoration: none;
+  }
+  .profile-container1 {
+   
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  .profile-info1 {
+    width: 42%;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin:auto;
+   
+  
+  }
+  

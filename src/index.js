@@ -5,6 +5,7 @@ import RouterCustom from './router';
 import './style/style.scss';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './AuthContext';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
