@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "./style.scss"; // Ensure you have this CSS file
+import "./style.scss"; 
+import "./editStyle.scss"
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import { Card, CardGroup, Container, Button } from "react-bootstrap";
 import userImg from "assets/users/images/hero/user.png"
 
@@ -10,6 +11,13 @@ const Profile = () => {
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const [editFormValues, setEditFormValues] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    facebook: "",
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -54,6 +62,41 @@ const Profile = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (user && userData) {
+      setEditFormValues({
+        fullName: userData.fullName,
+        email: user.email,
+        phone: user.phoneNumber,
+        facebook: user.facebook || "",
+      });
+    }
+  }, [user, userData]);
+
+  const handleEditClick = () => {
+    setIsEditPopupOpen(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditPopupOpen(false);
+  };
+
+  const handleUpdate = async () => {
+    // Logic to update the user information
+    // Make API call to update user data
+    // On success, update the state and close the popup
+    try {
+      const response = await axios.put(
+        `https://courtcaller.azurewebsites.net/api/UserDetails/${userId}`,
+        editFormValues
+      );
+      setUserData(response.data);
+      setIsEditPopupOpen(false);
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
+  };
 
   if (!userData || !user) {
     return <div>Loading...</div>;
@@ -112,11 +155,60 @@ const Profile = () => {
           <button className="btn-back">Back</button>
         </Link>
 
-        <Link to="/profile/edit-name">
-          <button className="btn-edit">Edit</button>
-        </Link>
+        <button className="btn-edit" onClick={handleEditClick}>Edit</button>
         </div>
       </div>
+
+      {isEditPopupOpen && (
+        <div className="form-container">
+        <div class="edit-container">
+          <h2 className="edit-header">Update Information</h2>
+          <div class="form-box">
+            <div class="form-edit-group">
+              <div class="account">
+                <h3>Account</h3>
+                <p>halinhtvn3a</p>
+              </div>
+              <div className="form-edit">
+                <div className="edit-left">
+                  <div class="form-field">
+                    <span>Full Name</span>
+                    <input className="input-fname" type="text" id="name" />
+                  </div>
+                  <div class="form-field">
+                    <span>Phone</span>
+                    <input className="input-phone" type="text" id="phone" />
+                  </div>
+                </div>
+                <div className="edit-right">
+                  <div class="form-field">
+                    <span>Email</span>
+                    <input
+                      className="input-email"
+                      type="email"
+                      id="email"
+                      value="duonghaingu@gmail.com"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <span>Facebook</span>
+                    <input className="input-fb" type="text" id="facebook" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="buttons-edit">
+              <button className="btn-back" onClick={handleCancelEdit}>
+                Cancel
+              </button>
+              <button className="btn-update" onClick={handleUpdate}>
+                Update
+              </button>
+            </div>
+        </div>
+      </div>
+      )}
     </>
   );
 };

@@ -1,118 +1,62 @@
-import React from 'react';
+import React from "react";
 import { Link } from "react-router-dom";
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-import { Container, Row, Col, Card,CardGroup, Button } from 'react-bootstrap';
-import "./EditName.scss"
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { Container, Row, Col, Card, CardGroup, Button } from "react-bootstrap";
+import "./EditName.scss";
+import { RxCross2 } from "react-icons/rx";
 
 const EditName = () => {
-  const initialValues = {
-    fullName: '',
-    phoneNumber: '',
-    email: 'duonghaingu@gmail.com',  // Example email, replace with actual data
-    facebook: ''
-  };
-
-  const validationSchema = Yup.object({
-    fullName: Yup.string().required('Required'),
-    phoneNumber: Yup.string().required('Required'),
-    email: Yup.string().email('Invalid email format').required('Required'),
-    facebook: Yup.string().url('Invalid URL format')
-  });
-
-  const onSubmit = values => {
-    console.log(values);
-    // Add your submit logic here
-  };
 
   return (
-    <Container>
-      <Card className="mt-5">
-        <Card.Header>
-          <h2>Chỉnh sửa thông tin</h2>
-        </Card.Header>
-        <Card.Body>
-          <CardGroup>
-            <Card className="mb-3">
-              <Card.Body>
-                <h3>Account: halinhtvn3a</h3>
-              </Card.Body>
-            </Card>
-            <Card className="mb-3">
-              <Card.Body>
-                <Formik
-                  initialValues={initialValues}
-                  validationSchema={validationSchema}
-                  onSubmit={onSubmit}
-                >
-                  {formik => (
-                    <Form>
-                      <Row>
-                        <Col md={6}>
-                          <div className="form-group">
-                            <label htmlFor="fullName">Họ và tên</label>
-                            <Field
-                              type="text"
-                              id="fullName"
-                              name="fullName"
-                              className="form-control"
-                            />
-                            <ErrorMessage name="fullName" component="div" className="text-danger" />
-                          </div>
-                        </Col>
-                        <Col md={6}>
-                          <div className="form-group">
-                            <label htmlFor="phoneNumber">Số điện thoại</label>
-                            <Field
-                              type="text"
-                              id="phoneNumber"
-                              name="phoneNumber"
-                              className="form-control"
-                            />
-                            <ErrorMessage name="phoneNumber" component="div" className="text-danger" />
-                          </div>
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col md={6}>
-                          <div className="form-group">
-                            <label htmlFor="email">Email</label>
-                            <Field
-                              type="email"
-                              id="email"
-                              name="email"
-                              className="form-control"
-                              disabled
-                            />
-                            <ErrorMessage name="email" component="div" className="text-danger" />
-                          </div>
-                        </Col>
-                        <Col md={6}>
-                          <div className="form-group">
-                            <label htmlFor="facebook">Facebook</label>
-                            <Field
-                              type="text"
-                              id="facebook"
-                              name="facebook"
-                              className="form-control"
-                            />
-                            <ErrorMessage name="facebook" component="div" className="text-danger" />
-                          </div>
-                        </Col>
-                      </Row>
-                      <Link to="/profile">
-          <button className="btn-edit">Back</button>
-        </Link>
-                      <Button type="submit" className="mt-3">Cập nhật</Button>
-                    </Form>
-                  )}
-                </Formik>
-              </Card.Body>
-            </Card>
-          </CardGroup>
-        </Card.Body>
-      </Card>
-    </Container>
+    <>
+      <div className="form-container">
+        <div class="edit-container">
+          <h2 className="edit-header">Update Information</h2>
+          <div class="form-box">
+            <div class="form-edit-group">
+              <div class="account">
+                <h3>Account</h3>
+                <p>halinhtvn3a</p>
+              </div>
+              <div className="form-edit">
+                <div className="edit-left">
+                  <div class="form-field">
+                    <span>Full Name</span>
+                    <input className="input-fname" type="text" id="name" />
+                  </div>
+                  <div class="form-field">
+                    <span>Phone</span>
+                    <input className="input-phone" type="text" id="phone" />
+                  </div>
+                </div>
+                <div className="edit-right">
+                  <div class="form-field">
+                    <span>Email</span>
+                    <input
+                      className="input-email"
+                      type="email"
+                      id="email"
+                      value="duonghaingu@gmail.com"
+                    />
+                  </div>
+                  <div class="form-field">
+                    <span>Facebook</span>
+                    <input className="input-fb" type="text" id="facebook" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="buttons-edit">
+            <Link to="/profile">
+              <button class="btn-back">Cancel</button>
+            </Link>
+            <button class="btn-update">Update</button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
