@@ -166,7 +166,7 @@ const Profile = () => {
       </div>
 
       {showEditModal && (
-        <div className="form-container">
+        <div className="edit-form-container">
           <div className="edit-container">
             <h2 className="edit-header">Update Information</h2>
             <div className="form-box">
