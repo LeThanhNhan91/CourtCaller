@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "./style.scss"; 
+import "./style.scss";
 import "./editStyle.scss"
 import axios from "axios";
 import {jwtDecode} from "jwt-decode";
-import { Card, CardGroup, Container, Button } from "react-bootstrap";
-import userImg from "assets/users/images/hero/user.png"
+import userImg from "assets/users/images/hero/user.png";
 
 const Profile = () => {
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
-  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editFormValues, setEditFormValues] = useState({
     fullName: "",
     email: "",
@@ -75,27 +74,33 @@ const Profile = () => {
   }, [user, userData]);
 
   const handleEditClick = () => {
-    setIsEditPopupOpen(true);
+    setShowEditModal(true);
   };
 
   const handleCancelEdit = () => {
-    setIsEditPopupOpen(false);
+    setShowEditModal(false);
   };
 
   const handleUpdate = async () => {
     // Logic to update the user information
-    // Make API call to update user data
-    // On success, update the state and close the popup
     try {
       const response = await axios.put(
         `https://courtcaller.azurewebsites.net/api/UserDetails/${userId}`,
         editFormValues
       );
       setUserData(response.data);
-      setIsEditPopupOpen(false);
+      setShowEditModal(false);
     } catch (error) {
       console.error("Error updating user data:", error);
     }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormValues((prevValues) => ({
+      ...prevValues,
+      [name]: value,
+    }));
   };
 
   if (!userData || !user) {
@@ -139,66 +144,90 @@ const Profile = () => {
         </div>
 
         <div className="user-image-container">
-          <div className="user-image">         
-          <div className="image-placeholder">
-            <img src={userImg} alt="user image" />
-          </div>
-          <p>Profile Picture</p>
-          <p style={{margin: 0, color: "#00c853"}}>Online</p>
+          <div className="user-image">
+            <div className="image-placeholder">
+              <img src={userImg} alt="user image" />
+            </div>
+            <p>Profile Picture</p>
+            <p style={{ margin: 0, color: "#00c853" }}>Online</p>
           </div>
         </div>
       </div>
 
       <div className="btn-container">
         <div className="buttons">
-        <Link to="/">
-          <button className="btn-back">Back</button>
-        </Link>
-
-        <button className="btn-edit" onClick={handleEditClick}>Edit</button>
+          <Link to="/">
+            <button className="btn-back">Back</button>
+          </Link>
+          <button className="btn-edit" onClick={handleEditClick}>
+            Edit
+          </button>
         </div>
       </div>
 
-      {isEditPopupOpen && (
+      {showEditModal && (
         <div className="form-container">
-        <div class="edit-container">
-          <h2 className="edit-header">Update Information</h2>
-          <div class="form-box">
-            <div class="form-edit-group">
-              <div class="account">
-                <h3>Account</h3>
-                <p>halinhtvn3a</p>
-              </div>
-              <div className="form-edit">
-                <div className="edit-left">
-                  <div class="form-field">
-                    <span>Full Name</span>
-                    <input className="input-fname" type="text" id="name" />
-                  </div>
-                  <div class="form-field">
-                    <span>Phone</span>
-                    <input className="input-phone" type="text" id="phone" />
-                  </div>
+          <div className="edit-container">
+            <h2 className="edit-header">Update Information</h2>
+            <div className="form-box">
+              <div className="form-edit-group">
+                <div className="account">
+                  <h3>Account</h3>
+                  <p>halinhtvn3a</p>
                 </div>
-                <div className="edit-right">
-                  <div class="form-field">
-                    <span>Email</span>
-                    <input
-                      className="input-email"
-                      type="email"
-                      id="email"
-                      value="duonghaingu@gmail.com"
-                    />
+                <div className="form-edit">
+                  <div className="edit-left">
+                    <div className="form-field">
+                      <span>Full Name</span>
+                      <input
+                        className="input-fname"
+                        type="text"
+                        id="name"
+                        name="fullName"
+                        value={editFormValues.fullName}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <span>Phone</span>
+                      <input
+                        className="input-phone"
+                        type="text"
+                        id="phone"
+                        name="phone"
+                        value={editFormValues.phone}
+                        onChange={handleChange}
+                      />
+                    </div>
                   </div>
-                  <div class="form-field">
-                    <span>Facebook</span>
-                    <input className="input-fb" type="text" id="facebook" />
+                  <div className="edit-right">
+                    <div className="form-field">
+                      <span>Email</span>
+                      <input
+                        className="input-email"
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={editFormValues.email}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <span>Facebook</span>
+                      <input
+                        className="input-fb"
+                        type="text"
+                        id="facebook"
+                        name="facebook"
+                        value={editFormValues.facebook}
+                        onChange={handleChange}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="buttons-edit">
+            <div className="buttons-edit">
               <button className="btn-back" onClick={handleCancelEdit}>
                 Cancel
               </button>
@@ -206,8 +235,8 @@ const Profile = () => {
                 Update
               </button>
             </div>
+          </div>
         </div>
-      </div>
       )}
     </>
   );

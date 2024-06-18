@@ -8,6 +8,5 @@ export const ROUTERS = {
         NEWS: "/news",
         BOOKED: "/booked",
         BYDAY: "/bookbyday",
-        EDIT_PROFILE: "profile/edit-name",
     }
 }
