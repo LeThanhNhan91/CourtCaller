@@ -18,28 +18,31 @@ const HomePage = () => {
   const [district, setDistrict] = useState("");
   const [city, setCity] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [branchs, setBranchs] = useState([]);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [branches, setBranches] = useState([]);
   const [prices, setPrices] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState(null);
+  const [totalBranches, setTotalBranches] = useState(0);
   const navigate = useNavigate();
 
   const itemsPerPage = 9;
-  const totalPages = Math.ceil(branchs.length / itemsPerPage);
+  const totalPages = Math.ceil(22 / itemsPerPage);
 
   useEffect(() => {
-    const fetchBranchs = async () => {
+    const fetchBranches = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await fetch(
-          `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=${currentPage}&pageSize=${itemsPerPage}`
+           `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=${pageNumber}&pageSize=${itemsPerPage}`
         );
         const data = await response.json();
-        setBranchs(data);
+        console.log("data", data)
+        setBranches(data); // Assuming the API returns branches in an array called "branches"
+        setTotalBranches(data); // Assuming the API returns total count of branches
         await fetchPrices(data);
       } catch (err) {
         setError("Failed to fetch data");
@@ -48,8 +51,18 @@ const HomePage = () => {
       }
     };
 
-    fetchBranchs();
-  }, [currentPage]);
+    fetchBranches();
+  }, [pageNumber]);
+
+  const isJson = (str) => {
+    try {
+      JSON.parse(str)
+      
+    } catch (error) {
+      return false
+    }
+    return true
+  }
 
   const fetchPrices = async (branchData) => {
     const pricesData = {};
@@ -70,14 +83,9 @@ const HomePage = () => {
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setPageNumber(page);
     window.scrollTo(0, 0); // Scroll to the top of the page
   };
-
-  const displayBranchs = branchs.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   const handleBookNow = (branch) => {
     setSelectedBranch(branch);
@@ -146,14 +154,18 @@ const HomePage = () => {
           </button>
         </div>
         <div className="row booking_branch_container">
-          {displayBranchs.map((branch, index) => (
+          {branches.map((branch, index) => (
             <div
               className="booking_branch_detail col-lg-3 col-md-4 col-sm-6"
               key={index}
             >
-              <img src={branch.image || feature1Img} alt="san" />
+              {branch.branchPictures && (
+                // isJson(branch.branchPictures) ? JSON.parse(branch.branchPictures).map((url, index) =>  (<img className="home-img" key={index} src={url} alt="san" />))
+                // : 
+                <img className="home-img" src={branch.branchPictures} alt="no pic"/> 
+              )}
               <h3>{branch.branchName}</h3>
-              {/* <p>Số sân trống: {branch.availableBranchs}</p> */}
+              {/* <p>Số sân trống: {branch.availableBranches}</p> */}
               <p>Number of courts: 4</p>
               <p>Address: {branch.branchAddress}</p>
               <p>
@@ -176,7 +188,7 @@ const HomePage = () => {
             <button
               key={index}
               onClick={() => handlePageChange(index + 1)}
-              className={currentPage === index + 1 ? "active" : ""}
+              className={pageNumber === index + 1 ? "active" : ""}
             >
               {index + 1}
             </button>
