@@ -231,7 +231,7 @@ const BookByDay = () => {
       };
     });
 
-    navigate("/staff/PaymentDetail", {
+    navigate("/payment-detail", {
       state: {
         branchId: selectedBranch,
         bookingRequests,

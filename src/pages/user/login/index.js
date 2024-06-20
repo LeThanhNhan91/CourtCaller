@@ -88,11 +88,13 @@ const Login = () => {
       const res = await loginApi(email, password);
       if (res && res.token) {
         localStorage.setItem("token", res.token);
+        console.log('token: ', res.token)
         var decode = jwtDecode(res.token);
-
         const userData = {
+          Id: decode.Id,
           email: decode.email,
         };
+        console.log('data: ',userData)
         login(userData); // Lưu thông tin người dùng vào context
         toast.success("Login successful!");
         navigate(ROUTERS.USER.HOME);
@@ -185,7 +187,7 @@ const Login = () => {
       const data = await res.json();
 
       if (res.ok) {
-        console.log("Login successful:", data);
+        // console.log("Login successful:", data);
         localStorage.setItem("token", token);
         var decode = jwtDecode(token);
 

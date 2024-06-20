@@ -80,6 +80,12 @@
   align-items: center;
   justify-content: center;
   margin-top: 50px;
+
+  .profile-img{
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+  }
 }
 
 .user-image p{

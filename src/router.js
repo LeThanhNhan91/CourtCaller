@@ -8,6 +8,7 @@ import Login from "pages/user/login";
 import NewsPage from "pages/user/newsPage";
 import BookedPage from "pages/user/bookedPage"
 import BookByDay from "pages/user/bookingByDay"
+import PaymentDetail from "pages/user/Payment/PaymentDetails";
 
 
 const renderUserRouter = () => {
@@ -35,6 +36,11 @@ const renderUserRouter = () => {
         {
             path: ROUTERS.USER.BYDAY,
             component: <BookByDay/>
+        }
+        ,
+        {
+            path: ROUTERS.USER.PAYMENTDETAIL,
+            component: <PaymentDetail/>
         }
     ]
 

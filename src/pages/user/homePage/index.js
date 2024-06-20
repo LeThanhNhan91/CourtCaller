@@ -159,10 +159,10 @@ const HomePage = () => {
               className="booking_branch_detail col-lg-3 col-md-4 col-sm-6"
               key={index}
             >
-              {branch.branchPictures && (
-                // isJson(branch.branchPictures) ? JSON.parse(branch.branchPictures).map((url, index) =>  (<img className="home-img" key={index} src={url} alt="san" />))
-                // : 
-                <img className="home-img" src={branch.branchPictures} alt="no pic"/> 
+              {branch.branchPicture && (
+                isJson(branch.branchPicture) ? JSON.parse(branch.branchPicture).map((url, index) =>  (<img className="home-img" key={index} src={url} alt="san" />))
+                : 
+                <img className="home-img" src={branch.branchPicture} alt="no pic"/> 
               )}
               <h3>{branch.branchName}</h3>
               {/* <p>Số sân trống: {branch.availableBranches}</p> */}

@@ -1,4 +1,7 @@
+import { useAuth } from 'AuthContext';
 import axios from 'axios';
+
+
 
 const url = 'https://courtcaller.azurewebsites.net/api';
 
@@ -78,6 +81,7 @@ export const deleteBooking = async (id) => {
 
 //booking by day
 export const reserveSlots = async (userId, bookings) => {
+  
   try {
     const response = await axios.post(`https://courtcaller.azurewebsites.net/api/Bookings/reserve-slot?userId=${userId}`, bookings);
     return response.data;

@@ -103,6 +103,17 @@ const Profile = () => {
     }));
   };
 
+  const isJson = (str) => {
+    try {
+      JSON.parse(str)
+      
+    } catch (error) {
+      return false
+    }
+    return true
+  }
+
+
   if (!userData || !user) {
     return <div>Loading...</div>;
   }
@@ -146,7 +157,7 @@ const Profile = () => {
         <div className="user-image-container">
           <div className="user-image">
             <div className="image-placeholder">
-              <img src={userImg} alt="user image" />
+              <img className="profile-img" src={userData.profilePicture} alt="user image" />
             </div>
             <p>Profile Picture</p>
             <p style={{ margin: 0, color: "#00c853" }}>Online</p>
