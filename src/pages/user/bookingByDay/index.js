@@ -527,8 +527,8 @@ const BookByDay = () => {
                     <span className="score">5.0</span>
                     <span className="star">★</span>
                 </div>
-                <div className="rating-button">
-                    <button onClick={() => setReviewFormVisible(true)}>Đánh giá và nhận xét</button>
+                <div>
+                    <button className="rating-button" onClick={() => setReviewFormVisible(true)}>Đánh giá và nhận xét</button>
                 </div>
             </div>
             <div className="rating-bars">

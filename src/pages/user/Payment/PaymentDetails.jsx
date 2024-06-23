@@ -67,6 +67,7 @@ const PaymentDetail = () => {
             balance: detailedUserInfo.balance,
             address: detailedUserInfo.address,
           });
+          console.log(userInfo.userId)
           setErrorMessage('');
           
         } else {
@@ -89,9 +90,8 @@ const PaymentDetail = () => {
   
 
 
-
   const handleNext = async () => {
-    console.log(userInfo.userId)
+    
     if (activeStep === 0 && !userExists) {
       setErrorMessage('Please enter a valid email and check user existence.');
       return;
