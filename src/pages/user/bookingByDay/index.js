@@ -112,6 +112,12 @@ const BookByDay = () => {
   const [afternoonTimeSlots, setAfternoonTimeSlots] = useState([]);
   const navigate = useNavigate();
   const currentDate = dayjs();
+  const [reviewFormVisible, setReviewFormVisible] = useState(false);
+    const [highlightedStars, setHighlightedStars] = useState(0);
+
+  const handleStarClick = (value) => {
+        setHighlightedStars(value);
+  };
 
   // fetch giá theo branch đã chọn
   useEffect(() => {
@@ -133,7 +139,7 @@ const BookByDay = () => {
     if (openDay) {
       const days = getDaysOfWeek(startOfWeek, openDay);
       setWeekDays(days);
-      console.log('Computed weekDays:', days);
+      //console.log('Computed weekDays:', days);
     }
   }, [openDay, startOfWeek]);
 
@@ -142,11 +148,11 @@ const BookByDay = () => {
     if (openTime && '14:00:00') {
       const decimalOpenTime = timeStringToDecimal(openTime);
       const decimalCloseTime = timeStringToDecimal('14:00:00');
-      console.log('decimalOpenTime:', decimalOpenTime);
-      console.log('decimalCloseTime:', decimalCloseTime);
+      //console.log('decimalOpenTime:', decimalOpenTime);
+      //console.log('decimalCloseTime:', decimalCloseTime);
       const timeSlots = generateTimeSlots(decimalOpenTime, decimalCloseTime);
       setMorningTimeSlots(timeSlots);
-      console.log('generate timeSlots:', timeSlots);
+      //console.log('generate timeSlots:', timeSlots);
     }
   }, [openTime]);
 
@@ -155,11 +161,11 @@ const BookByDay = () => {
     if (closeTime && '14:00:00') {
       const decimalOpenTime = timeStringToDecimal('14:00:00');
       const decimalCloseTime = timeStringToDecimal(closeTime);
-      console.log('decimalOpenTime:', decimalOpenTime);
-      console.log('decimalCloseTime:', decimalCloseTime);
+      //console.log('decimalOpenTime:', decimalOpenTime);
+      //console.log('decimalCloseTime:', decimalCloseTime);
       const timeSlots = generateTimeSlots(decimalOpenTime, decimalCloseTime);
       setAfternoonTimeSlots(timeSlots);
-      console.log('generate timeSlots:', timeSlots);
+      //console.log('generate timeSlots:', timeSlots);
     }
   }, [closeTime]);
 
@@ -310,7 +316,7 @@ const BookByDay = () => {
           <Box display="flex" justifyContent="space-between" mb={2} alignItems="center">
             <FormControl sx={{ minWidth: 200, backgroundColor: "#0D1B34", borderRadius: 1 }}>
               <Typography
-                labelId="branch-select-label"
+                labelid="branch-select-label"
                 value={selectedBranch}
                 sx={{ color: "#FFFFFF", p: 2 }}
               >
@@ -513,37 +519,67 @@ const BookByDay = () => {
         </Box>
 
         {/* Rating form */}
-        <div className="rating">
-          <div className="rating-container">
-            <h1>RATING BRANCH</h1>
-            <textarea placeholder=" Please share with us some of your impressions..."></textarea>
-            <div className="rating-stars">
-              <p style={{ fontSize: "large" }}>How do you feel about the branch and the service? (Choosing star)</p>
-              <div className="stars">
-                <label>
-                  <input type="radio" name="rating" value="1" />
-                  <span> Very bad</span>
-                </label>
-                <label>
-                  <input type="radio" name="rating" value="2" />
-                  <span> Bad</span>
-                </label>
-                <label>
-                  <input type="radio" name="rating" value="3" />
-                  <span> Normal</span>
-                </label>
-                <label>
-                  <input type="radio" name="rating" value="4" />
-                  <span> Good</span>
-                </label>
-                <label>
-                  <input type="radio" name="rating" value="5" />
-                  <span> Very Good</span>
-                </label>
-              </div>
+        <div className="rating-form">
+        <div className="rating-container">
+            <h2>Đánh giá sân thể thao</h2>
+            <div className="average-rating">
+                <div className="average-score">
+                    <span className="score">5.0</span>
+                    <span className="star">★</span>
+                </div>
+                <div className="rating-button">
+                    <button onClick={() => setReviewFormVisible(true)}>Đánh giá và nhận xét</button>
+                </div>
             </div>
-            <button type="button">Rating</button>
-          </div>
+            <div className="rating-bars">
+                <div className="rating-bar">
+                    <span className="stars">★★★★★</span>
+                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+                    <span className="percentage">0%</span>
+                </div>
+                <div className="rating-bar">
+                    <span className="stars">★★★★☆</span>
+                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+                    <span className="percentage">0%</span>
+                </div>
+                <div className="rating-bar">
+                    <span className="stars">★★★☆☆</span>
+                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+                    <span className="percentage">0%</span>
+                </div>
+                <div className="rating-bar">
+                    <span className="stars">★★☆☆☆</span>
+                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+                    <span className="percentage">0%</span>
+                </div>
+                <div className="rating-bar">
+                    <span className="stars">★☆☆☆☆</span>
+                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+                    <span className="percentage">0%</span>
+                </div>
+            </div>
+            {reviewFormVisible && (
+                <div id="review-form">
+                    <h2>Gửi nhận xét của bạn</h2>
+                    <div className="star-rating">
+                        {[1, 2, 3, 4, 5].map(value => (
+                            <span
+                                key={value}
+                                className={`rating-star ${highlightedStars >= value ? 'highlight' : ''}`}
+                                data-value={value}
+                                onClick={() => handleStarClick(value)}
+                            >
+                                ★
+                            </span>
+                        ))}
+                    </div>
+                    <div className="rating-review">
+                    <textarea placeholder="Nhận xét của bạn về sản phẩm này"></textarea>
+                    </div>
+                    <button className="submit-rating">Gửi đánh giá</button>
+                </div>
+            )}
+        </div>
         </div>
       </div>
     </>

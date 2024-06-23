@@ -117,7 +117,6 @@ const PaymentDetail = () => {
 
         // Log dữ liệu gửi lên để kiểm tra
         console.log('Formatted Requests:', bookingForm);
-
         const booking = await reserveSlots(userInfo.userId, bookingForm);
         const bookingId = booking.bookingId;
         const tokenResponse = await generatePaymentToken(bookingId);
