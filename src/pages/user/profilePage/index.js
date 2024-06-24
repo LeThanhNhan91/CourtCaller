@@ -11,6 +11,9 @@ const Profile = () => {
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userPic, setUserPic] = useState('')
+  const [userEmail, setUserEmail] = useState('')
   const [editFormValues, setEditFormValues] = useState({
     fullName: "",
     email: "",
@@ -23,6 +26,10 @@ const Profile = () => {
 
     if (token) {
       const decoded = jwtDecode(token);
+      console.log(decoded)
+      setUserName(decoded.name)
+      setUserPic(decoded.picture)
+      setUserEmail(decoded.email)
 
       const fetchUserData = async (id, isGoogle) => {
         try {
@@ -62,11 +69,13 @@ const Profile = () => {
     }
   }, []);
 
+  console.log(userData)
+
   useEffect(() => {
     if (user && userData) {
       setEditFormValues({
-        fullName: userData.fullName,
-        email: user.email,
+        fullName: userData.fullName || userName,
+        email: user.email || userEmail,
         phone: user.phoneNumber,
         facebook: user.facebook || "",
       });
@@ -126,7 +135,7 @@ const Profile = () => {
             <h2>Basic Information</h2>
             <div className="form-group">
               <p className="info-field">Full Name</p>
-              <p className="info">{userData.fullName}</p>
+              <p className="info">{userData.fullName || userName}</p>
             </div>
             <div className="form-group">
               <p className="info-field">User Name</p>
@@ -145,7 +154,7 @@ const Profile = () => {
             <h2>Contact Information</h2>
             <div className="form-group">
               <p className="info-field">Email</p>
-              <p className="info">{user.email}</p>
+              <p className="info">{user.email || userEmail}</p>
             </div>
             <div className="form-group">
               <p className="info-field">Phone</p>
@@ -157,7 +166,7 @@ const Profile = () => {
         <div className="user-image-container">
           <div className="user-image">
             <div className="image-placeholder">
-              <img className="profile-img" src={userData.profilePicture} alt="user image" />
+              <img className="profile-img" src={userData.profilePicture || userPic} alt="user image" />
             </div>
             <p>Profile Picture</p>
             <p style={{ margin: 0, color: "#00c853" }}>Online</p>

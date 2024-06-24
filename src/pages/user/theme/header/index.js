@@ -145,7 +145,8 @@ const Header = () => {
                         <div className="profile-pic">
                           <img src={userData.profilePicture || userPic} alt="Avatar" />
                         </div>
-                        <p>{userData.fullName || userName}</p>
+                        <p style={{fontSize: "medium", fontWeight: "bold", marginBottom: 5}}>{userData.fullName || userName}</p>
+                        <p>{user.email}</p>
                       </div>
                       <ul className="profile-actions">
                         <li>
