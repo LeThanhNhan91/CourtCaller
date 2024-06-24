@@ -128,6 +128,16 @@ const BookByDay = () => {
   const [reviewFormVisible, setReviewFormVisible] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewsVisible, setReviewsVisible] = useState(false);
+  const [editingReview, setEditingReview] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setUserId(decodedToken.Id);
+    }
+  }, []);
 
   //console.log(branch.branchId);
   const handleStarClick = (value) => {
@@ -142,6 +152,9 @@ const BookByDay = () => {
     const token = localStorage.getItem("token");
     const decodedToken = jwtDecode(token);
     const userId = decodedToken.Id;
+    if (!token) {
+      throw new Error("No token found");
+    }
 
     const reviewData = {
       reviewText,
@@ -177,9 +190,48 @@ const BookByDay = () => {
       setReviews(response.data);
       setReviewsVisible(true);
       console.log("resdata: ", response.data);
-      console.log(reviews);
     } catch (error) {
       console.error("Error fetching reviews:", error);
+    }
+  };
+
+  const handleEditReview = (review) => {
+    setEditingReview(review);
+    setReviewText(review.reviewText);
+    setHighlightedStars(review.rating);
+  };
+
+  const handleUpdateReview = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const updatedReviewData = {
+        reviewText,
+        rating: highlightedStars,
+        userId: editingReview.id,
+        branchId: editingReview.branchId,
+      };
+
+      console.log('editingReview', editingReview)
+
+      const response = await axios.put(`https://courtcaller.azurewebsites.net/api/Reviews/${editingReview.reviewId}`, updatedReviewData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const updatedReviews = reviews.map(review =>
+        review.id === editingReview.id ? response.data : review
+      );
+      setReviews(updatedReviews);
+      setEditingReview(null);
+      setReviewText("");
+      setHighlightedStars(0);
+    } catch (error) {
+      console.error('Error updating review:', error);
     }
   };
 
@@ -667,138 +719,149 @@ const BookByDay = () => {
 
         {/* Rating form */}
         <div className="rating-form">
-          <div className="rating-container">
-            <h2>Rating this Branch</h2>
-            <div className="average-rating">
-              <div className="average-score">
-                <span className="score">5.0</span>
-                <span className="star">★</span>
-              </div>
-              <div>
-                <button
-                  className="rating-button"
-                  style={{ marginRight: 15 }}
-                  onClick={() => setReviewFormVisible(true)}
-                >
-                  Reviews and Comments
-                </button>
-                <button className="rating-button" onClick={handleViewReviews}>
-                  Viewing reviews
-                </button>
-              </div>
-            </div>
-            <div className="rating-bars">
-              <div className="rating-bar">
-                <span className="stars">★★★★★</span>
-                <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
-                </div>
-                <span className="percentage">0%</span>
-              </div>
-              <div className="rating-bar">
-                <span className="stars">★★★★☆</span>
-                <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
-                </div>
-                <span className="percentage">0%</span>
-              </div>
-              <div className="rating-bar">
-                <span className="stars">★★★☆☆</span>
-                <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
-                </div>
-                <span className="percentage">0%</span>
-              </div>
-              <div className="rating-bar">
-                <span className="stars">★★☆☆☆</span>
-                <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
-                </div>
-                <span className="percentage">0%</span>
-              </div>
-              <div className="rating-bar">
-                <span className="stars">★☆☆☆☆</span>
-                <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
-                </div>
-                <span className="percentage">0%</span>
-              </div>
-            </div>
-            {reviewFormVisible && (
-              <div id="review-form">
-                <h2>Tell us your experience</h2>
-                <div className="star-rating">
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <span
-                      key={value}
-                      className={`rating-star ${
-                        highlightedStars >= value ? "highlight" : ""
-                      }`}
-                      data-value={value}
-                      onClick={() => handleStarClick(value)}
-                    >
-                      ★
-                    </span>
-                  ))}
-                </div>
-                <div className="rating-review">
-                  <textarea
-                    placeholder="Remarking this branch here...."
-                    value={reviewText}
-                    onChange={handleReviewTextChange}
-                  ></textarea>
-                </div>
-                <button className="submit-rating" onClick={handleSubmitReview}>
-                  Send Rating
-                </button>
-              </div>
-            )}
-            {reviewsVisible && (
-              <>
-                <div
-                  className="reviews-popup-overlay"
-                  onClick={() => setReviewsVisible(false)}
-                ></div>
-                <div className="reviews-popup">
-                  <div className="reviewing-title">
-                    <h2>All Reviews</h2>
-                  </div>
-                  <div className="close-btn">
-                    <button
-                      className="rating-button"
-                      onClick={() => setReviewsVisible(false)}
-                    >
-                      Close
-                    </button>
-                  </div>
-                  <div
-                    className="reviews-container"
-                    style={{ maxHeight: "300px", overflowY: "scroll" }}
-                  >
-                    {reviews.map((review, index) => (
-                      <div key={index} className="review">
-                        <div className="review-header">
-                          <span className="review-author">
-                            User: {review.userId}
-                          </span>
-                          <span className="review-rating">
-                            {review.rating}★
-                          </span>
-                        </div>
-                        <div className="review-body">
-                          <div className="review-content">
-                          <p>{review.reviewText}</p>
-                          <CiEdit style={{marginRight: "10px", fontSize: "larger", fontWeight: "bold"}} />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
+      <div className="rating-container">
+        <h2>Rating this Branch</h2>
+        <div className="average-rating">
+          <div className="average-score">
+            <span className="score">5.0</span>
+            <span className="star">★</span>
+          </div>
+          <div>
+            <button
+              className="rating-button"
+              style={{ marginRight: 15 }}
+              onClick={() => setReviewFormVisible(true)}
+            >
+              Reviews and Comments
+            </button>
+            <button className="rating-button" onClick={handleViewReviews}>Viewing reviews</button>
           </div>
         </div>
+        <div className="rating-bars">
+          <div className="rating-bar">
+            <span className="stars">★★★★★</span>
+            <div className="bar">
+              <div className="fill" style={{ width: "0%" }}></div>
+            </div>
+            <span className="percentage">0%</span>
+          </div>
+          <div className="rating-bar">
+            <span className="stars">★★★★☆</span>
+            <div className="bar">
+              <div className="fill" style={{ width: "0%" }}></div>
+            </div>
+            <span className="percentage">0%</span>
+          </div>
+          <div className="rating-bar">
+            <span className="stars">★★★☆☆</span>
+            <div className="bar">
+              <div className="fill" style={{ width: "0%" }}></div>
+            </div>
+            <span className="percentage">0%</span>
+          </div>
+          <div className="rating-bar">
+            <span className="stars">★★☆☆☆</span>
+            <div className="bar">
+              <div className="fill" style={{ width: "0%" }}></div>
+            </div>
+            <span className="percentage">0%</span>
+          </div>
+          <div className="rating-bar">
+            <span className="stars">★☆☆☆☆</span>
+            <div className="bar">
+              <div className="fill" style={{ width: "0%" }}></div>
+            </div>
+            <span className="percentage">0%</span>
+          </div>
+        </div>
+        {reviewFormVisible && (
+          <div id="review-form">
+            <h2>Tell us your experience</h2>
+            <div className="star-rating">
+              {[1, 2, 3, 4, 5].map((value) => (
+                <span
+                  key={value}
+                  className={`rating-star ${
+                    highlightedStars >= value ? "highlight" : ""
+                  }`}
+                  data-value={value}
+                  onClick={() => handleStarClick(value)}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+            <div className="rating-review">
+              <textarea
+                placeholder="Remarking this branch here...."
+                value={reviewText}
+                onChange={handleReviewTextChange}
+              ></textarea>
+            </div>
+            <button className="submit-rating" onClick={handleSubmitReview}>
+              Send Rating
+            </button>
+          </div>
+        )}
+        {reviewsVisible && (
+          <>
+            <div className="reviews-popup-overlay" onClick={() => setReviewsVisible(false)}></div>
+            <div className="reviews-popup">
+              <div className="reviewing-title">
+                <h2>All Reviews</h2>
+              </div>
+              <div className="close-btn">
+                <button className="rating-button" onClick={() => setReviewsVisible(false)}>Close</button>
+              </div>
+              <div className="reviews-container" style={{ maxHeight: "300px", overflowY: "scroll" }}>
+                {reviews.map((review, index) => (
+                  <div key={index} className="review">
+                    <div className="review-header">
+                      <span className="review-author">User: {review.id}</span>
+                      <span className="review-rating">{review.rating}★</span>
+                      {review.id === userId && (
+                        <CiEdit
+                          style={{ marginRight: "10px", fontSize: "larger", fontWeight: "bold" }}
+                          onClick={() => handleEditReview(review)}
+                        />
+                      )}
+                    </div>
+                    {editingReview?.id === review.id ? (
+                      <div className="review-body">
+                        <div className="star-rating">
+                          {[1, 2, 3, 4, 5].map((value) => (
+                            <span
+                              key={value}
+                              className={`rating-star ${
+                                highlightedStars >= value ? "highlight" : ""
+                              }`}
+                              data-value={value}
+                              onClick={() => handleStarClick(value)}
+                            >
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                        <textarea
+                          value={reviewText}
+                          onChange={handleReviewTextChange}
+                        />
+                        <button style={{marginRight: "10px"}} className="submit-rating" onClick={handleUpdateReview}>Update</button>
+                        <button className="submit-rating" onClick={() => setEditingReview(null)}>Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="review-body">
+                        <p>{review.reviewText}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
       </div>
     </>
   );
