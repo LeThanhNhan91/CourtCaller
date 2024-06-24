@@ -29,6 +29,7 @@ import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import { CiEdit } from "react-icons/ci";
 import "./styles.scss";
 import "react-multi-carousel/lib/styles.css";
 import "./style.scss";
@@ -772,7 +773,7 @@ const BookByDay = () => {
                   </div>
                   <div
                     className="reviews-container"
-                    style={{ maxHeight: "400px", overflowY: "scroll" }}
+                    style={{ maxHeight: "300px", overflowY: "scroll" }}
                   >
                     {reviews.map((review, index) => (
                       <div key={index} className="review">
@@ -785,7 +786,10 @@ const BookByDay = () => {
                           </span>
                         </div>
                         <div className="review-body">
+                          <div className="review-content">
                           <p>{review.reviewText}</p>
+                          <CiEdit style={{marginRight: "10px", fontSize: "larger", fontWeight: "bold"}} />
+                          </div>
                         </div>
                       </div>
                     ))}

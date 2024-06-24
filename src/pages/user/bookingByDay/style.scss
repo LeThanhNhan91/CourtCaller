@@ -300,7 +300,7 @@ textarea {
 }
 
 .reviews-popup {
-  width: 500px;
+  width: 900px;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -313,7 +313,7 @@ textarea {
 }
 
 .reviews-container {
-  max-height: 400px;
+  max-height: 200px;
   overflow-y: scroll;
 }
 
@@ -351,6 +351,12 @@ textarea {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 10px;
+}
+
+.review-body .review-content{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
 .review-author {
