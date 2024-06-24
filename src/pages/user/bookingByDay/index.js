@@ -12,41 +12,49 @@ import pic3 from "assets/users/images/byday/pic3.webp";
 import pic4 from "assets/users/images/byday/pic4.webp";
 import pic5 from "assets/users/images/byday/pic5.webp";
 import { IoLocationOutline } from "react-icons/io5";
-import { Box, Button, Grid, Typography, Select, MenuItem, FormControl, IconButton } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  IconButton,
+} from "@mui/material";
 import { fetchBranches, fetchBranchById } from "api/branchApi";
 import { reserveSlots } from "api/bookingApi";
 import { fetchPrice } from "api/priceApi";
 import dayjs from "dayjs";
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import "./styles.scss";
 import "react-multi-carousel/lib/styles.css";
 import "./style.scss";
 
 dayjs.extend(isSameOrBefore);
 
-
 // quy ước các ngày trong tuần thành số
 const dayToNumber = {
-  "Monday": 1,
-  "Tuesday": 2,
-  "Wednesday": 3,
-  "Thursday": 4,
-  "Friday": 5,
-  "Saturday": 6,
-  "Sunday": 7
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+  Sunday: 7,
 };
 
 //trả về mảng 2 cái ngày bắt đầu và kết thúc dạng số
 const parseOpenDay = (openDay) => {
-  if (!openDay || typeof openDay !== 'string') {
-    console.error('Invalid openDay:', openDay);
+  if (!openDay || typeof openDay !== "string") {
+    console.error("Invalid openDay:", openDay);
     return [0, 0];
   }
-  const days = openDay.split(' to ');
+  const days = openDay.split(" to ");
   if (days.length !== 2) {
-    console.error('Invalid openDay format:', openDay);
+    console.error("Invalid openDay format:", openDay);
     return [0, 0];
   }
   const [startDay, endDay] = days;
@@ -58,12 +66,12 @@ const getDaysOfWeek = (startOfWeek, openDay) => {
   let days = [];
   const [startDay, endDay] = parseOpenDay(openDay);
   if (startDay === 0 || endDay === 0) {
-    console.error('Invalid days parsed:', { startDay, endDay });
+    console.error("Invalid days parsed:", { startDay, endDay });
     return days;
   }
 
   for (var i = startDay; i <= endDay; i++) {
-    days.push(dayjs(startOfWeek).add(i, 'day'));
+    days.push(dayjs(startOfWeek).add(i, "day"));
   }
 
   return days;
@@ -102,7 +110,7 @@ const BookByDay = () => {
 
   const [selectedBranch, setSelectedBranch] = useState(branch.branchId);
   const [showAfternoon, setShowAfternoon] = useState(false);
-  const [startOfWeek, setStartOfWeek] = useState(dayjs().startOf('week'));
+  const [startOfWeek, setStartOfWeek] = useState(dayjs().startOf("week"));
   const [weekdayPrice, setWeekdayPrice] = useState(0);
   const [weekendPrice, setWeekendPrice] = useState(0);
   const [selectedSlots, setSelectedSlots] = useState([]);
@@ -117,9 +125,10 @@ const BookByDay = () => {
   const [highlightedStars, setHighlightedStars] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [reviewFormVisible, setReviewFormVisible] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsVisible, setReviewsVisible] = useState(false);
 
-
-  console.log(branch.branchId)
+  //console.log(branch.branchId);
   const handleStarClick = (value) => {
     setHighlightedStars(value);
   };
@@ -129,10 +138,10 @@ const BookByDay = () => {
   };
 
   const handleSubmitReview = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     const decodedToken = jwtDecode(token);
     const userId = decodedToken.Id;
-    
+
     const reviewData = {
       reviewText,
       rating: highlightedStars,
@@ -141,12 +150,35 @@ const BookByDay = () => {
     };
 
     try {
-      await axios.post('https://courtcaller.azurewebsites.net/api/Reviews', reviewData);
+      await axios.post(
+        "https://courtcaller.azurewebsites.net/api/Reviews",
+        reviewData
+      );
       setReviewFormVisible(false);
       // Xử lý sau khi gửi đánh giá thành công (ví dụ: thông báo cho người dùng, cập nhật danh sách đánh giá, v.v.)
     } catch (error) {
-      console.error('Error submitting review', error);
+      console.error("Error submitting review", error);
       // Xử lý lỗi khi gửi đánh giá
+    }
+  };
+
+  const handleViewReviews = async () => {
+    try {
+      const response = await axios.get(
+        `https://courtcaller.azurewebsites.net/api/Reviews/GetReviewsByBranch/${branch.branchId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setReviews(response.data);
+      setReviewsVisible(true);
+      console.log("resdata: ", response.data);
+      console.log(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
     }
   };
 
@@ -158,7 +190,7 @@ const BookByDay = () => {
         setWeekdayPrice(prices.weekdayPrice);
         setWeekendPrice(prices.weekendPrice);
       } catch (error) {
-        console.error('Error fetching prices', error);
+        console.error("Error fetching prices", error);
       }
     };
 
@@ -174,11 +206,11 @@ const BookByDay = () => {
     }
   }, [openDay, startOfWeek]);
 
-  // tạo ra các slot nhỏ sáng từ opentime đến 14h 
+  // tạo ra các slot nhỏ sáng từ opentime đến 14h
   useEffect(() => {
-    if (openTime && '14:00:00') {
+    if (openTime && "14:00:00") {
       const decimalOpenTime = timeStringToDecimal(openTime);
-      const decimalCloseTime = timeStringToDecimal('14:00:00');
+      const decimalCloseTime = timeStringToDecimal("14:00:00");
       //console.log('decimalOpenTime:', decimalOpenTime);
       //console.log('decimalCloseTime:', decimalCloseTime);
       const timeSlots = generateTimeSlots(decimalOpenTime, decimalCloseTime);
@@ -189,8 +221,8 @@ const BookByDay = () => {
 
   // tạo ra các slot nhỏ chiều từ 14h đến closeTime
   useEffect(() => {
-    if (closeTime && '14:00:00') {
-      const decimalOpenTime = timeStringToDecimal('14:00:00');
+    if (closeTime && "14:00:00") {
+      const decimalOpenTime = timeStringToDecimal("14:00:00");
       const decimalCloseTime = timeStringToDecimal(closeTime);
       //console.log('decimalOpenTime:', decimalOpenTime);
       //console.log('decimalCloseTime:', decimalCloseTime);
@@ -202,15 +234,21 @@ const BookByDay = () => {
 
   // xử lý khi click vào slot
   const handleSlotClick = (slot, day, price) => {
-    const slotId = `${day.format('YYYY-MM-DD')}_${slot}_${price}`;
- 
+    const slotId = `${day.format("YYYY-MM-DD")}_${slot}_${price}`;
+
     // Tìm tất cả các slot cùng thời gian đã được chọn
-    const sameTimeSlots = selectedSlots.filter(selectedSlot => selectedSlot.slotId.startsWith(`${day.format('YYYY-MM-DD')}_${slot}`));
+    const sameTimeSlots = selectedSlots.filter((selectedSlot) =>
+      selectedSlot.slotId.startsWith(`${day.format("YYYY-MM-DD")}_${slot}`)
+    );
 
     // Nếu slot đã chọn tồn tại và đã chọn đủ 2 slot cùng thời gian, hủy chọn slot đầu tiên
     if (sameTimeSlots.length >= 2) {
       const firstSlotId = sameTimeSlots[0].slotId;
-      setSelectedSlots(selectedSlots.filter(selectedSlot => selectedSlot.slotId !== firstSlotId));
+      setSelectedSlots(
+        selectedSlots.filter(
+          (selectedSlot) => selectedSlot.slotId !== firstSlotId
+        )
+      );
     } else {
       // Nếu tổng số slot đã chọn nhỏ hơn 3, thêm slot mới
       if (selectedSlots.length < 3) {
@@ -222,7 +260,9 @@ const BookByDay = () => {
   };
 
   const handleRemoveSlot = (slotId) => {
-    setSelectedSlots(selectedSlots.filter(selectedSlot => selectedSlot.slotId !== slotId));
+    setSelectedSlots(
+      selectedSlots.filter((selectedSlot) => selectedSlot.slotId !== slotId)
+    );
   };
 
   // xử lý nút sáng chiều
@@ -236,17 +276,19 @@ const BookByDay = () => {
 
   // xử lý chỉ hiện 1 tuần trước và các tuần sau
   const handlePreviousWeek = () => {
-    const oneWeekBeforeCurrentWeek = dayjs().startOf('week').subtract(1, 'week');
-    if (!dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week')) {
+    const oneWeekBeforeCurrentWeek = dayjs()
+      .startOf("week")
+      .subtract(1, "week");
+    if (!dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week")) {
       setStartOfWeek(oneWeekBeforeCurrentWeek);
     }
   };
 
   const handleNextWeek = () => {
-    setStartOfWeek(dayjs(startOfWeek).add(1, 'week'));
+    setStartOfWeek(dayjs(startOfWeek).add(1, "week"));
   };
 
-  // xử lý khi click vào nút continue qua trang tiếp theo 
+  // xử lý khi click vào nút continue qua trang tiếp theo
   //(Nhân lấy về cần chú ý là chỉ lấy các slot đã click qua trang mới chứ chưa post api booking, và chưa lấy userid)
   const handleContinue = async () => {
     if (!selectedBranch) {
@@ -256,10 +298,10 @@ const BookByDay = () => {
 
     const bookingRequests = selectedSlots.map((slot) => {
       const { day, slot: timeSlot, price } = slot;
-      const [slotStartTime, slotEndTime] = timeSlot.split(' - ');
+      const [slotStartTime, slotEndTime] = timeSlot.split(" - ");
 
       return {
-        slotDate: day.format('YYYY-MM-DD'),
+        slotDate: day.format("YYYY-MM-DD"),
         timeSlot: {
           slotStartTime: `${slotStartTime}:00`,
           slotEndTime: `${slotEndTime}:00`,
@@ -272,7 +314,10 @@ const BookByDay = () => {
       state: {
         branchId: selectedBranch,
         bookingRequests,
-        totalPrice: bookingRequests.reduce((totalprice, object) => totalprice + parseFloat(object.price), 0),
+        totalPrice: bookingRequests.reduce(
+          (totalprice, object) => totalprice + parseFloat(object.price),
+          0
+        ),
       },
     });
   };
@@ -285,18 +330,31 @@ const BookByDay = () => {
         <div className="header-container">
           <div className="brief-info">
             <h1>{branch.branchName}</h1>
-            <p><IoLocationOutline style={{ fontSize: 22 }} /> {branch.branchAddress}</p>
+            <p>
+              <IoLocationOutline style={{ fontSize: 22 }} />{" "}
+              {branch.branchAddress}
+            </p>
             <p>{branch.description}</p>
           </div>
 
           <div className="header-info">
             <div className="branch-img">
               <div className="images">
-                <div className="inner-image"><img src={pic1} alt="img-fluid" /></div>
-                <div className="inner-image"><img src={pic2} alt="img-fluid" /></div>
-                <div className="inner-image"><img src={pic3} alt="img-fluid" /></div>
-                <div className="inner-image"><img src={pic5} alt="img-fluid" /></div>
-                <div className="inner-image"><img src={pic4} alt="img-fluid" /></div>
+                <div className="inner-image">
+                  <img src={pic1} alt="img-fluid" />
+                </div>
+                <div className="inner-image">
+                  <img src={pic2} alt="img-fluid" />
+                </div>
+                <div className="inner-image">
+                  <img src={pic3} alt="img-fluid" />
+                </div>
+                <div className="inner-image">
+                  <img src={pic5} alt="img-fluid" />
+                </div>
+                <div className="inner-image">
+                  <img src={pic4} alt="img-fluid" />
+                </div>
               </div>
             </div>
 
@@ -325,27 +383,56 @@ const BookByDay = () => {
                 </div>
                 <div className="item">
                   <span>Rating:</span>
-                  <span style={{ fontWeight: 700 }}>4/5 <FaStar style={{ color: "#F1C40F" }} /></span>
+                  <span style={{ fontWeight: 700 }}>
+                    4/5 <FaStar style={{ color: "#F1C40F" }} />
+                  </span>
                 </div>
               </div>
               <div className="services-info">
                 <div className="service-title">Convenient Service</div>
                 <div className="service-list">
-                  <span className="service-item"><FaWifi className="icon" /> Wifi</span>
-                  <span className="service-item"><FaMotorcycle className="icon" /> Motorbike Parking</span>
-                  <span className="service-item"><FaCar className="icon" /> Car Parking</span>
-                  <span className="service-item"><FaBowlFood className="icon" /> Food</span>
-                  <span className="service-item"><RiDrinks2Fill className="icon" /> Drinks</span>
-                  <span className="service-item"><MdOutlineLocalDrink className="icon" /> Free Ice Tea</span>
+                  <span className="service-item">
+                    <FaWifi className="icon" /> Wifi
+                  </span>
+                  <span className="service-item">
+                    <FaMotorcycle className="icon" /> Motorbike Parking
+                  </span>
+                  <span className="service-item">
+                    <FaCar className="icon" /> Car Parking
+                  </span>
+                  <span className="service-item">
+                    <FaBowlFood className="icon" /> Food
+                  </span>
+                  <span className="service-item">
+                    <RiDrinks2Fill className="icon" /> Drinks
+                  </span>
+                  <span className="service-item">
+                    <MdOutlineLocalDrink className="icon" /> Free Ice Tea
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <Box m="20px" className="max-width-box" sx={{ backgroundColor: "#F5F5F5", borderRadius: 2, p: 2 }}>
-          <Box display="flex" justifyContent="space-between" mb={2} alignItems="center">
-            <FormControl sx={{ minWidth: 200, backgroundColor: "#0D1B34", borderRadius: 1 }}>
+        <Box
+          m="20px"
+          className="max-width-box"
+          sx={{ backgroundColor: "#F5F5F5", borderRadius: 2, p: 2 }}
+        >
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            mb={2}
+            alignItems="center"
+          >
+            <FormControl
+              sx={{
+                minWidth: 200,
+                backgroundColor: "#0D1B34",
+                borderRadius: 1,
+              }}
+            >
               <Typography
                 labelid="branch-select-label"
                 value={selectedBranch}
@@ -358,12 +445,17 @@ const BookByDay = () => {
             {/* Khung ngày */}
             <>
               {branch.branchId && (
-                <Box display="flex" alignItems="center" sx={{ backgroundColor: "#E0E0E0", p: 1, borderRadius: 2 }}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  sx={{ backgroundColor: "#E0E0E0", p: 1, borderRadius: 2 }}
+                >
                   <IconButton onClick={handlePreviousWeek} size="small">
                     <ArrowBackIosIcon fontSize="inherit" />
                   </IconButton>
                   <Typography variant="h6" sx={{ color: "#0D1B34", mx: 1 }}>
-                    From {dayjs(startOfWeek).add(1, 'day').format('D/M')} To {dayjs(startOfWeek).add(7, 'day').format('D/M')}
+                    From {dayjs(startOfWeek).add(1, "day").format("D/M")} To{" "}
+                    {dayjs(startOfWeek).add(7, "day").format("D/M")}
                   </Typography>
                   <IconButton onClick={handleNextWeek} size="small">
                     <ArrowForwardIosIcon fontSize="inherit" />
@@ -381,7 +473,7 @@ const BookByDay = () => {
                       color: showAfternoon ? "#0D1B34" : "white",
                       mr: 1,
                       textTransform: "none",
-                      marginBottom: '0'
+                      marginBottom: "0",
                     }}
                     onClick={handleToggleMorning}
                   >
@@ -393,7 +485,7 @@ const BookByDay = () => {
                       backgroundColor: showAfternoon ? "#0D1B34" : "#FFFFFF",
                       color: showAfternoon ? "white" : "#0D1B34",
                       textTransform: "none",
-                      marginBottom: '0'
+                      marginBottom: "0",
                     }}
                     onClick={handleToggleAfternoon}
                   >
@@ -415,129 +507,152 @@ const BookByDay = () => {
                     textAlign: "center",
                     padding: "8px",
                     borderRadius: "4px",
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    height: '100%',
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    height: "100%",
                   }}
                 >
                   <Typography variant="body2" component="div">
-                    {day.format('ddd')}
+                    {day.format("ddd")}
                   </Typography>
                   <Typography variant="body2" component="div">
-                    {day.format('D/M')}
+                    {day.format("D/M")}
                   </Typography>
                 </Box>
               </Grid>
 
-              {(showAfternoon ? afternoonTimeSlots : morningTimeSlots).map((slot, slotIndex) => {
-                const price = day.day() >= 1 && day.day() <= 5 ? weekdayPrice : weekendPrice; // Monday to Friday for weekdays, Saturday to Sunday for weekends
-                const slotId = `${day.format('YYYY-MM-DD')}_${slot}_${price}`;
-                const isSelected = selectedSlots.some(selectedSlot => selectedSlot.slotId === slotId);
-                const slotCount = selectedSlots.filter(selectedSlot => selectedSlot.slotId === slotId).length;
+              {(showAfternoon ? afternoonTimeSlots : morningTimeSlots).map(
+                (slot, slotIndex) => {
+                  const price =
+                    day.day() >= 1 && day.day() <= 5
+                      ? weekdayPrice
+                      : weekendPrice; // Monday to Friday for weekdays, Saturday to Sunday for weekends
+                  const slotId = `${day.format("YYYY-MM-DD")}_${slot}_${price}`;
+                  const isSelected = selectedSlots.some(
+                    (selectedSlot) => selectedSlot.slotId === slotId
+                  );
+                  const slotCount = selectedSlots.filter(
+                    (selectedSlot) => selectedSlot.slotId === slotId
+                  ).length;
 
-                return (
-                  <Grid item xs key={slotIndex}>
-                    <Button
-                      onClick={() => handleSlotClick(slot, day, price)}
-                      sx={{
-                        backgroundColor: day.isBefore(currentDate, 'day') ? "#E0E0E0" : isSelected ? "#1976d2" : "#D9E9FF",
-                        color: isSelected ? "#FFFFFF" : "#0D1B34",
-                        p: 2,
-                        borderRadius: 2,
-                        width: "100%",
-                        textTransform: "none",
-                        border: isSelected ? '2px solid #0D61F2' : '1px solid #90CAF9',
-                        textAlign: 'center',
-                        marginBottom: '16px',
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        position: 'relative'
-                      }}
-                      m="10px"
-                      disabled={day.isBefore(currentDate, 'day')}
-                    >
-                      <Box>
-                        <Typography
-                          sx={{
-                            fontWeight: 'bold',
-                            color: isSelected ? "#FFFFFF" : "#0D1B34"
-                          }}
-                        >
-                          {slot}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            color: isSelected ? "#FFFFFF" : "#0D1B34"
-                          }}
-                        >
-                          {price}k
-                        </Typography>
-                        {isSelected && (
-                          <IconButton
-                            onClick={(e) => { e.stopPropagation(); handleRemoveSlot(slotId); }}
-                            sx={{
-                              position: 'absolute',
-                              top: 5,
-                              left: 5,
-                              backgroundColor: '#FFFFFF',
-                              color: '#1976d2',
-                              borderRadius: '50%',
-                              width: 20,
-                              height: 20,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '12px',
-                              fontWeight: 'bold'
-                            }}
-                          >
-                            -
-                          </IconButton>
-                        )}
-                        {isSelected && (
+                  return (
+                    <Grid item xs key={slotIndex}>
+                      <Button
+                        onClick={() => handleSlotClick(slot, day, price)}
+                        sx={{
+                          backgroundColor: day.isBefore(currentDate, "day")
+                            ? "#E0E0E0"
+                            : isSelected
+                            ? "#1976d2"
+                            : "#D9E9FF",
+                          color: isSelected ? "#FFFFFF" : "#0D1B34",
+                          p: 2,
+                          borderRadius: 2,
+                          width: "100%",
+                          textTransform: "none",
+                          border: isSelected
+                            ? "2px solid #0D61F2"
+                            : "1px solid #90CAF9",
+                          textAlign: "center",
+                          marginBottom: "16px",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          position: "relative",
+                        }}
+                        m="10px"
+                        disabled={day.isBefore(currentDate, "day")}
+                      >
+                        <Box>
                           <Typography
                             sx={{
-                              position: 'absolute',
-                              top: 5,
-                              right: 5,
-                              backgroundColor: '#FFFFFF',
-                              color: '#1976d2',
-                              borderRadius: '50%',
-                              width: 20,
-                              height: 20,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '12px',
-                              fontWeight: 'bold'
+                              fontWeight: "bold",
+                              color: isSelected ? "#FFFFFF" : "#0D1B34",
                             }}
                           >
-                            {slotCount}
+                            {slot}
                           </Typography>
-                        )}
-                      </Box>
-                    </Button>
-                  </Grid>
-                );
-              })}
+                          <Typography
+                            sx={{
+                              color: isSelected ? "#FFFFFF" : "#0D1B34",
+                            }}
+                          >
+                            {price}k
+                          </Typography>
+                          {isSelected && (
+                            <IconButton
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveSlot(slotId);
+                              }}
+                              sx={{
+                                position: "absolute",
+                                top: 5,
+                                left: 5,
+                                backgroundColor: "#FFFFFF",
+                                color: "#1976d2",
+                                borderRadius: "50%",
+                                width: 20,
+                                height: 20,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              -
+                            </IconButton>
+                          )}
+                          {isSelected && (
+                            <Typography
+                              sx={{
+                                position: "absolute",
+                                top: 5,
+                                right: 5,
+                                backgroundColor: "#FFFFFF",
+                                color: "#1976d2",
+                                borderRadius: "50%",
+                                width: 20,
+                                height: 20,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {slotCount}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Button>
+                    </Grid>
+                  );
+                }
+              )}
             </Grid>
           ))}
           <>
             {branch.branchId && (
-              <Box display="flex" justifyContent="end" mt={1} marginRight={'12px'}>
+              <Box
+                display="flex"
+                justifyContent="end"
+                mt={1}
+                marginRight={"12px"}
+              >
                 <Button
                   variant="contained"
                   sx={{
                     color: "white",
                     backgroundColor: "#1976d2",
-                    ':hover': {
-                      backgroundColor: '#1565c0',
+                    ":hover": {
+                      backgroundColor: "#1565c0",
                     },
-                    ':active': {
-                      backgroundColor: '#1976d2',
+                    ":active": {
+                      backgroundColor: "#1976d2",
                     },
                   }}
                   onClick={handleContinue}
@@ -551,71 +666,135 @@ const BookByDay = () => {
 
         {/* Rating form */}
         <div className="rating-form">
-      <div className="rating-container">
-        <h2>Đánh giá sân thể thao</h2>
-        <div className="average-rating">
-          <div className="average-score">
-            <span className="score">5.0</span>
-            <span className="star">★</span>
-          </div>
-          <div>
-            <button className="rating-button" onClick={() => setReviewFormVisible(true)}>Đánh giá và nhận xét</button>
-          </div>
-        </div>
-        <div className="rating-bars">
-          <div className="rating-bar">
-            <span className="stars">★★★★★</span>
-            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★★★★☆</span>
-            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★★★☆☆</span>
-            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★★☆☆☆</span>
-            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★☆☆☆☆</span>
-            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-            <span className="percentage">0%</span>
-          </div>
-        </div>
-        {reviewFormVisible && (
-          <div id="review-form">
-            <h2>Gửi nhận xét của bạn</h2>
-            <div className="star-rating">
-              {[1, 2, 3, 4, 5].map(value => (
-                <span
-                  key={value}
-                  className={`rating-star ${highlightedStars >= value ? 'highlight' : ''}`}
-                  data-value={value}
-                  onClick={() => handleStarClick(value)}
+          <div className="rating-container">
+            <h2>Rating this Branch</h2>
+            <div className="average-rating">
+              <div className="average-score">
+                <span className="score">5.0</span>
+                <span className="star">★</span>
+              </div>
+              <div>
+                <button
+                  className="rating-button"
+                  style={{ marginRight: 15 }}
+                  onClick={() => setReviewFormVisible(true)}
                 >
-                  ★
-                </span>
-              ))}
+                  Reviews and Comments
+                </button>
+                <button className="rating-button" onClick={handleViewReviews}>
+                  Viewing reviews
+                </button>
+              </div>
             </div>
-            <div className="rating-review">
-              <textarea
-                placeholder="Nhận xét của bạn về sân này"
-                value={reviewText}
-                onChange={handleReviewTextChange}
-              ></textarea>
+            <div className="rating-bars">
+              <div className="rating-bar">
+                <span className="stars">★★★★★</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★★★☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★★☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★☆☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★☆☆☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
             </div>
-            <button className="submit-rating" onClick={handleSubmitReview}>Gửi đánh giá</button>
+            {reviewFormVisible && (
+              <div id="review-form">
+                <h2>Tell us your experience</h2>
+                <div className="star-rating">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <span
+                      key={value}
+                      className={`rating-star ${
+                        highlightedStars >= value ? "highlight" : ""
+                      }`}
+                      data-value={value}
+                      onClick={() => handleStarClick(value)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <div className="rating-review">
+                  <textarea
+                    placeholder="Remarking this branch here...."
+                    value={reviewText}
+                    onChange={handleReviewTextChange}
+                  ></textarea>
+                </div>
+                <button className="submit-rating" onClick={handleSubmitReview}>
+                  Send Rating
+                </button>
+              </div>
+            )}
+            {reviewsVisible && (
+              <>
+                <div
+                  className="reviews-popup-overlay"
+                  onClick={() => setReviewsVisible(false)}
+                ></div>
+                <div className="reviews-popup">
+                  <div className="reviewing-title">
+                    <h2>All Reviews</h2>
+                  </div>
+                  <div className="close-btn">
+                    <button
+                      className="rating-button"
+                      onClick={() => setReviewsVisible(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <div
+                    className="reviews-container"
+                    style={{ maxHeight: "400px", overflowY: "scroll" }}
+                  >
+                    {reviews.map((review, index) => (
+                      <div key={index} className="review">
+                        <div className="review-header">
+                          <span className="review-author">
+                            User: {review.userId}
+                          </span>
+                          <span className="review-rating">
+                            {review.rating}★
+                          </span>
+                        </div>
+                        <div className="review-body">
+                          <p>{review.reviewText}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-        )}
-      </div>
-    </div>
+        </div>
       </div>
     </>
   );
