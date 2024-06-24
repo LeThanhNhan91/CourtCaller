@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaWifi, FaMotorcycle, FaBowlFood } from "react-icons/fa6";
 import { FaCar, FaStar } from "react-icons/fa";
 import { RiDrinks2Fill } from "react-icons/ri";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { MdOutlineLocalDrink } from "react-icons/md";
 import pic1 from "assets/users/images/byday/pic1.webp";
 import pic2 from "assets/users/images/byday/pic2.webp";
@@ -112,11 +114,40 @@ const BookByDay = () => {
   const [afternoonTimeSlots, setAfternoonTimeSlots] = useState([]);
   const navigate = useNavigate();
   const currentDate = dayjs();
+  const [highlightedStars, setHighlightedStars] = useState(0);
+  const [reviewText, setReviewText] = useState("");
   const [reviewFormVisible, setReviewFormVisible] = useState(false);
-    const [highlightedStars, setHighlightedStars] = useState(0);
 
+
+  console.log(branch.branchId)
   const handleStarClick = (value) => {
-        setHighlightedStars(value);
+    setHighlightedStars(value);
+  };
+
+  const handleReviewTextChange = (event) => {
+    setReviewText(event.target.value);
+  };
+
+  const handleSubmitReview = async () => {
+    const token = localStorage.getItem('token');
+    const decodedToken = jwtDecode(token);
+    const userId = decodedToken.Id;
+    
+    const reviewData = {
+      reviewText,
+      rating: highlightedStars,
+      userId,
+      branchId: branch.branchId, // Đảm bảo rằng branchId đang được cung cấp ở đây nếu cần
+    };
+
+    try {
+      await axios.post('https://courtcaller.azurewebsites.net/api/Reviews', reviewData);
+      setReviewFormVisible(false);
+      // Xử lý sau khi gửi đánh giá thành công (ví dụ: thông báo cho người dùng, cập nhật danh sách đánh giá, v.v.)
+    } catch (error) {
+      console.error('Error submitting review', error);
+      // Xử lý lỗi khi gửi đánh giá
+    }
   };
 
   // fetch giá theo branch đã chọn
@@ -520,67 +551,71 @@ const BookByDay = () => {
 
         {/* Rating form */}
         <div className="rating-form">
-        <div className="rating-container">
-            <h2>Đánh giá sân thể thao</h2>
-            <div className="average-rating">
-                <div className="average-score">
-                    <span className="score">5.0</span>
-                    <span className="star">★</span>
-                </div>
-                <div>
-                    <button className="rating-button" onClick={() => setReviewFormVisible(true)}>Đánh giá và nhận xét</button>
-                </div>
-            </div>
-            <div className="rating-bars">
-                <div className="rating-bar">
-                    <span className="stars">★★★★★</span>
-                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-                    <span className="percentage">0%</span>
-                </div>
-                <div className="rating-bar">
-                    <span className="stars">★★★★☆</span>
-                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-                    <span className="percentage">0%</span>
-                </div>
-                <div className="rating-bar">
-                    <span className="stars">★★★☆☆</span>
-                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-                    <span className="percentage">0%</span>
-                </div>
-                <div className="rating-bar">
-                    <span className="stars">★★☆☆☆</span>
-                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-                    <span className="percentage">0%</span>
-                </div>
-                <div className="rating-bar">
-                    <span className="stars">★☆☆☆☆</span>
-                    <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
-                    <span className="percentage">0%</span>
-                </div>
-            </div>
-            {reviewFormVisible && (
-                <div id="review-form">
-                    <h2>Gửi nhận xét của bạn</h2>
-                    <div className="star-rating">
-                        {[1, 2, 3, 4, 5].map(value => (
-                            <span
-                                key={value}
-                                className={`rating-star ${highlightedStars >= value ? 'highlight' : ''}`}
-                                data-value={value}
-                                onClick={() => handleStarClick(value)}
-                            >
-                                ★
-                            </span>
-                        ))}
-                    </div>
-                    <div className="rating-review">
-                    <textarea placeholder="Nhận xét của bạn về sản phẩm này"></textarea>
-                    </div>
-                    <button className="submit-rating">Gửi đánh giá</button>
-                </div>
-            )}
+      <div className="rating-container">
+        <h2>Đánh giá sân thể thao</h2>
+        <div className="average-rating">
+          <div className="average-score">
+            <span className="score">5.0</span>
+            <span className="star">★</span>
+          </div>
+          <div>
+            <button className="rating-button" onClick={() => setReviewFormVisible(true)}>Đánh giá và nhận xét</button>
+          </div>
         </div>
+        <div className="rating-bars">
+          <div className="rating-bar">
+            <span className="stars">★★★★★</span>
+            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+            <span className="percentage">0%</span>
+          </div>
+          <div className="rating-bar">
+            <span className="stars">★★★★☆</span>
+            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+            <span className="percentage">0%</span>
+          </div>
+          <div className="rating-bar">
+            <span className="stars">★★★☆☆</span>
+            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+            <span className="percentage">0%</span>
+          </div>
+          <div className="rating-bar">
+            <span className="stars">★★☆☆☆</span>
+            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+            <span className="percentage">0%</span>
+          </div>
+          <div className="rating-bar">
+            <span className="stars">★☆☆☆☆</span>
+            <div className="bar"><div className="fill" style={{ width: '0%' }}></div></div>
+            <span className="percentage">0%</span>
+          </div>
         </div>
+        {reviewFormVisible && (
+          <div id="review-form">
+            <h2>Gửi nhận xét của bạn</h2>
+            <div className="star-rating">
+              {[1, 2, 3, 4, 5].map(value => (
+                <span
+                  key={value}
+                  className={`rating-star ${highlightedStars >= value ? 'highlight' : ''}`}
+                  data-value={value}
+                  onClick={() => handleStarClick(value)}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+            <div className="rating-review">
+              <textarea
+                placeholder="Nhận xét của bạn về sân này"
+                value={reviewText}
+                onChange={handleReviewTextChange}
+              ></textarea>
+            </div>
+            <button className="submit-rating" onClick={handleSubmitReview}>Gửi đánh giá</button>
+          </div>
+        )}
+      </div>
+    </div>
       </div>
     </>
   );

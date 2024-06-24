@@ -91,7 +91,6 @@ const Login = () => {
         console.log('token: ', res.token)
         var decode = jwtDecode(res.token);
         const userData = {
-          Id: decode.Id,
           email: decode.email,
         };
         console.log('data: ',userData)
@@ -314,7 +313,7 @@ const Login = () => {
           <div className="form-container sign-up">
             <form onSubmit={handleRegister}>
               <h1>Create Account</h1>
-              <div className="social-icons">
+              {/* <div className="social-icons">
                 <GoogleLogin
                   onSuccess={loginGoogle}
                   onError={() => {
@@ -330,7 +329,7 @@ const Login = () => {
                   <FaFacebookF />{" "}
                   <span style={{ marginLeft: 5 }}>Login with Facebook</span>
                 </a>
-              </div>
+              </div> */}
               <span>or use your email for registration</span>
               <input
                 type="text"

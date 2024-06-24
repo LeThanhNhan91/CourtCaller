@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useState, useEffect } from "react";
 import "./style.scss";
 import "./styleHeader.scss"
 import { AiOutlineUser } from "react-icons/ai";
@@ -11,12 +11,68 @@ import { ROUTERS } from "utils/router";
 import { Slide, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAuth } from 'AuthContext';
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [showProfilePopup, setShowProfilePopup] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [userName, setUserName] = useState('');
+  const [userPic, setUserPic] = useState('')
+  // console.log("userData", userData)
+  // console.log("user", user)
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      const decoded = jwtDecode(token);
+      console.log('decode: ', decoded)
+      setUserName(decoded.name)
+      setUserPic(decoded.picture)
+
+      const fetchUserData = async (id, isGoogle) => {
+        try {
+          if (isGoogle) {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
+            );
+            setUserData(response.data);
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
+            );
+            setUser(userResponse.data);
+          } else {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
+            );
+            setUserData(response.data);
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/${id}`
+            );
+            setUser(userResponse.data);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      if (decoded.iss !== "https://accounts.google.com") {
+        const userId = decoded.Id;
+        setUserId(userId);
+        fetchUserData(userId, false);
+      } else {
+        const userId = decoded.email;
+        setUserId(userId);
+        fetchUserData(userId, true);
+      }
+    }
+  }, []);
+  
   const [menus] = useState([
     {
       name: "Home",
@@ -87,10 +143,9 @@ const Header = () => {
                     <div className={`profile-popup ${showProfilePopup ? 'active' : ''}`}>
                       <div className="profile-info">
                         <div className="profile-pic">
-                          <img src="/path-to-user-avatar.jpg" alt="Avatar" />
-                         
+                          <img src={userData.profilePicture || userPic} alt="Avatar" />
                         </div>
-                        <p>{user.email}</p>
+                        <p>{userData.fullName || userName}</p>
                       </div>
                       <ul className="profile-actions">
                         <li>
