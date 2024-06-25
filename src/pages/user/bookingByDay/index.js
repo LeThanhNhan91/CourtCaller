@@ -178,20 +178,35 @@ const BookByDay = () => {
 
   const handleViewReviews = async () => {
     try {
-      const response = await axios.get(
-        `https://courtcaller.azurewebsites.net/api/Reviews/GetReviewsByBranch/${branch.branchId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const response = await axios.get(`https://courtcaller.azurewebsites.net/api/Reviews?branchId=${branch.branchId}`, {
+        headers: {
+          'Content-Type': 'application/json',
         }
+      });
+
+      const reviewsWithDetails = await Promise.all(
+        response.data.map(async (review) => {
+          let userFullName = 'Unknown User';
+          if (review.id) {
+            try {
+              const userDetailsResponse = await axios.get(`https://courtcaller.azurewebsites.net/api/UserDetails/${review.id}`, {
+                headers: {
+                  'Content-Type': 'application/json',
+                }
+              });
+              userFullName = userDetailsResponse.data.fullName;
+            } catch (userDetailsError) {
+              console.error('Error fetching user details:', userDetailsError);
+            }
+          }
+          return { ...review, userFullName };
+        })
       );
 
-      setReviews(response.data);
+      setReviews(reviewsWithDetails);
       setReviewsVisible(true);
-      console.log("resdata: ", response.data);
     } catch (error) {
-      console.error("Error fetching reviews:", error);
+      console.error('Error fetching reviews:', error);
     }
   };
 
@@ -817,11 +832,13 @@ const BookByDay = () => {
                 {reviews.map((review, index) => (
                   <div key={index} className="review">
                     <div className="review-header">
-                      <span className="review-author">User: {review.id}</span>
-                      <span className="review-rating">{review.rating}★</span>
+                      <div className="name-rating">
+                      <span className="review-author">{review.userFullName}</span>
+                      <span className="review-rating">{review.rating}</span><FaStar style={{color:"gold"}}/>
+                      </div>
                       {review.id === userId && (
                         <CiEdit
-                          style={{ marginRight: "10px", fontSize: "larger", fontWeight: "bold" }}
+                          style={{ marginRight: "10px", fontSize: "23px", fontWeight: "bold" }}
                           onClick={() => handleEditReview(review)}
                         />
                       )}
