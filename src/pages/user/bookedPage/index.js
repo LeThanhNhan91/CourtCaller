@@ -82,6 +82,21 @@ const BookedPage = () => {
     return `${formattedDay}/${formattedMonth}/${year}`;
   };
 
+  const handleCancelBooking = async (bookingId) => {
+    const userConfirmed = window.confirm("Do you want to cancel your appointment?");
+    if (!userConfirmed) {
+      return;
+    }
+
+    try {
+      await axios.delete(`https://courtcaller.azurewebsites.net/api/Bookings/cancelBooking/${bookingId}`);
+      // Update the state to remove the canceled booking
+      setBookings((prevBookings) => prevBookings.filter((booking) => booking.bookingId !== bookingId));
+    } catch (error) {
+      console.error(`Error canceling booking ID ${bookingId}:`, error);
+    }
+  };
+
   return (
     <div style={{ backgroundColor: "#EAECEE" }}>
       <div className="container">
@@ -129,7 +144,12 @@ const BookedPage = () => {
                       <td>{booked.totalPrice} VND</td>
                       <td>{booked.status}</td>
                       <td>
-                        <button className="cancel-button">✘</button>
+                        <button
+                          className="cancel-button"
+                          onClick={() => handleCancelBooking(booked.bookingId)}
+                        >
+                          ✘
+                        </button>
                       </td>
                     </tr>
                   </tbody>
