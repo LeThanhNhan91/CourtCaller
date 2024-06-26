@@ -18,7 +18,7 @@ const Profile = () => {
     fullName: "",
     email: "",
     phone: "",
-    facebook: "",
+    address: "",
   });
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Profile = () => {
 
     if (token) {
       const decoded = jwtDecode(token);
-      console.log(decoded)
+      //console.log(decoded)
       setUserName(decoded.name)
       setUserPic(decoded.picture)
       setUserEmail(decoded.email)
@@ -69,15 +69,13 @@ const Profile = () => {
     }
   }, []);
 
-  console.log(userData)
-
   useEffect(() => {
     if (user && userData) {
       setEditFormValues({
         fullName: userData.fullName || userName,
         email: user.email || userEmail,
         phone: user.phoneNumber,
-        facebook: user.facebook || "",
+        address: userData.address || "",
       });
     }
   }, [user, userData]);
@@ -193,7 +191,7 @@ const Profile = () => {
               <div className="form-edit-group">
                 <div className="account">
                   <h3>Account</h3>
-                  <p>halinhtvn3a</p>
+                  <p>Balance: {userData.balance}</p>
                 </div>
                 <div className="form-edit">
                   <div className="edit-left">
@@ -233,13 +231,13 @@ const Profile = () => {
                       />
                     </div>
                     <div className="form-field">
-                      <span>Facebook</span>
+                      <span>Address</span>
                       <input
                         className="input-fb"
                         type="text"
-                        id="facebook"
-                        name="facebook"
-                        value={editFormValues.facebook}
+                        id="address"
+                        name="address"
+                        value={editFormValues.address}
                         onChange={handleChange}
                       />
                     </div>

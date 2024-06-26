@@ -41,7 +41,7 @@ const HomePage = () => {
         );
         const data = await response.json();
         console.log("data", data)
-        setBranches(data); // Assuming the API returns branches in an array called "branches"
+        setBranches(data.data); // Assuming the API returns branches in an array called "branches"
         setTotalBranches(data); // Assuming the API returns total count of branches
         await fetchPrices(data);
       } catch (err) {
