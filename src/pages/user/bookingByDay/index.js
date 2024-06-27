@@ -162,6 +162,7 @@ const BookByDay = () => {
       userId,
       branchId: branch.branchId, // Đảm bảo rằng branchId đang được cung cấp ở đây nếu cần
     };
+    console.log(branch.branchId)
 
     try {
       await axios.post(
@@ -183,9 +184,10 @@ const BookByDay = () => {
           'Content-Type': 'application/json',
         }
       });
+      console.log(response.data)
 
       const reviewsWithDetails = await Promise.all(
-        response.data.map(async (review) => {
+        response.data.data.map(async (review) => {
           let userFullName = 'Unknown User';
           if (review.id) {
             try {

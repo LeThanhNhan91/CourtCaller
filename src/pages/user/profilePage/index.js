@@ -69,6 +69,8 @@ const Profile = () => {
     }
   }, []);
 
+  console.log("userData", userData)
+
   useEffect(() => {
     if (user && userData) {
       setEditFormValues({

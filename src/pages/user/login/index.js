@@ -95,15 +95,15 @@ const Login = () => {
         };
         console.log('data: ',userData)
         login(userData); // Lưu thông tin người dùng vào context
-        toast.success("Login successful!");
+        //toast.success("Login successful!");
         navigate(ROUTERS.USER.HOME);
       } else if (res && res.status === 401) {
-        toast.error(res.error);
+        //toast.error(res.error);
         setMessage("Login failed!");
         setMessageType("error");
       }
     } catch (error) {
-      toast.error("Login failed!");
+      //toast.error("Login failed!");
       setMessage("Login failed!");
       setMessageType("error");
     } finally {
