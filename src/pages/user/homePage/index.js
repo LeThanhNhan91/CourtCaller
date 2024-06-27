@@ -28,8 +28,7 @@ const HomePage = () => {
   const [totalBranches, setTotalBranches] = useState(0);
   const navigate = useNavigate();
 
-  const itemsPerPage = 9;
-  const totalPages = Math.ceil(22 / itemsPerPage);
+  
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -42,7 +41,7 @@ const HomePage = () => {
         const data = await response.json();
         console.log("data", data)
         setBranches(data.data); // Assuming the API returns branches in an array called "data"
-        setTotalBranches(data.totalCount); // Assuming the API returns total count of branches
+        setTotalBranches(data.total); // Assuming the API returns total count of branches
         await fetchPrices(data.data);
       } catch (err) {
         setError("Failed to fetch data");
@@ -53,6 +52,9 @@ const HomePage = () => {
 
     fetchBranches();
   }, [pageNumber]);
+
+  const itemsPerPage = 9;
+  const totalPages = Math.ceil(totalBranches / itemsPerPage);
 
   const isJson = (str) => {
     try {
