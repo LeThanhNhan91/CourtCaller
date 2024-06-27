@@ -8,6 +8,8 @@ export const ROUTERS = {
         NEWS: "/news",
         BOOKED: "/booked",
         BYDAY: "/bookbyday",
-        PAYMENTDETAIL: "/payment-detail"
+        PAYMENTDETAIL: "/payment-detail",
+        PAYMENTFAILED: "/reject",
+        PAYMENTSUCCESSFUL: "/confirm"
     }
 }

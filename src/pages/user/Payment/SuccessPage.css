@@ -3,7 +3,7 @@
     padding: 0;
 }
 
-.container{
+.payment-container{
     width: 100%;
     height: 100vh;
     background: linear-gradient(to right, #dedddd, #ABEBC6);

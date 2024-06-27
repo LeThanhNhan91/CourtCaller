@@ -37,13 +37,13 @@ const HomePage = () => {
       setError(null);
       try {
         const response = await fetch(
-           `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=${pageNumber}&pageSize=${itemsPerPage}`
+          `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=${pageNumber}&pageSize=${itemsPerPage}`
         );
         const data = await response.json();
         console.log("data", data)
-        setBranches(data.data); // Assuming the API returns branches in an array called "branches"
-        setTotalBranches(data); // Assuming the API returns total count of branches
-        await fetchPrices(data);
+        setBranches(data.data); // Assuming the API returns branches in an array called "data"
+        setTotalBranches(data.totalCount); // Assuming the API returns total count of branches
+        await fetchPrices(data.data);
       } catch (err) {
         setError("Failed to fetch data");
       } finally {
@@ -57,7 +57,6 @@ const HomePage = () => {
   const isJson = (str) => {
     try {
       JSON.parse(str)
-      
     } catch (error) {
       return false
     }
@@ -165,7 +164,6 @@ const HomePage = () => {
                 <img className="home-img" src={branch.branchPicture} alt="no pic"/> 
               )}
               <h3>{branch.branchName}</h3>
-              {/* <p>Số sân trống: {branch.availableBranches}</p> */}
               <p>Number of courts: 4</p>
               <p>Address: {branch.branchAddress}</p>
               <p>

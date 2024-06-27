@@ -9,7 +9,8 @@ import NewsPage from "pages/user/newsPage";
 import BookedPage from "pages/user/bookedPage"
 import BookByDay from "pages/user/bookingByDay"
 import PaymentDetail from "pages/user/Payment/PaymentDetails";
-
+import PaymentFailed from "pages/user/Payment/PaymentFailed";
+import PaymentSuccessful from "pages/user/Payment/PaymentSuccessful";
 
 const renderUserRouter = () => {
     const userRouters  = [
@@ -41,7 +42,15 @@ const renderUserRouter = () => {
         {
             path: ROUTERS.USER.PAYMENTDETAIL,
             component: <PaymentDetail/>
-        }
+        },
+        {
+            path: ROUTERS.USER.PAYMENTFAILED,
+            component: <PaymentFailed/>
+        },
+        {
+            path: ROUTERS.USER.PAYMENTSUCCESSFUL,
+            component: <PaymentSuccessful/>
+        } 
     ]
 
     return(

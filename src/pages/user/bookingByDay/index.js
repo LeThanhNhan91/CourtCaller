@@ -450,10 +450,8 @@ const BookByDay = () => {
                   <span style={{ fontWeight: 700 }}>{weekendPrice} VND</span>
                 </div>
                 <div className="item">
-                  <span>Rating:</span>
-                  <span style={{ fontWeight: 700 }}>
-                    4/5 <FaStar style={{ color: "#F1C40F" }} />
-                  </span>
+                  <span>Phone:</span>
+                  <span style={{ fontWeight: 700 }}>{branch.branchPhone} </span>
                 </div>
               </div>
               <div className="services-info">
