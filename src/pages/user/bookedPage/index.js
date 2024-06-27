@@ -6,39 +6,29 @@ import "./style.scss";
 const BookedPage = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [slotInfo, setSlotInfo] = useState([]);
+  const [branchInfo, setBranchInfo] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        // Retrieve the token from local storage
         const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No token found");
-        }
+        if (!token) throw new Error("No token found");
 
-        // Decode the token to get the user ID
         const decodedToken = jwtDecode(token);
-        const userId = decodedToken.id || decodedToken.Id; // Check for both possible field names
+        const userId = decodedToken.id || decodedToken.Id;
+        if (!userId) throw new Error("User ID not found in token");
 
-        if (!userId) {
-          throw new Error("User ID not found in token");
-        }
-
-        // Fetch bookings data using the user ID
         const bookingsResponse = await axios.get(`https://courtcaller.azurewebsites.net/api/Bookings/userId/${userId}`);
-        // console.log('bookingsResponse', bookingsResponse);
         const allBookings = bookingsResponse.data;
-        // console.log('allBookings', allBookings);
 
-        // Fetch payment data for each booking and filter completed payments
         const filteredBookings = await Promise.all(
           allBookings.map(async (booking) => {
             try {
               const paymentResponse = await axios.get(`https://courtcaller.azurewebsites.net/api/Payments/bookingid/${booking.bookingId}`);
-              console.log('paymentResponse', paymentResponse.data);
-              if (paymentResponse.data.paymentMessage === "Complete") {
-                return booking;
-              }
+              if (paymentResponse.data.paymentMessage === "Complete") return booking;
             } catch (paymentError) {
               console.error(`Error fetching payment data for booking ID ${booking.bookingId}:`, paymentError);
             }
@@ -46,14 +36,7 @@ const BookedPage = () => {
           })
         );
 
-        // Log filtered bookings
-        // console.log('filteredBookings before filtering null values', filteredBookings);
-
-        // Filter out null values
         const validBookings = filteredBookings.filter((booking) => booking !== null);
-        // console.log('validBookings after filtering null values', validBookings);
-
-        // Set the state
         setBookings(validBookings);
       } catch (error) {
         console.error("Error fetching bookings data:", error);
@@ -66,35 +49,47 @@ const BookedPage = () => {
   }, []);
 
   const formatDate = (dateString) => {
-    // Parse the date string into a Date object
     const date = new Date(dateString);
-
-    // Extract the day, month, and year from the Date object
     const day = date.getDate();
-    const month = date.getMonth() + 1; // Months are zero-based, so add 1
+    const month = date.getMonth() + 1;
     const year = date.getFullYear();
-
-    // Format the day and month with leading zeros if needed
-    const formattedDay = day < 10 ? `0${day}` : day;
-    const formattedMonth = month < 10 ? `0${month}` : month;
-
-    // Combine the parts into the desired format
-    return `${formattedDay}/${formattedMonth}/${year}`;
+    return `${day < 10 ? `0${day}` : day}/${month < 10 ? `0${month}` : month}/${year}`;
   };
 
   const handleCancelBooking = async (bookingId) => {
     const userConfirmed = window.confirm("Do you want to cancel your appointment?");
-    if (!userConfirmed) {
-      return;
-    }
+    if (!userConfirmed) return;
 
     try {
       await axios.delete(`https://courtcaller.azurewebsites.net/api/Bookings/cancelBooking/${bookingId}`);
-      // Update the state to remove the canceled booking
       setBookings((prevBookings) => prevBookings.filter((booking) => booking.bookingId !== bookingId));
     } catch (error) {
       console.error(`Error canceling booking ID ${bookingId}:`, error);
     }
+  };
+
+  const handleViewBooking = async (booking) => {
+    setSelectedBooking(booking);
+    setShowModal(true);
+
+    try {
+      const slotResponse = await axios.get(`https://courtcaller.azurewebsites.net/api/TimeSlots/bookingId/${booking.bookingId}`);
+      console.log('Slot Response:', slotResponse.data);
+      setSlotInfo(slotResponse.data);
+
+      const branchResponse = await axios.get(`https://courtcaller.azurewebsites.net/api/Branches/${booking.branchId}`);
+      console.log('Branch Response:', branchResponse.data);
+      setBranchInfo(branchResponse.data);
+    } catch (error) {
+      console.error("Error fetching slot or branch data:", error);
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedBooking(null);
+    setSlotInfo([]);
+    setBranchInfo(null);
   };
 
   return (
@@ -130,6 +125,7 @@ const BookedPage = () => {
                   <th>Booking Type</th>
                   <th>Price</th>
                   <th>Status</th>
+                  <th>Details</th>
                   <th>Cancel</th>
                 </tr>
               </thead>
@@ -144,10 +140,12 @@ const BookedPage = () => {
                       <td>{booked.totalPrice} VND</td>
                       <td>{booked.status}</td>
                       <td>
-                        <button
-                          className="cancel-button"
-                          onClick={() => handleCancelBooking(booked.bookingId)}
-                        >
+                        <button className="view-button" onClick={() => handleViewBooking(booked)}>
+                          View
+                        </button>
+                      </td>
+                      <td>
+                        <button className="cancel-button" onClick={() => handleCancelBooking(booked.bookingId)}>
                           ✘
                         </button>
                       </td>
@@ -157,7 +155,7 @@ const BookedPage = () => {
               ) : (
                 <tbody>
                   <tr>
-                    <td colSpan="7" style={{ textAlign: "center" }}>No completed bookings found</td>
+                    <td colSpan="8" style={{ textAlign: "center" }}>No completed bookings found</td>
                   </tr>
                 </tbody>
               )}
@@ -165,6 +163,46 @@ const BookedPage = () => {
           )}
         </main>
       </div>
+
+      {showModal && selectedBooking && (
+        <div className="modal-container">
+          <div className="modal-content">
+            <span className="close" onClick={closeModal}>
+              &times;
+            </span>
+            <div style={{ display: "flex", justifyContent: "space-between", width: "670px" }}>
+              <div className="slot-view">
+                <h2>Slot Information</h2>
+                {slotInfo.length > 0 ? (
+                  slotInfo.map((slot, index) => (
+                    <div  key={index}>
+                      <p>CourtID: {slot.courtId}</p>
+                      <p>Slot Date: {formatDate(slot.slotDate)}</p>
+                      <p>Start Time: {slot.slotStartTime}</p>
+                      <p>End Time: {slot.slotEndTime}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p>No slot information available</p>
+                )}
+              </div>
+              <div className="branch-view">
+                <h2>Branch Information</h2>
+                {branchInfo ? (
+                  <>
+                    <p>Name: {branchInfo.branchName}</p>
+                    <p>Address: {branchInfo.branchAddress}</p>
+                    <p>Phone: {branchInfo.branchPhone}</p>
+                    <p>Status: {branchInfo.status}</p>
+                  </>
+                ) : (
+                  <p>No branch information available</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

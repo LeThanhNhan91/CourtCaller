@@ -89,3 +89,90 @@ td {
     width: 30px;
     height: auto;
 }
+
+/* Modal styles */
+.modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 100%;
+    height: 300px;
+    max-width: 669px;
+    border-radius: 10px;
+    position: relative;
+  }
+
+  .slot-view, .branch-view{
+    border: solid #000;
+    border-radius: 5px;
+    width: 300px;
+    height: 235px;
+    padding: 10px;
+  }
+
+  .slot-view p, .branch-view p{
+    border-bottom: #aaa solid;
+    border-bottom-width: thin;
+    margin-top: 22px;
+    font-size: larger;
+  }
+  
+  .close {
+    color: #aaa;
+    position: absolute;
+    top: 0px;
+    right: 10px;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: red;
+    text-decoration: none;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .modal-header h2 {
+    margin: 0;
+  }
+  
+  .modal-body {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .slot-info, .branch-info {
+    width: 45%;
+  }
+  
+  .slot-info div, .branch-info div {
+    margin-bottom: 10px;
+  }
+  
+  
