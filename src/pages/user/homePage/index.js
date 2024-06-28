@@ -161,9 +161,10 @@ const HomePage = () => {
               key={index}
             >
               {branch.branchPicture && (
-                isJson(branch.branchPicture) ? JSON.parse(branch.branchPicture).map((url, index) =>  (<img className="home-img" key={index} src={url} alt="san" />))
-                : 
-                <img className="home-img" src={branch.branchPicture} alt="no pic"/> 
+                isJson(branch.branchPicture) ? (
+                  <img className="home-img" src={JSON.parse(branch.branchPicture)[0]} alt="branch" />
+                ) : (
+                <img className="home-img" src={branch.branchPicture} alt="no pic"/>) 
               )}
               <h3>{branch.branchName}</h3>
               <p>Number of courts: 4</p>
