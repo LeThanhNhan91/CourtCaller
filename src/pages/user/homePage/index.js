@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate , BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
 import Modal from "react-modal";
 import "react-multi-carousel/lib/styles.css";
 import feature1Img from "assets/users/images/featured/images.jpg";
@@ -11,6 +11,8 @@ import cat4Img from "assets/users/images/categories/cat-4.png";
 import { AiOutlineSearch } from "react-icons/ai";
 import "./style.scss";
 import { fetchPrice } from "api/priceApi"; 
+//thêm thư viện scroll cuộn cho pro
+import {  animateScroll as scroll } from 'react-scroll';
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
 
@@ -99,6 +101,11 @@ const HomePage = () => {
 
   const handleScheduleByDay = () => {
     navigate("/bookbyday", { state: { branch: selectedBranch } });
+    scroll.scrollToTop({
+      duration: 1000, 
+      smooth: 'easeInOutQuart', 
+    });
+
   };
 
   return (

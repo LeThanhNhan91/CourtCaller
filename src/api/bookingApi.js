@@ -102,3 +102,12 @@ export const fetchBookingById = async (bookingId) => {
   }
 };
 
+
+export const fetchQrcode = async (bookingId) => {
+  try {
+    const response = await axios.get(`${url}/Bookings/qrcode/${bookingId}`);
+    return response.data.qrCodeBase64;
+  } catch (error) {
+    throw new Error('Network response was not ok: ' + error.message);
+  }
+};

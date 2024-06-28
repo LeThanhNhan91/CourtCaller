@@ -3,6 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { FaRegCalendarCheck } from "react-icons/fa";
 import { GiShuttlecock } from "react-icons/gi";
+import {fetchQrcode} from "api/bookingApi";
 import qrCheckIn from "assets/users/images/hero/qr.png";
 import "./style.scss";
 
@@ -15,6 +16,7 @@ const BookedPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [bookingIdToCancel, setBookingIdToCancel] = useState(null);
+  const [qrcode, setQrcode] = useState(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -90,8 +92,9 @@ const BookedPage = () => {
   const handleViewBooking = async (booking) => {
     setSelectedBooking(booking);
     setShowModal(true);
-
+    
     try {
+      setQrcode(await fetchQrcode(booking.bookingId));
       const slotResponse = await axios.get(
         `https://courtcaller.azurewebsites.net/api/TimeSlots/bookingId/${booking.bookingId}`
       );
@@ -294,10 +297,10 @@ const BookedPage = () => {
 
             <div className="user-qr-checking">
               <div className="user-qr">
-                <div className="qr-placeholder">
-                  <img className="qr" src={qrCheckIn} alt="user image" />
+                <div className="qr-placeholder"  style={{ margin: '5px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <img src={`data:image/png;base64,${qrcode}`} alt="QR Code" style={{ width: '300px', height: '310px' }} />
                 </div>
-                <p>QR Code for Checking In</p>
+                <p style={{marginTop: '6px'}}>QR Code for Checking In</p>
                 <p style={{ margin: 0, color: "#00c853" }}>Checked</p>
               </div>
             </div>
