@@ -393,10 +393,12 @@ const BookByDay = () => {
   };
 
   const days = weekDays;
+  const pictures = JSON.parse(branch.branchPicture).slice(0, 5);
 
   return (
     <>
       <div style={{ backgroundColor: "#EAECEE" }}>
+
         <div className="header-container">
           <div className="brief-info">
             <h1>{branch.branchName}</h1>
@@ -410,6 +412,12 @@ const BookByDay = () => {
           <div className="header-info">
             <div className="branch-img">
               <div className="images">
+                {pictures.map((picture, index) => (
+                   <div key={index} className="inner-image">
+                   <img src={picture} alt="img-fluid" />
+                 </div>
+
+                ))}
                 <div className="inner-image">
                   <img src={pic1} alt="img-fluid" />
                 </div>
@@ -419,12 +427,7 @@ const BookByDay = () => {
                 <div className="inner-image">
                   <img src={pic3} alt="img-fluid" />
                 </div>
-                <div className="inner-image">
-                  <img src={pic5} alt="img-fluid" />
-                </div>
-                <div className="inner-image">
-                  <img src={pic4} alt="img-fluid" />
-                </div>
+                
               </div>
             </div>
 
