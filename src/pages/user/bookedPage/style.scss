@@ -46,13 +46,18 @@ main {
 
 h2 {
     margin-top: 0;
+    margin-bottom: 10px;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
     border-spacing: 0;
+}
+
+th{
+  position: sticky;
+  top: 0;
 }
 
 table th, table td {
@@ -65,7 +70,7 @@ table th, table td {
 }
 
 th {
-    background-color: #008874;
+    background-color: #2ECC71;
     color: #fff;
     border: none;
 }
@@ -106,39 +111,81 @@ td {
   
   .modal-content {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     background-color: white;
     padding: 20px;
     border: 1px solid #888;
     width: 100%;
-    height: 300px;
-    max-width: 669px;
+    height: 540px;
+    max-width: 830px;
     border-radius: 10px;
     position: relative;
   }
 
   .slot-view, .branch-view{
-    border: solid #000;
-    border-radius: 5px;
-    width: 300px;
+    width: 400px;
     height: 235px;
     padding: 10px;
+    border-radius: 10px;
+    box-shadow: inset 2px 2px 2px 0px rgba(255,255,255,.5),
+                    7px 7px 20px 0px rgba(0,0,0,.2),
+                    4px 4px 5px 0px rgba(0,0,0,.2);
   }
-
-  .slot-view p, .branch-view p{
-    border-bottom: #aaa solid;
-    border-bottom-width: thin;
-    margin-top: 22px;
-    font-size: larger;
+  .user-qr-checking{
+    width: 360px;
+    height: 400px;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: inset 2px 2px 2px 0px rgba(255,255,255,.5),
+                    7px 7px 20px 0px rgba(0,0,0,.2),
+                    4px 4px 5px 0px rgba(0,0,0,.2);
   }
   
+.branch-view{
+  margin-top: 20px;
+}
+
+.branch-detail{
+  display: flex;
+  justify-content: space-between;
+  border-bottom: solid #b2b2b2;
+  border-bottom-width: thin;
+
+  .branch-field{
+    font-weight: 600;
+    padding: 20px 0 6px 0;
+  }
+  .branch-info{
+    padding: 20px 0 6px 0;
+  }
+}
+
+.qr-placeholder{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 50px;
+
+  .qr{
+    width: 250px;
+    height: 250px;
+  }
+}
+
+.user-qr p{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  font-size: large;
+}
+
   .close {
     color: #aaa;
     position: absolute;
     top: 0px;
     right: 10px;
-    font-size: 35px;
+    font-size: 50px;
     font-weight: bold;
     cursor: pointer;
   }
@@ -147,32 +194,6 @@ td {
   .close:focus {
     color: red;
     text-decoration: none;
-  }
-  
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .modal-header h2 {
-    margin: 0;
-  }
-  
-  .modal-body {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .slot-info, .branch-info {
-    width: 45%;
-  }
-  
-  .slot-info div, .branch-info div {
-    margin-bottom: 10px;
   }
   
   

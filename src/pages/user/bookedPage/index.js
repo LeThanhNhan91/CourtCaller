@@ -1,6 +1,9 @@
 import { memo, useState, useEffect } from "react";
 import {jwtDecode} from "jwt-decode";
 import axios from "axios";
+import { FaRegCalendarCheck } from "react-icons/fa";
+import { GiShuttlecock } from "react-icons/gi";
+import qrCheckIn from "assets/users/images/hero/qr.png";
 import "./style.scss";
 
 const BookedPage = () => {
@@ -166,38 +169,81 @@ const BookedPage = () => {
 
       {showModal && selectedBooking && (
         <div className="modal-container">
+          
           <div className="modal-content">
             <span className="close" onClick={closeModal}>
               &times;
             </span>
-            <div style={{ display: "flex", justifyContent: "space-between", width: "670px" }}>
+            <div style={{marginRight: 30}}>
               <div className="slot-view">
-                <h2>Slot Information</h2>
-                {slotInfo.length > 0 ? (
-                  slotInfo.map((slot, index) => (
-                    <div  key={index}>
-                      <p>CourtID: {slot.courtId}</p>
-                      <p>Slot Date: {formatDate(slot.slotDate)}</p>
-                      <p>Start Time: {slot.slotStartTime}</p>
-                      <p>End Time: {slot.slotEndTime}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p>No slot information available</p>
-                )}
+                <h2>Slot Information <FaRegCalendarCheck style={{color: "blue", verticalAlign: -3}}/></h2>
+                <div style={{ maxHeight: "200px", overflowY: "scroll" }}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>CourtID</th>
+                      <th>Slot Date</th>
+                      <th>Start Time</th>
+                      <th>End Time</th>
+                    </tr>
+                  </thead>
+                 
+                  {slotInfo.length>0 ? (
+                    slotInfo.map((slot, index) => (
+                      <tbody key = {index}>
+                        <tr>
+                          <td>{slot.courtId}</td>
+                          <td>{formatDate(slot.slotDate)}</td>
+                          <td>{slot.slotStartTime}</td>
+                          <td>{slot.slotEndTime}</td>
+                        </tr>
+                      </tbody>
+                    ))
+                  ) : (
+                    <tbody>
+                      <tr>
+                        <td colSpan="8" style={{ textAlign: "center" }}>No slot information available</td>
+                      </tr>
+                    </tbody>
+                  )}
+                  
+                </table>
+                </div>
               </div>
               <div className="branch-view">
-                <h2>Branch Information</h2>
+                <h2>Branch Information <GiShuttlecock style={{fontSize: 25, color: "green", verticalAlign: -3}}/></h2>
                 {branchInfo ? (
                   <>
-                    <p>Name: {branchInfo.branchName}</p>
-                    <p>Address: {branchInfo.branchAddress}</p>
-                    <p>Phone: {branchInfo.branchPhone}</p>
-                    <p>Status: {branchInfo.status}</p>
+                  <div className="branch-detail">
+                    <p className="branch-field">Name: </p>
+                    <p className="branch-info">{branchInfo.branchName}</p>
+                  </div>
+                  <div className="branch-detail">
+                    <p className="branch-field">Address: </p>
+                    <p className="branch-info">{branchInfo.branchAddress}</p>
+                  </div>
+                  <div className="branch-detail">
+                    <p className="branch-field">Phone: </p>
+                    <p className="branch-info">{branchInfo.branchPhone}</p>
+                  </div>
+                  <div className="branch-detail">
+                    <p className="branch-field">Status: </p>
+                    <p className="branch-info">{branchInfo.status}</p>
+                  </div>
                   </>
                 ) : (
                   <p>No branch information available</p>
                 )}
+              </div>
+            </div>
+
+            <div className="user-qr-checking">
+              <div className="user-qr">
+                <div className="qr-placeholder">
+                  <img className="qr" src={qrCheckIn}  alt="user image" />
+                </div>
+                <p>QR Code for Checking In</p>
+                <p style={{ margin: 0, color: "#00c853" }}>Checked</p>
               </div>
             </div>
           </div>
