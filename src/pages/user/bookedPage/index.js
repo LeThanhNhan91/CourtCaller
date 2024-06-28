@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { FaRegCalendarCheck } from "react-icons/fa";
 import { GiShuttlecock } from "react-icons/gi";
@@ -77,11 +77,19 @@ const BookedPage = () => {
 
     try {
       const slotResponse = await axios.get(`https://courtcaller.azurewebsites.net/api/TimeSlots/bookingId/${booking.bookingId}`);
-      console.log('Slot Response:', slotResponse.data);
-      setSlotInfo(slotResponse.data);
+      const sortedSlots = slotResponse.data.sort((a, b) => {
+        const dateA = new Date(a.slotDate);
+        const dateB = new Date(b.slotDate);
+        if (dateA < dateB) return -1;
+        if (dateA > dateB) return 1;
+        // If dates are equal, compare start times
+        const startTimeA = new Date(`1970-01-01T${a.slotStartTime}`);
+        const startTimeB = new Date(`1970-01-01T${b.slotStartTime}`);
+        return startTimeA - startTimeB;
+      });
+      setSlotInfo(sortedSlots);
 
       const branchResponse = await axios.get(`https://courtcaller.azurewebsites.net/api/Branches/${booking.branchId}`);
-      console.log('Branch Response:', branchResponse.data);
       setBranchInfo(branchResponse.data);
     } catch (error) {
       console.error("Error fetching slot or branch data:", error);
@@ -169,7 +177,6 @@ const BookedPage = () => {
 
       {showModal && selectedBooking && (
         <div className="modal-container">
-          
           <div className="modal-content">
             <span className="close" onClick={closeModal}>
               &times;
@@ -240,7 +247,7 @@ const BookedPage = () => {
             <div className="user-qr-checking">
               <div className="user-qr">
                 <div className="qr-placeholder">
-                  <img className="qr" src={qrCheckIn}  alt="user image" />
+                  <img className="qr" src={qrCheckIn} alt="user image" />
                 </div>
                 <p>QR Code for Checking In</p>
                 <p style={{ margin: 0, color: "#00c853" }}>Checked</p>
