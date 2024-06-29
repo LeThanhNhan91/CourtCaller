@@ -195,7 +195,7 @@ const BookedPage = () => {
                       <td>
                         {booked.status !== "Canceled" && (
                           <button className="cancel-button" onClick={() => handleCancelClick(booked.bookingId)}>
-                            ✘
+                            Cancel
                           </button>
                         )}
                       </td>
