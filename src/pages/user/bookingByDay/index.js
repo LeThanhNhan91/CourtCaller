@@ -345,14 +345,16 @@ const BookByDay = () => {
   };
 
   // xử lý chỉ hiện 1 tuần trước và các tuần sau
-  const handlePreviousWeek = () => {
-    const oneWeekBeforeCurrentWeek = dayjs()
-      .startOf("week")
-      .subtract(1, "week");
-    if (!dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week")) {
+  const handlePreviousWeek = async () => {
+    const oneWeekBeforeCurrentWeek = dayjs().startOf('week').subtract(1, 'week');
+    const oneWeekBeforeStartOfWeek = dayjs(startOfWeek).subtract(1, 'week');
+  
+    if (!dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week') && oneWeekBeforeStartOfWeek.isAfter(oneWeekBeforeCurrentWeek)) {
+      setStartOfWeek(oneWeekBeforeStartOfWeek);
+    } else if (dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week')) {
       setStartOfWeek(oneWeekBeforeCurrentWeek);
     }
-  };
+  }
 
   const handleNextWeek = () => {
     setStartOfWeek(dayjs(startOfWeek).add(1, "week"));
