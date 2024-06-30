@@ -33,6 +33,7 @@ import { CiEdit } from "react-icons/ci";
 import "./styles.scss";
 import "react-multi-carousel/lib/styles.css";
 import "./style.scss";
+import DisplayMap from "map/DisplayMap";
 
 dayjs.extend(isSameOrBefore);
 
@@ -774,7 +775,26 @@ const BookByDay = () => {
             )}
           </>
         </Box>
-
+          {/* Map */}
+          <div className="map-section">
+          <div className="map-form">
+            <div className="map-header">
+              <h2 className="map-title">Branch Location</h2>
+              <p className="map-address">{branch.branchAddress}</p>
+            </div>
+            <div className="map-container">
+              <div className="map-wrapper">
+                <div className="map-overlay">
+                  <div className="map-legend">
+                    <div className="map-legend-icon"></div>
+                    <span>Branch Location</span>
+                  </div>
+                </div>
+                <DisplayMap address={branch.branchAddress} />
+              </div>
+            </div>
+          </div>
+        </div>
         {/* Rating form */}
         <div className="rating-form">
       <div className="rating-container">
