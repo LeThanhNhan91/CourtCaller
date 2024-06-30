@@ -78,6 +78,22 @@ td {
   border-right: none;
 }
 
+.overdue-booking{
+  border: solid red;
+  th {
+    background-color: red;
+    color: #fff;
+    border: none;
+    position: sticky;
+    top: 0;
+  }
+}
+
+.upcoming-booking{
+  border: solid #2ecc71;
+  margin-bottom: 30px;
+}
+
 .cancel-button {
   width: 80px;
   height: 30px;

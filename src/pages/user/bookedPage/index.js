@@ -1,14 +1,15 @@
 import { memo, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import axios from "axios";
 import { FaRegCalendarCheck } from "react-icons/fa";
 import { GiShuttlecock } from "react-icons/gi";
-import {fetchQrcode} from "api/bookingApi";
-import qrCheckIn from "assets/users/images/hero/qr.png";
+import { fetchQrcode } from "api/bookingApi";
+import BeatLoader from "react-spinners/BeatLoader";
 import "./style.scss";
 
 const BookedPage = () => {
   const [bookings, setBookings] = useState([]);
+  const [overdueBookings, setOverdueBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [slotInfo, setSlotInfo] = useState([]);
@@ -54,7 +55,32 @@ const BookedPage = () => {
         const validBookings = filteredBookings.filter(
           (booking) => booking !== null
         );
-        setBookings(validBookings);
+
+        const currentDate = new Date();
+        const scheduledBookings = [];
+        const overdueBookingsList = [];
+
+        await Promise.all(
+          validBookings.map(async (booking) => {
+            const slotResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/TimeSlots/bookingId/${booking.bookingId}`
+            );
+            const slots = slotResponse.data;
+
+            const isOverdue = slots.every(
+              (slot) => new Date(slot.slotDate) < currentDate
+            );
+
+            if (isOverdue && booking.status !== "Canceled") {
+              overdueBookingsList.push(booking);
+            } else if (booking.status !== "Canceled") {
+              scheduledBookings.push(booking);
+            }
+          })
+        );
+
+        setBookings(scheduledBookings);
+        setOverdueBookings(overdueBookingsList);
       } catch (error) {
         console.error("Error fetching bookings data:", error);
       } finally {
@@ -156,13 +182,13 @@ const BookedPage = () => {
       </div>
 
       <h1 style={{ textAlign: "center" }}>Booked Page</h1>
+      {loading ? (
+           <BeatLoader style={{display: "flex", justifyContent: "center", alignItems: "center"}} size={40} color="#36D7B7"/>
+          ) : ( 
       <div style={{ height: 500 }}>
         <main>
-          <h2>List of scheduled appointments</h2>
-          {loading ? (
-            <p>Loading...</p>
-          ) : (
-            <table>
+          <h2>Upcoming Schedule</h2>
+            <table className="upcoming-booking">
               <thead>
                 <tr>
                   <th>BookingID</th>
@@ -206,15 +232,61 @@ const BookedPage = () => {
                 <tbody>
                   <tr>
                     <td colSpan="8" style={{ textAlign: "center" }}>
-                      No completed bookings found
+                      No upcoming bookings found
                     </td>
                   </tr>
                 </tbody>
               )}
             </table>
-          )}
+
+          <h2>Overdue Schedule</h2>
+          <div style={{ overflowY: "scroll" }}>
+            <table className="overdue-booking">
+              <thead>
+                <tr>
+                  <th>BookingID</th>
+                  <th>Date</th>
+                  <th>Number of slots</th>
+                  <th>Booking Type</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              {overdueBookings.length > 0 ? (
+                overdueBookings.map((booked, index) => (
+                  <tbody key={index}>
+                    <tr>
+                      <td>{booked.bookingId}</td>
+                      <td>{formatDate(booked.bookingDate)}</td>
+                      <td>{booked.numberOfSlot}</td>
+                      <td>{booked.bookingType}</td>
+                      <td>{booked.totalPrice} VND</td>
+                      <td>{booked.status}</td>
+                      <td>
+                        {booked.status !== "Canceled" && (
+                          <button className="view-button" onClick={() => handleViewBooking(booked)}>
+                            View
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                ))
+              ) : (
+                <tbody>
+                  <tr>
+                    <td colSpan="8" style={{ textAlign: "center" }}>
+                      No overdue bookings found
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+            </table>
+            </div>
         </main>
       </div>
+      )} 
 
       {showModal && selectedBooking && (
         <div className="modal-container">
@@ -297,10 +369,10 @@ const BookedPage = () => {
 
             <div className="user-qr-checking">
               <div className="user-qr">
-                <div className="qr-placeholder"  style={{ margin: '5px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div className="qr-placeholder" style={{ margin: '5px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <img src={`data:image/png;base64,${qrcode}`} alt="QR Code" style={{ width: '300px', height: '310px' }} />
                 </div>
-                <p style={{marginTop: '6px'}}>QR Code for Checking In</p>
+                <p style={{ marginTop: '6px' }}>QR Code for Checking In</p>
                 <p style={{ margin: 0, color: "#00c853" }}>Checked</p>
               </div>
             </div>
@@ -316,21 +388,21 @@ const BookedPage = () => {
                 <svg
                   aria-hidden="true"
                   stroke="currentColor"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   viewBox="0 0 24 24"
                   fill="none"
                 >
                   <path
                     d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-                    stroke-linejoin="round"
-                    stroke-linecap="round"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
                   ></path>
                 </svg>
               </div>
               <div className="cancel-content">
                 <span className="cancel-title">Cancel Booking</span>
                 <p className="cancel-message">
-                  Are you sure you want to deactivate your account? All of your
+                  Are you sure you want to cancel your booking? All of your
                   data will be permanently removed. This action cannot be
                   undone.
                 </p>
@@ -339,7 +411,7 @@ const BookedPage = () => {
                 <button
                   className="cancel-desactivate"
                   type="button"
-                  style={{cursor: "pointer"}}
+                  style={{ cursor: "pointer" }}
                   onClick={handleCancelBooking}
                 >
                   YES
@@ -347,7 +419,7 @@ const BookedPage = () => {
                 <button
                   className="cancel-button2"
                   type="button"
-                  style={{cursor: "pointer"}}
+                  style={{ cursor: "pointer" }}
                   onClick={closeCancelModal}
                 >
                   Back
