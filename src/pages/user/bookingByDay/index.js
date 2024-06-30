@@ -195,7 +195,7 @@ const BookByDay = () => {
     const reviewData = {
       reviewText,
       rating: highlightedStars,
-      userId: user[0].id,
+      userId: userData.userId,
       branchId: branch.branchId, // Đảm bảo rằng branchId đang được cung cấp ở đây nếu cần
     };
 
@@ -222,6 +222,7 @@ const BookByDay = () => {
 
       const reviewsWithDetails = await Promise.all(
         response.data.data.map(async (review) => {
+          console.log('review',review.id)
           let userFullName = 'Unknown User';
           if (review.id) {
             try {
@@ -245,6 +246,9 @@ const BookByDay = () => {
       console.error('Error fetching reviews:', error);
     }
   };
+
+  console.log('user', user)
+  console.log('userData', userData)
 
   const handleEditReview = (review) => {
     setEditingReview(review);
@@ -875,7 +879,7 @@ const BookByDay = () => {
                       <span className="review-author">{review.userFullName}</span>
                       <span className="review-rating">{review.rating}</span><FaStar style={{color:"gold"}}/>
                       </div>
-                      {review.id === user[0].id && (
+                      {review.id ===userData.userId && (
                         <CiEdit
                           style={{ marginRight: "10px", fontSize: "23px", fontWeight: "bold" }}
                           onClick={() => handleEditReview(review)}

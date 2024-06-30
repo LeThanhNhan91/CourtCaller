@@ -71,7 +71,7 @@ const BookedPage = () => {
               (slot) => new Date(slot.slotDate) < currentDate
             );
 
-            if (isOverdue && booking.status !== "Canceled") {
+            if (isOverdue) {
               overdueBookingsList.push(booking);
             } else if (booking.status !== "Canceled") {
               scheduledBookings.push(booking);
