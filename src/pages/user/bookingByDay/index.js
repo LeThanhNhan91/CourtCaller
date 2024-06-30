@@ -130,16 +130,53 @@ const BookByDay = () => {
   const [reviewsVisible, setReviewsVisible] = useState(false);
   const [editingReview, setEditingReview] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       const decodedToken = jwtDecode(token);
       setUserId(decodedToken.Id);
+
+      const fetchUserData = async (id, isGoogle) => {
+        try {
+          if (isGoogle) {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
+            );
+            setUserData(response.data);
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
+            );
+            setUser(userResponse.data);
+          } else {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
+            );
+            setUserData(response.data);
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/${id}`
+            );
+            setUser(userResponse.data);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      if (decodedToken.iss !== "https://accounts.google.com") {
+        const userId = decodedToken.Id;
+        setUserId(userId);
+        fetchUserData(userId, false);
+      } else {
+        const userId = decodedToken.email;
+        setUserId(userId);
+        fetchUserData(userId, true);
+      }
     }
   }, []);
 
-  //console.log(branch.branchId);
   const handleStarClick = (value) => {
     setHighlightedStars(value);
   };
@@ -151,7 +188,6 @@ const BookByDay = () => {
   const handleSubmitReview = async () => {
     const token = localStorage.getItem("token");
     const decodedToken = jwtDecode(token);
-    const userId = decodedToken.Id;
     if (!token) {
       throw new Error("No token found");
     }
@@ -159,10 +195,9 @@ const BookByDay = () => {
     const reviewData = {
       reviewText,
       rating: highlightedStars,
-      userId,
+      userId: user[0].id,
       branchId: branch.branchId, // Đảm bảo rằng branchId đang được cung cấp ở đây nếu cần
     };
-    console.log(branch.branchId)
 
     try {
       await axios.post(
@@ -184,7 +219,6 @@ const BookByDay = () => {
           'Content-Type': 'application/json',
         }
       });
-      console.log(response.data)
 
       const reviewsWithDetails = await Promise.all(
         response.data.data.map(async (review) => {
@@ -841,7 +875,7 @@ const BookByDay = () => {
                       <span className="review-author">{review.userFullName}</span>
                       <span className="review-rating">{review.rating}</span><FaStar style={{color:"gold"}}/>
                       </div>
-                      {review.id === userId && (
+                      {review.id === user[0].id && (
                         <CiEdit
                           style={{ marginRight: "10px", fontSize: "23px", fontWeight: "bold" }}
                           onClick={() => handleEditReview(review)}

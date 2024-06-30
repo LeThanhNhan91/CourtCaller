@@ -31,7 +31,6 @@ const Header = () => {
 
     if (token) {
       const decoded = jwtDecode(token);
-      console.log('decode: ', decoded)
       setUserName(decoded.name)
       setUserPic(decoded.picture)
 
@@ -146,7 +145,7 @@ const Header = () => {
                           <img src={userData.profilePicture || userPic} alt="Avatar" />
                         </div>
                         <p style={{fontSize: "medium", fontWeight: "bold", marginBottom: 5}}>{userData.fullName || userName}</p>
-                        <p>{user.email}</p>
+                        <p>{user.email || user[0].email}</p>
                       </div>
                       <ul className="profile-actions">
                         <li>
