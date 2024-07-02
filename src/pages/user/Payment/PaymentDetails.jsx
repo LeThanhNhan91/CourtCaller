@@ -40,15 +40,15 @@ const PaymentDetail = () => {
   const [activeStep, setActiveStep] = useState(0);
   
   const [email, setEmail] = useState('');
-  const [userEmail, setUserEmail] = useState('')
-  const [userId, setUserId] = useState('')
+  const [userEmail, setUserEmail] = useState('');
+  const [userId, setUserId] = useState('');
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [userExists, setUserExists] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [userName, setUserName] = useState('')
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem("token");

@@ -9,8 +9,10 @@ import NewsPage from "pages/user/newsPage";
 import BookedPage from "pages/user/bookedPage"
 import BookByDay from "pages/user/bookingByDay"
 import PaymentDetail from "pages/user/Payment/PaymentDetails";
+import PaymentDetailFixed from "pages/user/Payment/PaymentDetailFixed";
 import PaymentFailed from "pages/user/Payment/PaymentFailed";
 import PaymentSuccessful from "pages/user/Payment/PaymentSuccessful";
+import FixedBooking from "pages/user/bookingFixDay/Fix";
 
 const renderUserRouter = () => {
     const userRouters  = [
@@ -40,8 +42,16 @@ const renderUserRouter = () => {
         }
         ,
         {
+            path: ROUTERS.USER.FIXBOOKING,
+            component: <FixedBooking/>
+        },
+        {
             path: ROUTERS.USER.PAYMENTDETAIL,
             component: <PaymentDetail/>
+        },
+        {
+            path: ROUTERS.USER.PAYMENTDETAILFIX,
+            component: <PaymentDetailFixed/>
         },
         {
             path: ROUTERS.USER.PAYMENTFAILED,

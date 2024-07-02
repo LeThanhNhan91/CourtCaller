@@ -19,3 +19,29 @@ export const fetchPrice = async (branchId) => {
     throw error;
   }
 };
+
+export const fetchPriceByBranchID = async (branchId) => {
+  try {
+    const response = await axios.get(`${url}/Prices/branchId/${branchId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching prices:', error);
+    throw error;
+  }
+};
+
+// New method to fetch price by branchId, type, and isWeekend
+export const fetchPriceByBranchIDType = async (branchId, type, isWeekend) => {
+  try {
+    const response = await axios.get(`${url}/Prices/branchId/${branchId}/type/${type}`, {
+      params: {
+        isWeekend
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching prices by branchId, type, and isWeekend:', error);
+    throw error;
+  }
+};
+

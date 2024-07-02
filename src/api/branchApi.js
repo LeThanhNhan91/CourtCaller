@@ -2,23 +2,15 @@ import axios from 'axios';
 
 const url = 'https://courtcaller.azurewebsites.net/api';
 
-export const fetchBranches = async (pageNumber = 1, pageSize = 10) => {
+export const fetchBranches = async (pageNumber = 1, pageSize = 10, searchQuery = '') => {
   try {
-    const response = await axios.get(`${url}/Branches`, {
-      params: {
-        pageNumber,
-        pageSize
-      }
-    });
+    const params = { pageNumber, pageSize, searchQuery };
+    const response = await axios.get(`${url}/Branches`, { params });
 
-    if (Array.isArray(response.data)) {
-      const items = response.data;
-      const totalCount = parseInt(response.headers['x-total-count'], 10) || 100;
-
-      return {
-        items,
-        totalCount
-      };
+    if (response.data && Array.isArray(response.data.data)) {
+      const items = response.data.data;
+      const totalCount = response.data.total || 0;
+      return { items, totalCount };
     } else {
       throw new Error('Invalid API response structure');
     }

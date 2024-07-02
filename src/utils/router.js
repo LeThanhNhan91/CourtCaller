@@ -9,7 +9,9 @@ export const ROUTERS = {
         BOOKED: "/booked",
         BYDAY: "/bookbyday",
         PAYMENTDETAIL: "/payment-detail",
+        PAYMENTDETAILFIX: "/fixed-payment",
         PAYMENTFAILED: "/reject",
-        PAYMENTSUCCESSFUL: "/confirm"
+        PAYMENTSUCCESSFUL: "/confirm",
+        FIXBOOKING: "/fixschedule"
     }
 }

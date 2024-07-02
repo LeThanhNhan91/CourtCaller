@@ -108,6 +108,15 @@ const HomePage = () => {
 
   };
 
+  const handleFixBooking = () => {
+    navigate("/fixschedule", { state: { branch: selectedBranch } });
+    scroll.scrollToTop({
+      duration: 1000, 
+      smooth: 'easeInOutQuart', 
+    });
+
+  }
+
   return (
     <>
     <div style={{backgroundColor: "#EAECEE"}}>
@@ -247,7 +256,7 @@ const HomePage = () => {
         overlayClassName="modal-overlay"
       >
         <h2>Select the Type of Booking</h2>
-        <button onClick={() => alert("Fixed Schedule Selected")}>Fixed Schedule</button>
+        <button onClick={handleFixBooking}>Fixed Schedule</button>
         <button onClick={handleScheduleByDay}>Schedule by Day</button>
       </Modal>
       </div>
