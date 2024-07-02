@@ -47,7 +47,7 @@ const PaymentDetailFixed = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log('bookdata: ', branchId, bookingRequests, totalPrice, numberOfMonths, daysOfWeek, startDate, slotStartTime, slotEndTime)
+  console.log('bookdata: ', branchId, bookingRequests, totalPrice, numberOfMonths, daysOfWeek, startDate, bookingRequests[0].slotDate, slotStartTime, slotEndTime)
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -109,9 +109,11 @@ const PaymentDetailFixed = () => {
           formattedStartDate,
           userData.userId,
           branchId,
+          bookingRequests[0].slotDate,
           slotStartTime,
           slotEndTime
         );
+        console.log('res', response)
 
         const bookingId = response.bookingId;
         console.log('Booking ID:', bookingId);

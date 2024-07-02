@@ -92,7 +92,7 @@ const isValidTime = (time) => {
 };
 
 // Create a fixed booking
-export const createFixedBooking = async (numberOfMonths, daysOfWeek, formattedStartDate, userId, branchId, slotStartTime, slotEndTime) => {
+export const createFixedBooking = async (numberOfMonths, daysOfWeek, formattedStartDate, userId, branchId, slotDate, slotStartTime, slotEndTime) => {
   try {
     // Check if slotStartTime and slotEndTime are valid
     if (!isValidTime(slotStartTime) || !isValidTime(slotEndTime)) {
@@ -112,16 +112,18 @@ export const createFixedBooking = async (numberOfMonths, daysOfWeek, formattedSt
 
     console.log('URL with params:', urlWithParams);
     console.log('Request body:', {
+      slotDate,
       slotStartTime,
       slotEndTime,
     });
 
     const response = await axios.post(
       urlWithParams,
-      {
+      [{
+        slotDate,
         slotStartTime,
         slotEndTime,
-      },
+      }],
       {
         headers: {
           'Content-Type': 'application/json',
