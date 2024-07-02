@@ -35,6 +35,12 @@ $bannerImg: "/assets/users/images/hero/banner.jpg";
   }
 }
 
+.booked-title{
+  display: flex;
+  justify-content: center;
+  
+}
+
 main {
   padding: 20px;
   background-color: #fff;
@@ -79,7 +85,6 @@ td {
 }
 
 .overdue-booking{
-  border: solid red;
   th {
     background-color: red;
     color: #fff;
@@ -89,9 +94,15 @@ td {
   }
 }
 
-.upcoming-booking{
-  border: solid #2ecc71;
-  margin-bottom: 30px;
+
+.canceled-booking{
+  th {
+    background-color: #DC7633;
+    color: #fff;
+    border: none;
+    position: sticky;
+    top: 0;
+  }
 }
 
 .cancel-button {

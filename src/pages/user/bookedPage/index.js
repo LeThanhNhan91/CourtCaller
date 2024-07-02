@@ -6,10 +6,12 @@ import { GiShuttlecock } from "react-icons/gi";
 import { fetchQrcode } from "api/bookingApi";
 import BeatLoader from "react-spinners/BeatLoader";
 import "./style.scss";
+import { red } from "@mui/material/colors";
 
 const BookedPage = () => {
   const [bookings, setBookings] = useState([]);
   const [overdueBookings, setOverdueBookings] = useState([]);
+  const [canceledBookings, setCanceledBookings] = useState([])
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [slotInfo, setSlotInfo] = useState([]);
@@ -59,6 +61,7 @@ const BookedPage = () => {
         const currentDate = new Date();
         const scheduledBookings = [];
         const overdueBookingsList = [];
+        const canceledBookingsList = [];
 
         await Promise.all(
           validBookings.map(async (booking) => {
@@ -71,9 +74,11 @@ const BookedPage = () => {
               (slot) => new Date(slot.slotDate) < currentDate
             );
 
-            if (isOverdue) {
+            if (booking.status === "Canceled") {
+              canceledBookingsList.push(booking);
+            } else if (isOverdue) {
               overdueBookingsList.push(booking);
-            } else if (booking.status !== "Canceled") {
+            } else {
               scheduledBookings.push(booking);
             }
           })
@@ -81,6 +86,7 @@ const BookedPage = () => {
 
         setBookings(scheduledBookings);
         setOverdueBookings(overdueBookingsList);
+        setCanceledBookings(canceledBookingsList);
       } catch (error) {
         console.error("Error fetching bookings data:", error);
       } finally {
@@ -180,14 +186,16 @@ const BookedPage = () => {
           </div>
         </div>
       </div>
-
-      <h1 style={{ textAlign: "center" }}>Booked Page</h1>
+      <div className="booked-title">
+      <h1 className="btn-shine">BOOKED PAGE</h1>
+      </div>
       {loading ? (
            <BeatLoader style={{display: "flex", justifyContent: "center", alignItems: "center"}} size={40} color="#36D7B7"/>
           ) : ( 
-      <div style={{ height: 500 }}>
+      <div style={{ height: "100%" }}>
         <main>
-          <h2>Upcoming Schedule</h2>
+          <h2 style={{color: "#2ecc71", fontStyle: "italic"}}>Upcoming Schedule</h2>
+          <div style={{ overflowY: "scroll", maxHeight: "200px", border: "solid #2ecc71", marginBottom: 40 }}>
             <table className="upcoming-booking">
               <thead>
                 <tr>
@@ -238,9 +246,10 @@ const BookedPage = () => {
                 </tbody>
               )}
             </table>
+            </div>
 
-          <h2>Overdue Schedule</h2>
-          <div style={{ overflowY: "scroll" }}>
+          <h2 style={{color: "red", fontStyle: "italic"}}>Overdue Schedule</h2>
+          <div style={{ overflowY: "scroll", maxHeight: "200px", border: "solid red", marginBottom: 40 }}>
             <table className="overdue-booking">
               <thead>
                 <tr>
@@ -278,6 +287,44 @@ const BookedPage = () => {
                   <tr>
                     <td colSpan="8" style={{ textAlign: "center" }}>
                       No overdue bookings found
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+            </table>
+            </div>
+
+            <h2 style={{color: "#DC7633", fontStyle: "italic"}}>Canceled Bookings</h2>
+            <div style={{ overflowY: "scroll", maxHeight: "200px", border: "solid #DC7633" }}>
+            <table className="canceled-booking">
+              <thead>
+                <tr>
+                  <th>BookingID</th>
+                  <th>Date</th>
+                  <th>Number of slots</th>
+                  <th>Booking Type</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              {canceledBookings.length > 0 ? (
+                canceledBookings.map((booked, index) => (
+                  <tbody key={index}>
+                    <tr>
+                      <td>{booked.bookingId}</td>
+                      <td>{formatDate(booked.bookingDate)}</td>
+                      <td>{booked.numberOfSlot}</td>
+                      <td>{booked.bookingType}</td>
+                      <td>{booked.totalPrice} VND</td>
+                      <td>{booked.status}</td>
+                    </tr>
+                  </tbody>
+                ))
+              ) : (
+                <tbody>
+                  <tr>
+                    <td colSpan="7" style={{ textAlign: "center" }}>
+                      No canceled bookings found
                     </td>
                   </tr>
                 </tbody>

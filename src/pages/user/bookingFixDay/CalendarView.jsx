@@ -181,7 +181,7 @@ const CalendarView = ({ selectedBranch, setSelectedBranch, onSlotSelect }) => {
   };
 
   return (
-    <Box m="20px" sx={{ backgroundColor: "#F5F5F5", borderRadius: 2, p: 2, width: '100%' }}>
+    <Box m="20px" sx={{ backgroundColor: "#F5F5F5", borderRadius: 2, p: 2, width: '95%' }}>
       <Box display="flex" justifyContent="space-between" mb={2} alignItems="center">
         <FormControl sx={{ minWidth: 200, backgroundColor: "#0D1B34", borderRadius: 1 }}>
         <Typography
