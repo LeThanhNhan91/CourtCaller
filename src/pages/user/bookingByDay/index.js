@@ -31,9 +31,9 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { CiEdit } from "react-icons/ci";
 import "./styles.scss";
-import "react-multi-carousel/lib/styles.css";
+// import "react-multi-carousel/lib/styles.css";
 import "./style.scss";
-import DisplayMap from "map/DisplayMap";
+// import DisplayMap from "map/DisplayMap";
 
 dayjs.extend(isSameOrBefore);
 

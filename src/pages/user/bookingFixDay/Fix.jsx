@@ -16,7 +16,7 @@ import { IoLocationOutline } from "react-icons/io5";
 import { CiEdit } from "react-icons/ci";
 import CalendarView from './CalendarView';
 import { fetchPriceByBranchIDType } from 'api/priceApi';
-import DisplayMap from "map/DisplayMap";
+// import DisplayMap from "map/DisplayMap";
 
 const theme = createTheme({
   palette: {

@@ -1,6 +1,7 @@
 @use "sass:map";
 @import "style/pages/_all.scss";
-@import url(~leaflet/dist/leaflet.css);
+
+// @import url(~leaflet/dist/leaflet.css);
 
 .leaflet-control-attribution {
   display: none !important;
