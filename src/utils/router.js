@@ -12,6 +12,8 @@ export const ROUTERS = {
         PAYMENTDETAILFIX: "/fixed-payment",
         PAYMENTFAILED: "/reject",
         PAYMENTSUCCESSFUL: "/confirm",
-        FIXBOOKING: "/fixschedule"
+        FIXBOOKING: "/fixschedule",
+        FORGETPASSWORD: "/forget-password",
+        RESETPASSWORD: "/reset-password"
     }
 }
