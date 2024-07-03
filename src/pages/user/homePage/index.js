@@ -13,6 +13,7 @@ import "./style.scss";
 import { fetchPrice } from "api/priceApi"; 
 //thêm thư viện scroll cuộn cho pro
 import {  animateScroll as scroll } from 'react-scroll';
+import FacebookMsg from "FacebookMsg";
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
 
@@ -213,6 +214,10 @@ const HomePage = () => {
         </div>
       </div>
       {/* Booking branch End */}
+      <div className="facebook-msg-container">
+      <FacebookMsg />
+      </div>
+     
 
       {/* Introduction Begin */}
       <div className="container">
