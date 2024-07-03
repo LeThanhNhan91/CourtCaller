@@ -2,7 +2,7 @@
     padding: 0;
     margin: 0;
 }
-.payment-container{
+.failed-container{
     width: 100%;
     height: 100vh;
     background: linear-gradient(to right, #dedddd, #f3b1ab);
@@ -11,7 +11,7 @@
     justify-content: center;
 }
 
-.success-box{
+.failed-box{
     width: 301px;
     background-color: #fff;
     border-radius: 6px;
@@ -24,22 +24,21 @@
     color: #333;
 }
 
-.success-box img{
+.failed-box img{
     width: 90px;
     margin-top: -50px;
     border-radius: 50%;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.success-box h2{
+.failed-box h2{
     font-size: 38px;
     font-weight: 500;
     margin: 30px 0 10px;
 }
 
-.success-box button{
+.failed-box button{
     width: 100%;
-    margin-top: 50px;
     padding: 10px 0;
     background: #f44f3d;
     color: #fff;
@@ -50,13 +49,13 @@
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
-.success-box button:hover{
+.failed-box button:hover{
     background-color: #d24838;
 }
 
-.contact-email{
+.email-contact{
     text-decoration: none;
 }
-.contact-email:hover{
+.email-contact:hover{
     text-decoration: underline;
 }

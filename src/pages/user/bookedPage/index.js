@@ -449,9 +449,10 @@ const BookedPage = () => {
               <div className="cancel-content">
                 <span className="cancel-title">Cancel Booking</span>
                 <p className="cancel-message">
-                  Are you sure you want to cancel your booking? All of your
-                  data will be permanently removed. This action cannot be
-                  undone.
+                  Are you sure you want to cancel your booking? 
+                  Your balance will only be refunded half. 
+                  However, your membership points remain the same. 
+                  This action cannot be undone.
                 </p>
               </div>
               <div className="cancel-actions">

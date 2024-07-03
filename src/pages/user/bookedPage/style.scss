@@ -261,7 +261,7 @@ td {
   background-color: #ffffff;
   text-align: left;
   border-radius: 0.5rem;
-  max-width: 290px;
+  max-width: 291px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
@@ -279,15 +279,15 @@ td {
   flex-shrink: 0;
   justify-content: center;
   align-items: center;
-  width: 3rem;
-  height: 3rem;
+  width: 5rem;
+  height: 5rem;
   border-radius: 9999px;
 }
 
 .cancel-image svg {
   color: #dc2626;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 .cancel-content {
@@ -297,7 +297,7 @@ td {
 
 .cancel-title {
   color: #111827;
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 600;
   line-height: 1.5rem;
 }
