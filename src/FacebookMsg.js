@@ -1,25 +1,27 @@
-// "use client";
-// import { FacebookProvider, CustomChat } from 'react-facebook';
+// src/components/FacebookChat.js
+import React, { useEffect } from 'react';
 
-// const FacebookMsg = () => {
-//     return (
-//       <FacebookProvider appId="981312986521330" chatSupport>
-//         <CustomChat pageId="330210223511680" minimized={false}/>
-//       </FacebookProvider>    
-//     );
-// };
+const FacebookMsg = () => {
+    useEffect(() => {
+        // Ensure the SDK is initialized before rendering the chat plugin
+        const checkFbInit = setInterval(() => {
+            if (window.FB) {
+                window.FB.XFBML.parse();
+                clearInterval(checkFbInit);
+            }
+        }, 100);
+    }, []);
 
-// export default FacebookMsg;
-
-import React, { Component} from 'react';
-import { FacebookProvider, CustomChat } from 'react-facebook';
-
-export default class FacebookMsg extends Component {
-  render() {
     return (
-      <FacebookProvider appId="981312986521330" chatSupport>
-        <CustomChat pageId="330210223511680" minimized={false}/>
-      </FacebookProvider>    
+        <div>
+            <div
+                className="fb-customerchat"
+                attribution="setup_tool"
+                page_id="330210223511680"
+                minimized="false"
+            ></div>
+        </div>
     );
-  }
-}
+};
+
+export default FacebookMsg;
