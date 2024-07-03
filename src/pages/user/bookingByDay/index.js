@@ -31,9 +31,9 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { CiEdit } from "react-icons/ci";
 import "./styles.scss";
-// import "react-multi-carousel/lib/styles.css";
+import "react-multi-carousel/lib/styles.css";
 import "./style.scss";
-// import DisplayMap from "map/DisplayMap";
+import DisplayMap from "map/DisplayMap";
 
 dayjs.extend(isSameOrBefore);
 
@@ -776,7 +776,7 @@ const BookByDay = () => {
           </>
         </Box>
           {/* Map */}
-          {/* <div className="map-section">
+          <div className="map-section">
           <div className="map-form">
             <div className="map-header">
               <h2 className="map-title">Branch Location</h2>
@@ -794,7 +794,7 @@ const BookByDay = () => {
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
         {/* Rating form */}
         <div className="rating-form">
       <div className="rating-container">
