@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from "react";
-import { useNavigate , BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
+import { useNavigate, BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
 import Modal from "react-modal";
 import "react-multi-carousel/lib/styles.css";
 import feature1Img from "assets/users/images/featured/images.jpg";
@@ -10,9 +10,9 @@ import cat3Img from "assets/users/images/categories/cat-3.png";
 import cat4Img from "assets/users/images/categories/cat-4.png";
 import { AiOutlineSearch } from "react-icons/ai";
 import "./style.scss";
-import { fetchPrice } from "api/priceApi"; 
+import { fetchPrice } from "api/priceApi";
 //thêm thư viện scroll cuộn cho pro
-import {  animateScroll as scroll } from 'react-scroll';
+import { animateScroll as scroll } from 'react-scroll';
 import FacebookMsg from "FacebookMsg";
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
@@ -31,7 +31,7 @@ const HomePage = () => {
   const [totalBranches, setTotalBranches] = useState(0);
   const navigate = useNavigate();
 
-  
+
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -103,8 +103,8 @@ const HomePage = () => {
   const handleScheduleByDay = () => {
     navigate("/bookbyday", { state: { branch: selectedBranch } });
     scroll.scrollToTop({
-      duration: 1000, 
-      smooth: 'easeInOutQuart', 
+      duration: 1000,
+      smooth: 'easeInOutQuart',
     });
 
   };
@@ -112,158 +112,158 @@ const HomePage = () => {
   const handleFixBooking = () => {
     navigate("/fixschedule", { state: { branch: selectedBranch } });
     scroll.scrollToTop({
-      duration: 1000, 
-      smooth: 'easeInOutQuart', 
+      duration: 1000,
+      smooth: 'easeInOutQuart',
     });
 
   }
 
   return (
     <>
-    <div style={{backgroundColor: "#EAECEE"}}>
-      <div className="container">
-        <div className="hero_banner_container">
-          <div className="hero_banner">
-            <div className="hero_text">
-              <span>WELCOME TO</span>
-              <h2>
-                {" "}
-                COURT CALLER
-                <br />
-                HAVE FUN
-              </h2>
+      <div style={{ backgroundColor: "#EAECEE" }}>
+        <div className="container">
+          <div className="hero_banner_container">
+            <div className="hero_banner">
+              <div className="hero_text">
+                <span>WELCOME TO</span>
+                <h2>
+                  {" "}
+                  COURT CALLER
+                  <br />
+                  HAVE FUN
+                </h2>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Search Begin */}
-      <div className="select_bar container">
-        <select value={city} onChange={(e) => setCity(e.target.value)}>
-          <option value="">City</option>
-          <option value="Ho Chi Minh City">Thành phố Hồ Chí Minh</option>
-          <option value="Hanoi">Hà Nội</option>
-          <option value="Da Nang">Đà Nẵng</option>
-        </select>
+        {/* Search Begin */}
+        <div className="select_bar container">
+          <select value={city} onChange={(e) => setCity(e.target.value)}>
+            <option value="">City</option>
+            <option value="Ho Chi Minh City">Thành phố Hồ Chí Minh</option>
+            <option value="Hanoi">Hà Nội</option>
+            <option value="Da Nang">Đà Nẵng</option>
+          </select>
 
-        <select value={district} onChange={(e) => setDistrict(e.target.value)}>
-          <option value="">District</option>
-          <option value="District 1">Quận 1</option>
-          <option value="District 2">Quận 2</option>
-          <option value="District 3">Quận 3</option>
-        </select>
-        <button onClick={handleSearch}>Search</button>
-      </div>
-
-      {/* Search End */}
-
-      {/* Booking branch */}
-      <div className="container booking_branch">
-        <h1>Đặt Sân</h1>
-        <div className="search_bar">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Searching branch by name"
-          />
-          <button onClick={handleSearch}>
-            <AiOutlineSearch />
-          </button>
+          <select value={district} onChange={(e) => setDistrict(e.target.value)}>
+            <option value="">District</option>
+            <option value="District 1">Quận 1</option>
+            <option value="District 2">Quận 2</option>
+            <option value="District 3">Quận 3</option>
+          </select>
+          <button onClick={handleSearch}>Search</button>
         </div>
-        <div className="row booking_branch_container">
-          {branches.map((branch, index) => (
-            <div
-              className="booking_branch_detail col-lg-3 col-md-4 col-sm-6"
-              key={index}
-            >
-              {branch.branchPicture && (
-                isJson(branch.branchPicture) ? (
-                  <img className="home-img" src={JSON.parse(branch.branchPicture)[0]} alt="branch" />
-                ) : (
-                <img className="home-img" src={branch.branchPicture} alt="no pic"/>) 
-              )}
-              <h3>{branch.branchName}</h3>
-              <p>Number of courts: 4</p>
-              <p>Address: {branch.branchAddress}</p>
-              <p>
-                {prices[branch.branchId]
-                  ? `Weekday: ${prices[branch.branchId].weekdayPrice} VND`
-                  : 'Loading...'}
-              </p>
-              <p>
-                {prices[branch.branchId]
-                  ? `Weekend: ${prices[branch.branchId].weekendPrice} VND`
-                  : 'Loading...'}
-              </p>
-              <button onClick={() => handleBookNow(branch)}>Book now</button>
-            </div>
-          ))}
-        </div>
-        {/* Pagination */}
-        <div className="pagination">
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index}
-              onClick={() => handlePageChange(index + 1)}
-              className={pageNumber === index + 1 ? "active" : ""}
-            >
-              {index + 1}
+
+        {/* Search End */}
+
+        {/* Booking branch */}
+        <div className="container booking_branch">
+          <h1>Đặt Sân</h1>
+          <div className="search_bar">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Searching branch by name"
+            />
+            <button onClick={handleSearch}>
+              <AiOutlineSearch />
             </button>
-          ))}
+          </div>
+          <div className="row booking_branch_container">
+            {branches.map((branch, index) => (
+              <div
+                className="booking_branch_detail col-lg-3 col-md-4 col-sm-6"
+                key={index}
+              >
+                {branch.branchPicture && (
+                  isJson(branch.branchPicture) ? (
+                    <img className="home-img" src={JSON.parse(branch.branchPicture)[0]} alt="branch" />
+                  ) : (
+                    <img className="home-img" src={branch.branchPicture} alt="no pic" />)
+                )}
+                <h3>{branch.branchName}</h3>
+                <p>Number of courts: 4</p>
+                <p>Address: {branch.branchAddress}</p>
+                <p>
+                  {prices[branch.branchId]
+                    ? `Weekday: ${prices[branch.branchId].weekdayPrice} VND`
+                    : 'Loading...'}
+                </p>
+                <p>
+                  {prices[branch.branchId]
+                    ? `Weekend: ${prices[branch.branchId].weekendPrice} VND`
+                    : 'Loading...'}
+                </p>
+                <button onClick={() => handleBookNow(branch)}>Book now</button>
+              </div>
+            ))}
+          </div>
+          {/* Pagination */}
+          <div className="pagination">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => handlePageChange(index + 1)}
+                className={pageNumber === index + 1 ? "active" : ""}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      {/* Booking branch End */}
-      <div className="facebook-msg-container">
-      <FacebookMsg />
-      </div>
-     
+        {/* Booking branch End */}
+        <div className="facebook-msg-container">
+          <FacebookMsg />
+        </div>
 
-      {/* Introduction Begin */}
-      <div className="container">
-        <h1>Lý do chọn đặt sân</h1>
-        <div className="">
-          <img src={hero} alt="hero" />
-        </div>
-      </div>
-      {/* Introduction End */}
 
-      {/* Image Begin */}
-      <div className="cat_info container">
-        <div className="cat_info_pic col-lg-3 col-md-4 col-sm-6">
-          <img src={cat1Img} alt="cat" />
-          <h3>Đặt lịch nhanh chóng</h3>
-          <p>Hoạt động trong 60 thành phố</p>
+        {/* Introduction Begin */}
+        <div className="container">
+          <h1>Lý do chọn đặt sân</h1>
+          <div className="">
+            <img src={hero} alt="hero" />
+          </div>
         </div>
-        <div className="cat_info_pic col-lg-3 col-md-4 col-sm-6">
-          <img src={cat2Img} alt="cat" />
-          <h3>Tiết kiệm thời gian</h3>
-          <p>Luôn đảm bảo đúng giờ</p>
-        </div>
-        <div className="cat_info_pic col-lg-3 col-md-4 col-sm-6">
-          <img src={cat3Img} alt="cat" />
-          <h3>Chất lượng cao</h3>
-          <p>Cung cấp chất lượng sân tốt nhất</p>
-        </div>
-        <div className="cat_info_pic col-lg-3 col-md-4 col-sm-6">
-          <img src={cat4Img} alt="cat" />
-          <h3>Hỗ trợ 24/7</h3>
-          <p>Luôn sẵn sàng hỗ trợ khách hàng</p>
-        </div>
-      </div>
-      {/* Image End */}
+        {/* Introduction End */}
 
-      {/* Modal */}
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={closeModal}
-        className="modal"
-        overlayClassName="modal-overlay"
-      >
-        <h2>Select the Type of Booking</h2>
-        <button onClick={handleFixBooking}>Fixed Schedule</button>
-        <button onClick={handleScheduleByDay}>Schedule by Day</button>
-      </Modal>
+        {/* Image Begin */}
+        <div className="cat_info container">
+          <div className="cat_info_pic col-lg-3 col-md-4 col-sm-6">
+            <img src={cat1Img} alt="cat" />
+            <h3>Đặt lịch nhanh chóng</h3>
+            <p>Hoạt động trong 60 thành phố</p>
+          </div>
+          <div className="cat_info_pic col-lg-3 col-md-4 col-sm-6">
+            <img src={cat2Img} alt="cat" />
+            <h3>Tiết kiệm thời gian</h3>
+            <p>Luôn đảm bảo đúng giờ</p>
+          </div>
+          <div className="cat_info_pic col-lg-3 col-md-4 col-sm-6">
+            <img src={cat3Img} alt="cat" />
+            <h3>Chất lượng cao</h3>
+            <p>Cung cấp chất lượng sân tốt nhất</p>
+          </div>
+          <div className="cat_info_pic col-lg-3 col-md-4 col-sm-6">
+            <img src={cat4Img} alt="cat" />
+            <h3>Hỗ trợ 24/7</h3>
+            <p>Luôn sẵn sàng hỗ trợ khách hàng</p>
+          </div>
+        </div>
+        {/* Image End */}
+
+        {/* Modal */}
+        <Modal
+          isOpen={modalIsOpen}
+          onRequestClose={closeModal}
+          className="modal"
+          overlayClassName="modal-overlay"
+        >
+          <h2>Select the Type of Booking</h2>
+          <button onClick={handleFixBooking}>Fixed Schedule</button>
+          <button onClick={handleScheduleByDay}>Schedule by Day</button>
+        </Modal>
       </div>
     </>
   );
