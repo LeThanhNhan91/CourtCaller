@@ -164,7 +164,7 @@ const HomePage = () => {
 
         {/* Booking branch */}
         <div className="container booking_branch">
-          <h1>Đặt Sân</h1>
+          <h1>Booking Now</h1>
           <div className="search_bar">
             <input
               type="text"

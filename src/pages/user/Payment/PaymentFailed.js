@@ -5,12 +5,12 @@ import noImg from "assets/users/images/byday/red_cross.png"
 
 function PaymentFailed() {
   return (
-    <div className="payment-container">
-      <div className="success-box">
+    <div className="failed-container">
+      <div className="failed-box">
         <img src={noImg} alt="Payment Failed" />
         <h2>OOPS !!!</h2>
-        <p>Something went wrong! Please try again or contact <a href="mailto:courtcallers@gmail.com" className="contact-email">courtcallers@gmail.com</a></p>
-        <button><Link to="/reject">Back to Booking Page</Link></button>
+        <p style={{fontSize: "large", lineHeight: 2}}>Something went wrong! Please try again on booking or contact with Us: <a href="mailto:courtcallers@gmail.com" className="email-contact">courtcallers@gmail.com</a></p>
+        <button style={{marginTop: 10}}><Link style={{textDecoration: "none", color: "#fff"}} to="/">Back to Home</Link></button>
       </div>
     </div>
   );

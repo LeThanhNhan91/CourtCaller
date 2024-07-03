@@ -54,7 +54,7 @@
     }
   
     .account {
-      margin: 10px 0;
+      margin: 20px 0;
       display: flex;
       justify-content: space-between;
       border-bottom: solid grey;
@@ -63,13 +63,6 @@
   
     .form-edit {
       display: grid;
-  
-      input {
-        margin-top: 15px;
-        width: 200px;
-        height: 25px;
-      }
-  
       .edit-left {
         grid-column-start: 1;
       }
@@ -78,21 +71,108 @@
       }
   
       .form-field {
-        margin-bottom: 10px;
+        margin-bottom: 20px;
   
         .input-fname {
-          margin-left: 15px;
+          margin-left: 20px;
+        }
+        .input-uname{
+          margin-left: 12px;
         }
         .input-phone {
-          margin-left: 41px;
+          margin-left: 46px;
         }
         .input-email {
-          margin-left: 33px;
+          margin-left: 58px;
         }
-        .input-fb {
-          margin-left: 15px;
+        .input-address {
+          margin-left: 39px;
+        }
+        .input-date{
+          margin-left: 10px;
+        }
+        
+        .input-fname, .input-uname, .input-phone, .input-email, .input-address, .input-date{
+        width: 200px;
+        height: 12px;
+        padding: 10px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        color: #333333;
+        outline: none;
+        }
+        .input-fname:focus, .input-uname:focus, .input-phone:focus, .input-email:focus, .input-address:focus, .input-date:focus{
+          border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
       }
     }
+  }
+
+  .file-btn {
+    width: 250px;
+    height: 150px;
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    color: #007bff;
+    background-color: #fff;
+    border: 1.5px dashed #007bff;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .file-btn:hover{
+    color: #0221be;
+    background-color: #fff;
+  }
+  .file-btn span{
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    color: #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25px;
+    background-color: #b9f0f9;
+  }
+  .selected-file{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #b9f0f9;
+    border: 1px solid #6ce4f7;
+    border-radius: 20px;
+    margin-top: 20px;
+    width: 76%;
+  }
+  .selected-file p{
+    font-size: 13px;
+    font-weight: 300px;
+    margin-left: 15px;
+  }
+  .selected-file button{
+    width: 38px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #007bff;
+    background-color: transparent;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .selected-file span:hover{
+    width: 100%;
+    color: #fff;
+    background-color: #007bff;
   }
   

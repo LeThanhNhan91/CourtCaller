@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./style.scss";
 import "./editStyle.scss"
 import axios from "axios";
 import {jwtDecode} from "jwt-decode";
-import userImg from "assets/users/images/hero/user.png";
-
+import { IoCloudUploadOutline } from "react-icons/io5";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { getDownloadURL, ref, uploadBytes, deleteObject } from "firebase/storage";
+import {storageDb} from "firebase.js";
+import {v4} from 'uuid'
 const Profile = () => {
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
@@ -17,19 +20,22 @@ const Profile = () => {
   const [editFormValues, setEditFormValues] = useState({
     fullName: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     address: "",
+    yearOfBirth: "",
+    profilePicture: []
   });
+  const inputRef = useRef();
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     if (token) {
       const decoded = jwtDecode(token);
-      //console.log(decoded)
-      setUserName(decoded.name)
-      setUserPic(decoded.picture)
-      setUserEmail(decoded.email)
+      setUserName(decoded.name);
+      setUserPic(decoded.picture);
+      setUserEmail(decoded.email);
 
       const fetchUserData = async (id, isGoogle) => {
         try {
@@ -68,16 +74,17 @@ const Profile = () => {
       }
     }
   }, []);
-
-  console.log("userData", userData)
+  console.log('user', user)
 
   useEffect(() => {
     if (user && userData) {
       setEditFormValues({
         fullName: userData.fullName || userName,
-        email: user.email || userEmail,
-        phone: user.phoneNumber,
+        userName: user.userName,
+        phoneNumber: user.phoneNumber || "",
         address: userData.address || "",
+        yearOfBirth: userData.yearOfBirth || "",
+        profilePicture: userData.profilePicture || null
       });
     }
   }, [user, userData]);
@@ -91,18 +98,49 @@ const Profile = () => {
   };
 
   const handleUpdate = async () => {
-    // Logic to update the user information
     try {
+      const uploadImageTask = async (selectedFile) => {
+        const imageRef = ref(storageDb, `BranchImage/${v4()}`);
+        await uploadBytes(imageRef, selectedFile);
+        const url = await getDownloadURL(imageRef);
+        return url;
+      };
+  
+      let imageUrl = null;
+      if (selectedFile) {
+        imageUrl = await uploadImageTask(selectedFile);
+      }
+  
+      // Log để kiểm tra các URL ảnh mới sau khi upload
+      console.log("Image URL after upload:", imageUrl);
+  
+      let formData = new FormData();
+      formData.append("fullName", editFormValues.fullName);
+      formData.append("userName", editFormValues.userName);
+      formData.append("phoneNumber", editFormValues.phoneNumber);
+      formData.append("address", editFormValues.address);
+      formData.append("yearOfBirth", editFormValues.yearOfBirth);
+      if (imageUrl) {
+        formData.append("profilePicture", imageUrl);
+      }
+  
       const response = await axios.put(
-        `https://courtcaller.azurewebsites.net/api/UserDetails/${userId}`,
-        editFormValues
+        `https://courtcaller.azurewebsites.net/api/UserDetails/foruser/${userId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
       );
+  
       setUserData(response.data);
       setShowEditModal(false);
     } catch (error) {
       console.error("Error updating user data:", error);
     }
   };
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -112,16 +150,19 @@ const Profile = () => {
     }));
   };
 
-  const isJson = (str) => {
-    try {
-      JSON.parse(str)
-      
-    } catch (error) {
-      return false
+  const handleOnChange = (event) => {
+    if(event.target.files && event.target.files.length > 0){
+      setSelectedFile(event.target.files[0]);
     }
-    return true
-  }
+  };
 
+  const onChooseFile = () => {
+    inputRef.current.click();
+  };
+
+  const onRemoveFile = () => {
+    setSelectedFile(null)
+  }
 
   if (!userData || !user) {
     return <div>Loading...</div>;
@@ -135,7 +176,7 @@ const Profile = () => {
             <h2>Basic Information</h2>
             <div className="form-group">
               <p className="info-field">Full Name</p>
-              <p className="info">{userData.fullName || userName}</p>
+              <p className="info">{userData.fullName}</p>
             </div>
             <div className="form-group">
               <p className="info-field">User Name</p>
@@ -154,7 +195,7 @@ const Profile = () => {
             <h2>Contact Information</h2>
             <div className="form-group">
               <p className="info-field">Email</p>
-              <p className="info">{user.email || userEmail}</p>
+              <p className="info">{user.email}</p>
             </div>
             <div className="form-group">
               <p className="info-field">Phone</p>
@@ -166,7 +207,7 @@ const Profile = () => {
         <div className="user-image-container">
           <div className="user-image">
             <div className="image-placeholder">
-              <img className="profile-img" src={userData.profilePicture || userPic} alt="user image" />
+              <img className="profile-img" src={userData.profilePicture} alt="user image" />
             </div>
             <p>Profile Picture</p>
             <p style={{ margin: 0, color: "#00c853" }}>Online</p>
@@ -202,9 +243,20 @@ const Profile = () => {
                       <input
                         className="input-fname"
                         type="text"
-                        id="name"
+                        id="fname"
                         name="fullName"
                         value={editFormValues.fullName}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <span>User Name</span>
+                      <input
+                        className="input-uname"
+                        type="text"
+                        id="uname"
+                        name="userName"
+                        value={editFormValues.userName}
                         onChange={handleChange}
                       />
                     </div>
@@ -213,33 +265,51 @@ const Profile = () => {
                       <input
                         className="input-phone"
                         type="text"
-                        id="phone"
-                        name="phone"
-                        value={editFormValues.phone}
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        value={editFormValues.phoneNumber}
                         onChange={handleChange}
                       />
+                    </div>
+                    <div style={{marginTop: 20}}>
+                      <p style={{marginBottom: 10}}>Profile Image</p>
+                      <input
+                        type="file"
+                        ref={inputRef}
+                        onChange={handleOnChange}
+                        style={{margin: 0, display: "none"}}
+                      />
+                      <button className="file-btn" onClick={onChooseFile}>
+                        <span className="material-symbol-rounded"><IoCloudUploadOutline /></span> Upload File
+                      </button>
+                      {selectedFile && <div className="selected-file">
+                        <p>{selectedFile.name}</p>
+                        <button className="file-btn" onClick={onRemoveFile}>
+                          <span  style={{width: 38}} className="material-symbol-rounded"><RiDeleteBin6Line style={{width: 25}}/></span>
+                        </button>
+                      </div>}
                     </div>
                   </div>
                   <div className="edit-right">
                     <div className="form-field">
-                      <span>Email</span>
-                      <input
-                        className="input-email"
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={editFormValues.email}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div className="form-field">
                       <span>Address</span>
                       <input
-                        className="input-fb"
+                        className="input-address"
                         type="text"
                         id="address"
                         name="address"
                         value={editFormValues.address}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <span>Date of birth</span>
+                      <input
+                        className="input-date"
+                        type="text"
+                        id="yearOfBirth"
+                        name="yearOfBirth"
+                        value={editFormValues.yearOfBirth}
                         onChange={handleChange}
                       />
                     </div>
