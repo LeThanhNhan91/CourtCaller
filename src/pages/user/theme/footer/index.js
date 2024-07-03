@@ -2,6 +2,7 @@ import { memo } from "react"
 import './style.scss'
 import { AiOutlineFacebook, AiOutlineInstagram, AiOutlinePhone } from "react-icons/ai";
 import { FiYoutube, FiTwitter } from "react-icons/fi";
+import { Email } from "@mui/icons-material";
 
 const Footer = () => {
     return (
@@ -14,7 +15,7 @@ const Footer = () => {
                             <ul>
                                 <li>Address: FPT University</li>
                                 <li>Phone: 123-456-789</li>
-                                <li>Email: courtcallers@gmail.com</li>
+                                <li>Email: <a href="mailto:courtcallers@gmail.com">courtcallers@gmail.com</a></li>
                             </ul>
                         </div>
                     </div>
