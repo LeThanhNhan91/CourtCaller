@@ -497,7 +497,7 @@ const FixedBooking = () => {
     </ThemeProvider>
 
     {/* Map */}
-    <div className="map-section">
+    {/* <div className="map-section">
           <div className="map-form">
             <div className="map-header">
               <h2 className="map-title">Branch Location</h2>
@@ -515,7 +515,7 @@ const FixedBooking = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
         {/* Rating form */}
         <div className="rating-form">
       <div className="rating-container">
