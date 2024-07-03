@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { resetPassword } from "api/userApi";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -31,26 +32,14 @@ const ResetPassword = () => {
     setLoading(true);
   
     try {
-      const response = await fetch('https://localhost:7104/api/authentication/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          token: token,
-          password: password,
-          confirmPassword: confirmPassword,
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.title || 'Something went wrong');
+      const response = await resetPassword(email, token, password, confirmPassword);
+      if (!response.success) {
+        
+        throw new Error(response.message || 'Something went wrong');
       }
   
-      const data = await response.json();
-      toast.success("Password reset successful!");
+     
+      toast.success(response.message || "Password reset successfully!");
       navigate("/login"); // Chuyển hướng người dùng đến trang đăng nhập sau khi reset password thành công
     } catch (error) {
       toast.error(error.message);
