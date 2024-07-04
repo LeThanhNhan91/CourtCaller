@@ -6,7 +6,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import { fetchUserDetailByEmail, fetchUserDetail } from 'api/userApi';
 import { generatePaymentToken, processPayment } from 'api/paymentApi';
 import LoadingPage from './LoadingPage';
-import { reserveSlots } from 'api/bookingApi';
+import { reserveSlots, createBookingFlex, deleteBookingInFlex } from 'api/bookingApi';
 import { useAuth } from 'AuthContext';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
@@ -31,7 +31,7 @@ const steps = ['Payment Details', 'Payment Confirmation'];
 
 const PaymentDetail = () => {
   const location = useLocation();
-  const { branchId, bookingRequests, totalPrice } = location.state || {  };
+  const { branchId, bookingRequests, totalPrice, type, availableSlot, bookingId, numberOfSlot } = location.state || {  };
   const sortedBookingRequests = bookingRequests ? [...bookingRequests].sort((a, b) => {
     const dateA = new Date(`${a.slotDate}T${a.timeSlot.slotStartTime}`);
     const dateB = new Date(`${b.slotDate}T${b.timeSlot.slotStartTime}`);
@@ -101,6 +101,62 @@ const PaymentDetail = () => {
   }, []);
 
   const handleNext = async () => {
+
+    if (availableSlot !== 0 && bookingId) {
+      const bookingForm = bookingRequests.map((request) => ({
+        courtId: null,
+        branchId: branchId,
+        slotDate: request.slotDate,
+        timeSlot: {
+          slotStartTime: request.timeSlot.slotStartTime,
+          slotEndTime: request.timeSlot.slotEndTime,
+        },
+      }));
+    }
+
+    if (type === 'flexible' && availableSlot === 0) {
+      let id = null;
+      try {
+        setIsLoading(true);
+        const bookingForm = bookingRequests.map((request) => ({
+          courtId: null,
+          branchId: branchId,
+          slotDate: request.slotDate,
+          timeSlot: {
+            slotStartTime: request.timeSlot.slotStartTime,
+            slotEndTime: request.timeSlot.slotEndTime,
+          },
+        }));
+  
+        const createBookingTypeFlex = await createBookingFlex(userData.userId, numberOfSlot, branchId);
+
+        id = createBookingTypeFlex.bookingId;
+        const booking = await reserveSlots(userData.userId, bookingForm);
+        
+        // If reservation is successful, continue to the next step or navigate
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        const tokenResponse = await generatePaymentToken(booking.bookingId);
+        const token = tokenResponse.token;
+        const paymentResponse = await processPayment(token);
+        const paymentUrl = paymentResponse;
+
+      window.location.href = paymentUrl;
+      } catch (error) {
+        console.error('Error processing payment:', error);
+        setErrorMessage('Error processing payment. Please try again.');
+        if (id) {
+          try {
+            await deleteBookingInFlex(id);
+            console.log('Booking rolled back successfully');
+          } catch (deleteError) {
+            console.error('Error rolling back booking:', deleteError);
+          }
+        }
+        setIsLoading(false);
+      }
+      
+    }
+
 
     if (activeStep === 0) {
       setIsLoading(true); // Show loading page
