@@ -48,3 +48,26 @@ export const validateConfirmPassword = (password, confirmPassword) => {
     if (password === confirmPassword) return { isValid: true, message: '' };
     return { isValid: false, message: 'Does not match with Password!' };
 };
+
+export const validatePhone = (phone) => {
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (phoneRegex.test(phone)) return { isValid: true, message: '' };
+    return { isValid: false, message: 'Invalid phone number! (must be 10-15 digits)' };
+  };
+  
+  export const validateTime = (time) => {
+    const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+    if (timeRegex.test(time)) return { isValid: true, message: '' };
+    return { isValid: false, message: 'Invalid time format! (hh:mm:ss)' };
+  };
+  
+  export const validateRequired = (value) => {
+    if (value.trim() !== '') return { isValid: true, message: '' };
+    return { isValid: false, message: 'This field is required' };
+  };
+  
+  export const validateNumber = (value) => {
+    if (!isNaN(value) && value.trim() !== '') return { isValid: true, message: '' };
+    return { isValid: false, message: 'Must be a number' };
+  };
+  

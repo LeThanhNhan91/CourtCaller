@@ -13,6 +13,8 @@ import PaymentDetailFixed from "pages/user/Payment/PaymentDetailFixed";
 import PaymentFailed from "pages/user/Payment/PaymentFailed";
 import PaymentSuccessful from "pages/user/Payment/PaymentSuccessful";
 import FixedBooking from "pages/user/bookingFixDay/Fix";
+import Flexible from "pages/user/bookingFlex/Flexible";
+import FlexibleBooking from "pages/user/bookingFlex/FlexibleBooking";
 
 const renderUserRouter = () => {
     const userRouters  = [
@@ -44,6 +46,14 @@ const renderUserRouter = () => {
         {
             path: ROUTERS.USER.FIXBOOKING,
             component: <FixedBooking/>
+        },
+        {
+            path: ROUTERS.USER.FLEXIBLE,
+            component: <Flexible/>
+        },
+        {
+            path: ROUTERS.USER.FLEXIBLEBOOKING,
+            component: <FlexibleBooking/>
         },
         {
             path: ROUTERS.USER.PAYMENTDETAIL,

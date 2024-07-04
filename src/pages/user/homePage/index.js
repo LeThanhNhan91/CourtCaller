@@ -123,6 +123,15 @@ const HomePage = () => {
 
   }
 
+  const handleFlexBooking = () => {
+    navigate("/flexible", { state: { branch: selectedBranch } });
+    scroll.scrollToTop({
+      duration: 1000,
+      smooth: 'easeInOutQuart',
+    });
+
+  }
+
   return (
     <>
       <div style={{ backgroundColor: "#EAECEE" }}>
@@ -270,8 +279,11 @@ const HomePage = () => {
           overlayClassName="modal-overlay"
         >
           <h2>Select the Type of Booking</h2>
+          <div style={{display: "flex", justifyContent: "space-around"}}>
           <button onClick={handleFixBooking}>Fixed Schedule</button>
           <button onClick={handleScheduleByDay}>Schedule by Day</button>
+          <button onClick={handleFlexBooking}>Flex Schedule</button>
+          </div>
         </Modal>
       </div>
     </>

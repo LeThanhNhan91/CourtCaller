@@ -312,7 +312,7 @@ $bannerImg: "/assets/users/images/hero/banner.jpg";
     border-radius: 10px;
     padding: 20px;
     width: 80%;
-    max-width: 500px;
+    max-width: 550px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
     z-index: 1001; // Ensure it appears above overlay
@@ -325,7 +325,7 @@ $bannerImg: "/assets/users/images/hero/banner.jpg";
 
     button {
         display: block;
-        width: 100%;
+        width: 30%;
         padding: 10px 0;
         margin-bottom: 10px;
         border: none;
@@ -339,9 +339,5 @@ $bannerImg: "/assets/users/images/hero/banner.jpg";
         &:hover {
             background-color: darken(map.get($theme-colors, "main"), 10%);
         }
-    }
-
-    button:last-child {
-        margin-bottom: 0;
     }
 }
