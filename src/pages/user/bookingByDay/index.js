@@ -187,6 +187,7 @@ const BookByDay = () => {
   };
 
   const handleSubmitReview = async () => {
+    try {
     const token = localStorage.getItem("token");
     const decodedToken = jwtDecode(token);
     if (!token) {
@@ -210,10 +211,13 @@ const BookByDay = () => {
     } catch (error) {
       console.error("Error submitting review", error);
       // Xử lý lỗi khi gửi đánh giá
+    }} catch (error) {
+    navigate("/login");
     }
   };
 
   const handleViewReviews = async () => {
+   
     try {
       const response = await axios.get(`https://courtcaller.azurewebsites.net/api/Reviews?branchId=${branch.branchId}`, {
         headers: {
@@ -245,6 +249,7 @@ const BookByDay = () => {
       setReviewsVisible(true);
     } catch (error) {
       console.error('Error fetching reviews:', error);
+      
     }
   };
 
@@ -899,7 +904,7 @@ const BookByDay = () => {
                       <span className="review-author">{review.userFullName}</span>
                       <span className="review-rating">{review.rating}</span><FaStar style={{color:"gold"}}/>
                       </div>
-                      {review.id ===userData.userId && (
+                      {userData && review.id ===userData.userId && (
                         <CiEdit
                           style={{ marginRight: "10px", fontSize: "23px", fontWeight: "bold" }}
                           onClick={() => handleEditReview(review)}
