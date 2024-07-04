@@ -2,6 +2,35 @@ import axios from 'axios';
 
 const url = 'https://courtcaller.azurewebsites.net/api';
 
+
+export const forgetPassword = async (email) => {
+  try {
+    const response = await axios.post(`${url}/authentication/forget-password`, { email });
+    if( response.data) {
+      return { message: response.data.message , success : true };
+    } else {
+      throw new Error('Invalid API response structure');
+    }
+  } catch (error) {
+    console.error('Error sending forget password request:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+
+export const resetPassword = async (email, token, password, confirmPassword) => {
+  try {
+    const response = await axios.post(`${url}/authentication/reset-password`, { email, token, password, confirmPassword });
+    if( response.data) {
+      return { message: response.data.message , success : true };
+    } else {
+      throw new Error('Invalid API response structure');
+    }
+  } catch (error) {
+    console.error('Error sending reset password request:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+
 export const fetchTeamData = async (pageNumber = 1, pageSize = 10, searchQuery = '') => {
   try {
     const params = { pageNumber, pageSize, searchQuery };

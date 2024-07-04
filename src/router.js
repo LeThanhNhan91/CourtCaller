@@ -13,9 +13,10 @@ import PaymentDetailFixed from "pages/user/Payment/PaymentDetailFixed";
 import PaymentFailed from "pages/user/Payment/PaymentFailed";
 import PaymentSuccessful from "pages/user/Payment/PaymentSuccessful";
 import FixedBooking from "pages/user/bookingFixDay/Fix";
+import ForgetPassword from "pages/user/forgetPass/index";
+import ResetPassword from "pages/user/resetPass/index";
 import Flexible from "pages/user/bookingFlex/Flexible";
 import FlexibleBooking from "pages/user/bookingFlex/FlexibleBooking";
-
 const renderUserRouter = () => {
     const userRouters  = [
         {
@@ -71,6 +72,7 @@ const renderUserRouter = () => {
             path: ROUTERS.USER.PAYMENTSUCCESSFUL,
             component: <PaymentSuccessful/>
         } 
+      
     ]
 
     return(
@@ -90,7 +92,10 @@ const RouterCustom = () => {
         <Routes>
             <Route path={ROUTERS.USER.LOGIN} element={<Login />} />
             <Route path="/*" element={renderUserRouter()} />
+            <Route path={ROUTERS.USER.FORGETPASSWORD} element={<ForgetPassword />}/>
+            <Route path={ROUTERS.USER.RESETPASSWORD} element={<ResetPassword />}/>
         </Routes>
+        
     )
 };
 
