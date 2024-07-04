@@ -13,12 +13,6 @@ import "./style.scss";
 import { fetchPrice } from "api/priceApi";
 //thêm thư viện scroll cuộn cho pro
 import { animateScroll as scroll } from 'react-scroll';
-import FacebookMsg from "facebook/FacebookMsg";
-import { MessageUs, MessengerCheckbox, SendToMessenger, ShareButton } from "react-facebook";
-import MessageUsMsg from "facebook/MessageUs";
-import MessengerCheckboxMsg from "facebook/MessengerCheckbox";
-import SendToMessengerMsg from "facebook/SendToMessenger";
-import ShareButtonExample from "facebook/shareButton";
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
 
@@ -228,13 +222,6 @@ const HomePage = () => {
           </div>
         </div>
         {/* Booking branch End */}
-        <div className="facebook-msg-container">
-          {/* <FacebookMsg /> */}
-          <MessageUsMsg />
-          {/* <ShareButtonExample /> */}
-          {/* <MessengerCheckboxMsg /> */}
-          {/* <SendToMessengerMsg /> */}
-        </div>
 
 
         {/* Introduction Begin */}
