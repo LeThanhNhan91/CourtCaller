@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useEffect , useRef} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaWifi, FaMotorcycle, FaBowlFood } from "react-icons/fa6";
 import { FaCar, FaStar } from "react-icons/fa";
@@ -9,8 +9,6 @@ import { MdOutlineLocalDrink } from "react-icons/md";
 import pic1 from "assets/users/images/byday/pic1.webp";
 import pic2 from "assets/users/images/byday/pic2.webp";
 import pic3 from "assets/users/images/byday/pic3.webp";
-import pic4 from "assets/users/images/byday/pic4.webp";
-import pic5 from "assets/users/images/byday/pic5.webp";
 import { IoLocationOutline } from "react-icons/io5";
 import {
   Box,
@@ -34,6 +32,9 @@ import "./styles.scss";
 import "react-multi-carousel/lib/styles.css";
 import "./style.scss";
 import DisplayMap from "map/DisplayMap";
+import * as signalR from '@microsoft/signalr';
+import { HubConnectionBuilder, HttpTransportType, LogLevel } from '@microsoft/signalr';
+import { fetchUnavailableSlots } from '../../../api/timeSlotApi';
 
 dayjs.extend(isSameOrBefore);
 
@@ -133,6 +134,19 @@ const BookByDay = () => {
   const [userId, setUserId] = useState(null);
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
+  const [connection, setConnection] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [unavailableSlots, setUnavailableSlot] = useState([]);
+  //dùng cái này để thay thế startOfWeek vì startOfWeek chỉ set về ngày hiện tại 
+  const [newWeekStart, setNewWeekStart] =  useState(dayjs().startOf('week'));
+  const selectBranchRef = useRef(selectedBranch);
+  useEffect(() => {
+    selectBranchRef.current = selectedBranch;
+  }, [selectedBranch]);
+  const newWeekStartRef = useRef(newWeekStart);
+  useEffect(() => {
+    newWeekStartRef.current = newWeekStart;
+  }, [newWeekStart]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -177,6 +191,85 @@ const BookByDay = () => {
       }
     }
   }, []);
+
+
+  //signalR
+  useEffect(() => {
+    const newConnection = new HubConnectionBuilder()
+        .withUrl("https://courtcaller.azurewebsites.net/timeslothub")
+        .withAutomaticReconnect()
+        .configureLogging(signalR.LogLevel.Information) 
+        .build();
+  
+    newConnection.onreconnecting((error) => {
+        console.log(`Connection lost due to error "${error}". Reconnecting.`);
+        setIsConnected(false);
+    });
+  
+    newConnection.onreconnected((connectionId) => {
+        console.log(`Connection reestablished. Connected with connectionId "${connectionId}".`);
+        setIsConnected(true);
+    });
+  
+    newConnection.onclose((error) => {
+        console.log(`Connection closed due to error "${error}". Try refreshing this page to restart the connection.`);
+        setIsConnected(false);
+    });
+  
+    newConnection.on("DisableSlot", (slotCheckModel) => {
+        console.log('Received DisableSlot:', slotCheckModel);
+  
+        //check nếu mà slot trả về có branch và date trùng với branch và date mà mình đang chọn thì set lại unavailable slot
+        const startOfWeekDayjs = dayjs(newWeekStartRef.current); //lấy ra đúng cái ngày đầu tiên của tuần user chọn
+        console.log('startOfWeekDayjs:', startOfWeekDayjs.format('YYYY-MM-DD'));
+        
+        const fromDate = startOfWeekDayjs.add(1, 'day').startOf('day');
+        const toDate = startOfWeekDayjs.add(7, 'day').endOf('day');
+        const slotDate = dayjs(slotCheckModel.slotDate, 'YYYY-MM-DD');
+        
+        console.log('fromDate :', fromDate.format('YYYY-MM-DD'), 'toDate ', toDate.format('YYYY-MM-DD'), 'slotDate:', slotDate.format('YYYY-MM-DD'));
+        
+        //check lẻ dkien 
+        const isBranchMatch = slotCheckModel.branchId === selectBranchRef.current;
+        console.log('branch của signalR:', slotCheckModel.branchId, 'branch mình chọn:', selectBranchRef.current, 'check thử cái này ', selectBranchRef)
+        const isDateMatch = slotDate.isBetween(fromDate, toDate, 'day', '[]');
+        console.log('isBranchMatch:', isBranchMatch, 'isDateMatch:', isDateMatch);
+        if(isBranchMatch && isDateMatch) {
+          console.log('điều kiện là true' );
+          const { slotDate, timeSlot: { slotStartTime, slotEndTime } } = slotCheckModel;
+        const newSlot = { slotDate, slotStartTime, slotEndTime };
+  
+        setUnavailableSlot((prev) => [...prev, newSlot]);
+       }
+    });
+  
+    setConnection(newConnection);
+  }, []);
+  //check unavailable slot
+  useEffect(() => {
+    console.log('UnavailableSlot:', unavailableSlots);
+  }, [unavailableSlots]);
+  
+  useEffect(() => {
+    if (connection) {
+        const startConnection = async () => {
+            try {
+                await connection.start();
+                console.log("SignalR Connected.");
+                setIsConnected(true);
+            } catch (error) {
+                console.error("SignalR Connection Error:", error);
+                setIsConnected(false);
+                setTimeout(startConnection, 5000);
+            }
+        }
+        startConnection();
+    }
+  }, [connection]);
+    
+    
+
+
 
   const handleStarClick = (value) => {
     setHighlightedStars(value);
@@ -253,9 +346,7 @@ const BookByDay = () => {
     }
   };
 
-  console.log('user', user)
-  console.log('userData', userData)
-
+  
   const handleEditReview = (review) => {
     setEditingReview(review);
     setReviewText(review.reviewText);
@@ -390,18 +481,39 @@ const BookByDay = () => {
 
   // xử lý chỉ hiện 1 tuần trước và các tuần sau
   const handlePreviousWeek = async () => {
+
+    const currentWeekStart = dayjs().startOf('week');
     const oneWeekBeforeCurrentWeek = dayjs().startOf('week').subtract(1, 'week');
     const oneWeekBeforeStartOfWeek = dayjs(startOfWeek).subtract(1, 'week');
-  
+    // Không cho phép quay về tuần trước tuần hiện tại
+    if (oneWeekBeforeStartOfWeek.isBefore(currentWeekStart, 'week')) {
+     
+      return; 
+    }
     if (!dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week') && oneWeekBeforeStartOfWeek.isAfter(oneWeekBeforeCurrentWeek)) {
       setStartOfWeek(oneWeekBeforeStartOfWeek);
     } else if (dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week')) {
       setStartOfWeek(oneWeekBeforeCurrentWeek);
     }
-  }
 
-  const handleNextWeek = () => {
-    setStartOfWeek(dayjs(startOfWeek).add(1, "week"));
+    const newWeekStart = oneWeekBeforeStartOfWeek.format('YYYY-MM-DD');
+    setNewWeekStart(newWeekStart);
+    const unavailableSlot = await fetchUnavailableSlots(newWeekStart, selectedBranch);
+    const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+    setUnavailableSlot(slots);
+
+  };
+
+  const handleNextWeek = async () => {
+   
+    const newWeekStart = dayjs(startOfWeek).add(1, 'week').format('YYYY-MM-DD');
+    setNewWeekStart(newWeekStart);
+    setStartOfWeek(dayjs(startOfWeek).add(1, 'week'));
+    console.log('startOfWeek là dcm:', startOfWeek.format('YYYY-MM-DD'));
+    const unavailableSlot = await fetchUnavailableSlots(newWeekStart, selectedBranch);
+    const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+    setUnavailableSlot(slots);
+   
   };
 
   // xử lý khi click vào nút continue qua trang tiếp theo
@@ -437,6 +549,38 @@ const BookByDay = () => {
       },
     });
   };
+  const isSlotUnavailable = (day, slot) => {
+    const formattedDay = day.format('YYYY-MM-DD'); 
+    const slotStartTime = slot.split(' - ')[0]; 
+    return unavailableSlots.some(unavailableSlot => {
+      return (
+         unavailableSlot.slotDate === formattedDay &&
+            unavailableSlot.slotStartTime === `${slotStartTime}:00`
+      );
+    });
+  };
+  const getSlotColor = (day, slot, isSelected) => {
+    const isPastSlot = day.isBefore(currentDate, 'day') || (day.isSame(currentDate, 'day') &&
+      timeStringToDecimal(currentDate.format('HH:mm:ss')) > timeStringToDecimal(slot.split(' - ')[0]) + 0.25) || isSlotUnavailable(day, slot);
+
+    if (isSelected) return "#1976d2";
+    if (isPastSlot) return "#E0E0E0";
+    return "#D9E9FF";
+  };
+  useEffect(() => {
+    const fetchInitialUnavailableSlots = async () => {
+      
+      const currentWeekStart = dayjs(startOfWeek).format('YYYY-MM-DD');
+      const unavailableSlot = await fetchUnavailableSlots(currentWeekStart, selectedBranch);
+      const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+      setUnavailableSlot(slots);
+     
+    };
+
+    if (selectedBranch) {
+      fetchInitialUnavailableSlots();
+    }
+  }, [selectedBranch, startOfWeek]);
 
   const days = weekDays;
   const pictures = JSON.parse(branch.branchPicture).slice(0, 5);
@@ -658,11 +802,7 @@ const BookByDay = () => {
                       <Button
                         onClick={() => handleSlotClick(slot, day, price)}
                         sx={{
-                          backgroundColor: day.isBefore(currentDate, "day")
-                            ? "#E0E0E0"
-                            : isSelected
-                            ? "#1976d2"
-                            : "#D9E9FF",
+                          backgroundColor: getSlotColor(day, slot, isSelected),
                           color: isSelected ? "#FFFFFF" : "#0D1B34",
                           p: 2,
                           borderRadius: 2,
@@ -680,7 +820,8 @@ const BookByDay = () => {
                           position: "relative",
                         }}
                         m="10px"
-                        disabled={day.isBefore(currentDate, "day")}
+                        disabled={day.isBefore(currentDate, 'day') || (day.isSame(currentDate, 'day') &&
+                          timeStringToDecimal(currentDate.format('HH:mm:ss')) > timeStringToDecimal(slot.split(' - ')[0]) + 0.25) || isSlotUnavailable(day, slot)}
                       >
                         <Box>
                           <Typography

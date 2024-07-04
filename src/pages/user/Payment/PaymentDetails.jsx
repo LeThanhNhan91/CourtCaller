@@ -11,6 +11,8 @@ import { addTimeSlotIfExistBooking } from 'api/timeSlotApi';
 import { useAuth } from 'AuthContext';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import * as signalR from '@microsoft/signalr';
 
 
 const theme = createTheme({
@@ -33,14 +35,14 @@ const steps = ['Payment Details', 'Payment Confirmation'];
 const PaymentDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { branchId, bookingRequests, totalPrice, type, availableSlot, bookingId, numberOfSlot } = location.state || {  };
+  const { branchId, bookingRequests, totalPrice, type, availableSlot, bookingId, numberOfSlot } = location.state || {};
   const sortedBookingRequests = bookingRequests ? [...bookingRequests].sort((a, b) => {
     const dateA = new Date(`${a.slotDate}T${a.timeSlot.slotStartTime}`);
     const dateB = new Date(`${b.slotDate}T${b.timeSlot.slotStartTime}`);
     return dateA - dateB;
   }) : [];
   const [activeStep, setActiveStep] = useState(0);
-  
+
   const [email, setEmail] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userId, setUserId] = useState('');
@@ -51,6 +53,8 @@ const PaymentDetail = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState('');
+  const [connection, setConnection] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -102,7 +106,84 @@ const PaymentDetail = () => {
     }
   }, []);
 
+  //đấm nhau với signalR
+  useEffect(() => {
+    const newConnection = new HubConnectionBuilder()
+      .withUrl("https://courtcaller.azurewebsites.net/timeslothub", {
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets
+      })
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Information)
+      .build();
+
+    newConnection.onreconnecting((error) => {
+      console.log(`Connection lost due to error "${error}". Reconnecting.`);
+      setIsConnected(false);
+    });
+
+    newConnection.onreconnected((connectionId) => {
+      console.log(`Connection reestablished. Connected with connectionId "${connectionId}".`);
+      setIsConnected(true);
+    });
+
+    newConnection.onclose((error) => {
+      console.log(`Connection closed due to error "${error}". Try refreshing this page to restart the connection.`);
+      setIsConnected(false);
+    });
+
+    console.log('Initializing connection...');
+    setConnection(newConnection);
+  }, []);
+
+  useEffect(() => {
+    if (connection) {
+      const startConnection = async () => {
+        try {
+          await connection.start();
+          console.log('SignalR Connected.');
+          setIsConnected(true);
+        } catch (error) {
+          console.log('Error starting connection:', error);
+          setIsConnected(false);
+          setTimeout(startConnection, 5000);
+        }
+      };
+      startConnection();
+    }
+  }, [connection]);
+
+
+  // gửi slot để backend signalr nó check
+  const sendUnavailableSlotCheck = async () => {
+    if (connection) {
+      const lastRequest = bookingRequests[bookingRequests.length - 1];
+      const slotCheckModel = {
+        branchId: branchId,
+        slotDate: lastRequest.slotDate,
+        timeSlot: {
+          slotDate: lastRequest.slotDate,
+          slotStartTime: lastRequest.timeSlot.slotStartTime,
+          slotEndTime: lastRequest.timeSlot.slotEndTime,
+        }
+      };
+      console.log('SlotCheckModel:', slotCheckModel);
+      try {
+        await connection.send('DisableSlot', slotCheckModel);
+        console.log('Data sent to server:', slotCheckModel);
+      } catch (e) {
+        console.log('Error sending data to server:', e);
+      }
+    } else {
+      alert('No connection to server yet.');
+    }
+  };
+
+
+
   const handleNext = async () => {
+    try{
+      await sendUnavailableSlotCheck();
 
     if (availableSlot !== 0 && bookingId) {
       const bookingForm = bookingRequests.map((request) => ({
@@ -137,14 +218,14 @@ const PaymentDetail = () => {
             slotEndTime: request.timeSlot.slotEndTime,
           },
         }));
-  
+
         const createBookingTypeFlex = await createBookingFlex(userData.userId, numberOfSlot, branchId);
 
         id = createBookingTypeFlex.bookingId;
         const booking = await reserveSlots(userData.userId, bookingForm);
         console.log('booking', booking)
         console.log('flexbookingform', bookingForm)
-        
+
         // If reservation is successful, continue to the next step or navigate
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
         const tokenResponse = await generatePaymentToken(booking.bookingId);
@@ -152,8 +233,8 @@ const PaymentDetail = () => {
         const paymentResponse = await processPayment(token);
         const paymentUrl = paymentResponse;
 
-      window.location.href = paymentUrl;
-      return; // if u not return the code will continue go to activeStep === 0 under
+        window.location.href = paymentUrl;
+        return; // if u not return the code will continue go to activeStep === 0 under
       } catch (error) {
         console.error('Error processing payment:', error);
         setErrorMessage('Error processing payment. Please try again.');
@@ -168,25 +249,26 @@ const PaymentDetail = () => {
         }
         setIsLoading(false);
       }
-      
+
     }
 
 
     if (activeStep === 0) {
       setIsLoading(true); // Show loading page
       try {
-        
+
 
         const bookingForm = bookingRequests.map((request) => {
-          
+
 
           return {
-            courtId: null, 
-            branchId: branchId, 
-            slotDate: request.slotDate, 
+            courtId: null,
+            branchId: branchId,
+            slotDate: request.slotDate,
             timeSlot: {
-              slotStartTime: request.timeSlot.slotStartTime, 
-              slotEndTime: request.timeSlot.slotEndTime, },
+              slotStartTime: request.timeSlot.slotStartTime,
+              slotEndTime: request.timeSlot.slotEndTime,
+            },
           };
         });
 
@@ -209,15 +291,17 @@ const PaymentDetail = () => {
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
+  } catch (error) {
+      console.error('Error sending time slot to server:', error);
+      setErrorMessage('Error sending time slot to server. Please try again.');
+    }
   };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-
-
-  const getStepContent = (step) => {
+const getStepContent = (step) => {
     switch (step) {
       case 0:
         return (
@@ -237,64 +321,64 @@ const PaymentDetail = () => {
 
             {/* box này là thông tin payment method */}
             <Box sx={{ marginTop: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-      <Grid container spacing={2} >
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{
-              backgroundColor: "#E0E0E0",
-              padding: '20px',
-              borderRadius: 2,
-              maxHeight: '400px',
-              overflowY: 'auto',
-            }}
-          >
-            <Typography variant="h5" gutterBottom color="black" display="flex" alignItems="center">
-              <PaymentIcon sx={{ marginRight: '8px' }} /> Payment Method
-            </Typography>
-            <FormControl component="fieldset">
-              <FormLabel component="legend" sx={{ color: 'black' }}>Select Payment Method</FormLabel>
-              <RadioGroup aria-label="payment method" name="paymentMethod">
-                <FormControlLabel value="creditCard" control={<Radio />} label="Credit Card" sx={{ color: 'black' }} />
-              </RadioGroup>
-            </FormControl>
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box sx={{ backgroundColor: "#E0E0E0", padding: '20px', borderRadius: 2 }}>
-            <Typography variant="h5" gutterBottom color="black">
-              Bill
-            </Typography>
-            <Typography variant="h6" color="black">
-              <strong>Branch ID:</strong> {branchId}
-            </Typography>
-            <Typography variant="h6" color="black" sx={{ marginTop: '20px' }}>
-              <strong>Time Slot:</strong>
-            </Typography>
-            {bookingRequests && sortedBookingRequests.map((request, index) => (
-              <Box key={index} sx={{ marginBottom: '15px', padding: '10px', backgroundColor: '#FFFFFF', borderRadius: 2, boxShadow: 1 }}>
-                <Typography variant="body1" color="black">
-                  <strong>Date:</strong> {request.slotDate}
-                </Typography>
-                <Typography variant="body1" color="black">
-                  <strong>Start Time:</strong> {request.timeSlot.slotStartTime}
-                </Typography>
-                <Typography variant="body1" color="black">
-                  <strong>End Time:</strong> {request.timeSlot.slotEndTime}
-                </Typography>
-                <Typography variant="body1" color="black">
-                  <strong>Price:</strong> {request.price} USD
-                </Typography>
-              </Box>
-            ))}
-            <Divider sx={{ marginY: '10px' }} />
-            <Typography variant="h6" color="black">
-              <strong>Total Price:</strong> {totalPrice} USD
-            </Typography>
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
-            
+              <Grid container spacing={2} >
+                <Grid item xs={12} md={6}>
+                  <Box
+                    sx={{
+                      backgroundColor: "#E0E0E0",
+                      padding: '20px',
+                      borderRadius: 2,
+                      maxHeight: '400px',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    <Typography variant="h5" gutterBottom color="black" display="flex" alignItems="center">
+                      <PaymentIcon sx={{ marginRight: '8px' }} /> Payment Method
+                    </Typography>
+                    <FormControl component="fieldset">
+                      <FormLabel component="legend" sx={{ color: 'black' }}>Select Payment Method</FormLabel>
+                      <RadioGroup aria-label="payment method" name="paymentMethod">
+                        <FormControlLabel value="creditCard" control={<Radio />} label="Credit Card" sx={{ color: 'black' }} />
+                      </RadioGroup>
+                    </FormControl>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ backgroundColor: "#E0E0E0", padding: '20px', borderRadius: 2 }}>
+                    <Typography variant="h5" gutterBottom color="black">
+                      Bill
+                    </Typography>
+                    <Typography variant="h6" color="black">
+                      <strong>Branch ID:</strong> {branchId}
+                    </Typography>
+                    <Typography variant="h6" color="black" sx={{ marginTop: '20px' }}>
+                      <strong>Time Slot:</strong>
+                    </Typography>
+                    {bookingRequests && sortedBookingRequests.map((request, index) => (
+                      <Box key={index} sx={{ marginBottom: '15px', padding: '10px', backgroundColor: '#FFFFFF', borderRadius: 2, boxShadow: 1 }}>
+                        <Typography variant="body1" color="black">
+                          <strong>Date:</strong> {request.slotDate}
+                        </Typography>
+                        <Typography variant="body1" color="black">
+                          <strong>Start Time:</strong> {request.timeSlot.slotStartTime}
+                        </Typography>
+                        <Typography variant="body1" color="black">
+                          <strong>End Time:</strong> {request.timeSlot.slotEndTime}
+                        </Typography>
+                        <Typography variant="body1" color="black">
+                          <strong>Price:</strong> {request.price} USD
+                        </Typography>
+                      </Box>
+                    ))}
+                    <Divider sx={{ marginY: '10px' }} />
+                    <Typography variant="h6" color="black">
+                      <strong>Total Price:</strong> {totalPrice} USD
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+
           </>
         );
       case 1:
