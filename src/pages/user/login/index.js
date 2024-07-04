@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./loginTest.scss";
 import { FaGoogle, FaFacebookF } from "react-icons/fa";
 import { loginApi } from "api/usersApi";
@@ -298,7 +298,7 @@ const Login = () => {
               {passwordValidation.message && (
                 <p className="errorVal">{passwordValidation.message}</p>
               )}
-              <a href="#">Forgot Password</a>
+              <a><Link to="/forget-password">Forgot Password</Link></a>
               <button type="submit" className="signInBtn" disabled={loading}>
                 {loading ? <ClipLoader size={15} color="#fff" /> : "Sign In"}
               </button>
