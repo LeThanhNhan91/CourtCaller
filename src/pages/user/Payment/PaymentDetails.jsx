@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button, TextField, Stepper, Step, StepLabel, Typography, Divider, Card, CardContent, CardHeader, Grid } from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import PaymentIcon from '@mui/icons-material/Payment';
 import { fetchUserDetailByEmail, fetchUserDetail } from 'api/userApi';
 import { generatePaymentToken, processPayment } from 'api/paymentApi';
 import LoadingPage from './LoadingPage';
 import { reserveSlots, createBookingFlex, deleteBookingInFlex } from 'api/bookingApi';
+import { addTimeSlotIfExistBooking } from 'api/timeSlotApi';
 import { useAuth } from 'AuthContext';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
@@ -31,6 +32,7 @@ const steps = ['Payment Details', 'Payment Confirmation'];
 
 const PaymentDetail = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { branchId, bookingRequests, totalPrice, type, availableSlot, bookingId, numberOfSlot } = location.state || {  };
   const sortedBookingRequests = bookingRequests ? [...bookingRequests].sort((a, b) => {
     const dateA = new Date(`${a.slotDate}T${a.timeSlot.slotStartTime}`);
@@ -112,6 +114,14 @@ const PaymentDetail = () => {
           slotEndTime: request.timeSlot.slotEndTime,
         },
       }));
+      const booking = await addTimeSlotIfExistBooking(bookingForm, bookingId);
+      navigate("/confirm", {
+        state: {
+          bookingId: bookingId,
+          bookingForm: bookingForm
+        }
+      });
+      return;
     }
 
     if (type === 'flexible' && availableSlot === 0) {
@@ -132,6 +142,8 @@ const PaymentDetail = () => {
 
         id = createBookingTypeFlex.bookingId;
         const booking = await reserveSlots(userData.userId, bookingForm);
+        console.log('booking', booking)
+        console.log('flexbookingform', bookingForm)
         
         // If reservation is successful, continue to the next step or navigate
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -141,6 +153,7 @@ const PaymentDetail = () => {
         const paymentUrl = paymentResponse;
 
       window.location.href = paymentUrl;
+      return; // if u not return the code will continue go to activeStep === 0 under
       } catch (error) {
         console.error('Error processing payment:', error);
         setErrorMessage('Error processing payment. Please try again.');
@@ -148,6 +161,7 @@ const PaymentDetail = () => {
           try {
             await deleteBookingInFlex(id);
             console.log('Booking rolled back successfully');
+            return;
           } catch (deleteError) {
             console.error('Error rolling back booking:', deleteError);
           }

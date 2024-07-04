@@ -169,6 +169,7 @@ const FlexibleBooking = () => {
         }
       };
     });
+    console.log('bookingRequests',bookingRequests)
 
     navigate("/payment-detail", {
       state: {
