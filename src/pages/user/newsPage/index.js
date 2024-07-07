@@ -1,72 +1,47 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import newImg from "assets/users/images/featured/news.jpg";
 import "./style.scss"
+import News from "./news";
 
 const NewsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [totalNews, setTotalNews] = useState(0);
 
-  const news = [
-    {
-      heading: "News 1",
-      information: "brief information 1",
-      img: newImg,
-    },
-    {
-      heading: "News 2",
-      information: "brief information 2",
-      img: newImg,
-    },
-    {
-      heading: "News 3",
-      information: "brief information 3",
-      img: newImg,
-    },
-    {
-      heading: "News 4",
-      information: "brief information 4",
-      img: newImg,
-    },
-    {
-      heading: "News 5",
-      information: "brief information 5",
-      img: newImg,
-    },
-    {
-      heading: "News 6",
-      information: "brief information 6",
-      img: newImg,
-    },
-    {
-      heading: "News 7",
-      information: "brief information 7",
-      img: newImg,
-    },
-    {
-      heading: "News 8",
-      information: "brief information 8",
-      img: newImg,
-    },
-    {
-      heading: "News 9",
-      information: "brief information 9",
-      img: newImg,
-    }
-  ];
+  const itemsPerPage = 3;
 
-  const itemsPerPage = 6;
-  const totalPages = Math.ceil(news.length / itemsPerPage);
+  useEffect(() => {
+    const fetchNews = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          `https://localhost:7104/api/News?pageNumber=${currentPage}&pageSize=${itemsPerPage}`
+        );
+        const data = await response.json();
+        console.log("data", data);
+        setNews(data.data);
+        setTotalNews(data.total);
+      } catch (err) {
+        setError("Failed to fetch data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, [currentPage]);
+
+  const totalPages = Math.ceil(totalNews / itemsPerPage);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    window.scrollTo(0, 0); // Scroll to the top of the page
+    window.scrollTo(0, 0);
   };
 
-  const displayNews = news.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
   return (
-    <>
     <div style={{backgroundColor: "#EAECEE"}}>
       <div className="container">
         <div className="hero_banner_container">
@@ -85,13 +60,12 @@ const NewsPage = () => {
 
       <div className="view_news">
         <h1>News Page</h1>
+        {loading && <p>Loading...</p>}
+        {error && <p>{error}</p>}
         <div className="row news_container">
-          {displayNews.map((news, index) => (
-            <div className="news_details col-lg-3 col-md-4 col-sm-6" key={index}>
-              <img src={news.img} alt="News Image" />
-              <h1>{news.heading}</h1>
-              <p>{news.information}</p>
-              <button>View</button>
+          {news.map((newsItem, index) => (
+            <div className="news_details" key={index}>
+              <News news={newsItem} />
             </div>
           ))}
         </div>
@@ -108,8 +82,7 @@ const NewsPage = () => {
           ))}
         </div>
       </div>
-      </div>
-    </>
+    </div>
   );
 };
 
