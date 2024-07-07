@@ -10,7 +10,7 @@ const NewsPage = () => {
   const [error, setError] = useState(null);
   const [totalNews, setTotalNews] = useState(0);
 
-  const itemsPerPage = 3;
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -18,7 +18,7 @@ const NewsPage = () => {
       setError(null);
       try {
         const response = await fetch(
-          `https://localhost:7104/api/News?pageNumber=${currentPage}&pageSize=${itemsPerPage}`
+          `https://courtcaller.azurewebsites.net/api/News/NewsPage?pageNumber=${currentPage}&pageSize=${itemsPerPage}&IsHomepageSlideshow=false&status=Active`
         );
         const data = await response.json();
         console.log("data", data);
