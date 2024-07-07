@@ -13,6 +13,8 @@ import "./style.scss";
 import { fetchPrice } from "api/priceApi";
 //thêm thư viện scroll cuộn cho pro
 import { animateScroll as scroll } from 'react-scroll';
+import { Slide } from "react-toastify";
+import SlideShowHomePage from "./SlideShow/SlideShow";
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
 
@@ -130,7 +132,7 @@ const HomePage = () => {
     <>
       <div style={{ backgroundColor: "#EAECEE" }}>
         <div className="container">
-          <div className="hero_banner_container">
+          {/* <div className="hero_banner_container">
             <div className="hero_banner">
               <div className="hero_text">
                 <span>WELCOME TO</span>
@@ -142,8 +144,12 @@ const HomePage = () => {
                 </h2>
               </div>
             </div>
+          </div> */}
+          <div className="slideshow-container">
+            <SlideShowHomePage />
           </div>
         </div>
+
 
         {/* Search Begin */}
         <div className="select_bar container">
@@ -266,10 +272,10 @@ const HomePage = () => {
           overlayClassName="modal-overlay"
         >
           <h2>Select the Type of Booking</h2>
-          <div style={{display: "flex", justifyContent: "space-around"}}>
-          <button onClick={handleFixBooking}>Fixed Schedule</button>
-          <button onClick={handleScheduleByDay}>Schedule by Day</button>
-          <button onClick={handleFlexBooking}>Flex Schedule</button>
+          <div style={{ display: "flex", justifyContent: "space-around" }}>
+            <button onClick={handleFixBooking}>Fixed Schedule</button>
+            <button onClick={handleScheduleByDay}>Schedule by Day</button>
+            <button onClick={handleFlexBooking}>Flex Schedule</button>
           </div>
         </Modal>
       </div>

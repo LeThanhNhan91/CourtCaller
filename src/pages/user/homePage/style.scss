@@ -3,7 +3,16 @@
 $bannerImg: "/assets/users/images/hero/banner.jpg";
 
 
-
+/* In your News.css or a separate CSS file */
+.slideshow-container {
+    padding-top: 10px;
+    padding-bottom: 30px;
+    width: 100%; /* Adjust based on your layout needs */
+    height: 500px; /* Adjust the height as needed */
+    overflow: hidden; /* Prevents overflow if images are too large */
+  }
+  
+  
 
 .hero_banner_container {
     .hero_banner {
