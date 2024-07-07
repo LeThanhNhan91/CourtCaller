@@ -56,6 +56,16 @@ export const processPayment = async (token) => {
   }
 };
 
+export const processBalancePayment = async (token) => {
+  try {
+    const response = await axios.post(`${url}/Payments/ProcessPaymentByBalance?token=${token}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error processing payment:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+
 export const fetchPaymentById = async (paymentId) => {
   try {
     const response = await axios.get(`${url}/Payments/${paymentId}`);

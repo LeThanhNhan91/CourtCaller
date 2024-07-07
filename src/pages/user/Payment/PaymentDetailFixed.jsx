@@ -8,6 +8,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import { generatePaymentToken, processPayment } from 'api/paymentApi';
 import { createFixedBooking } from 'api/bookingApi';
 import LoadingPage from './LoadingPage';
+import { processBalancePayment } from 'api/paymentApi';
 
 const theme = createTheme({
   components: {
@@ -97,7 +98,7 @@ const PaymentDetailFixed = () => {
     }
   }, []);
   
-  const handleNext = async () => {
+  const handleNext = async (paymentMethod) => {
     if (activeStep === 0) {
       setIsLoading(true);
       try {
@@ -116,15 +117,12 @@ const PaymentDetailFixed = () => {
         console.log('res', response)
 
         const bookingId = response.bookingId;
-        console.log('Booking ID:', bookingId);
         const tokenResponse = await generatePaymentToken(bookingId);
-        console.log('Token Response:', tokenResponse);
         const token = tokenResponse.token;
-        console.log('Token:', token);
-        const paymentResponse = await processPayment(token);
-        console.log('Payment Response:', paymentResponse);
+        const paymentResponse = paymentMethod === "Balance"
+            ? await processBalancePayment(token)
+            : await processPayment(token);
         const paymentUrl = paymentResponse;
-        console.log('Payment URL:', paymentUrl);
         window.location.href = paymentUrl;
 
       } catch (error) {
@@ -167,8 +165,27 @@ const PaymentDetailFixed = () => {
                     </Typography>
                     <FormControl component="fieldset">
                       <FormLabel component="legend" sx={{ color: 'black' }}>Choose Payment Method</FormLabel>
-                      <RadioGroup aria-label="payment method" name="paymentMethod">
-                        <FormControlLabel value="creditCard" control={<Radio />} label="Credit Card" sx={{ color: 'black' }} />
+                      <RadioGroup
+                        aria-label="payment method"
+                        name="paymentMethod"
+                      >
+                        <FormControlLabel
+                          value="creditCard"
+                          control={<Radio />}
+                          label="Credit Card"
+                          sx={{ color: "black" }}
+                        />
+                      </RadioGroup>
+                      <RadioGroup
+                        aria-label="payment method"
+                        name="paymentMethod"
+                      >
+                        <FormControlLabel
+                          value="Balance"
+                          control={<Radio />}
+                          label="Balance"
+                          sx={{ color: "black" }}
+                        />
                       </RadioGroup>
                     </FormControl>
                   </Box>
@@ -236,12 +253,21 @@ const PaymentDetailFixed = () => {
             Back
           </Button>
           <Button
+          style={{marginLeft: "1125px"}}
             variant="contained"
             color="primary"
-            onClick={handleNext}
-            disabled={isLoading}
+            onClick={() => handleNext("Balance")}
+            disabled={isLoading} // Disable button while loading
           >
-            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+            {activeStep === steps.length - 1 ? "Finish" : "By Balance"}
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleNext("CreditCard")}
+            disabled={isLoading} // Disable button while loading
+          >
+            {activeStep === steps.length - 1 ? "Finish" : "VNPay"}
           </Button>
         </Box>
       </Box>
