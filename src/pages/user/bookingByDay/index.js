@@ -39,6 +39,7 @@ import {
   LogLevel,
 } from "@microsoft/signalr";
 import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
+import RequestLogin from "../requestUserLogin";
 
 dayjs.extend(isSameOrBefore);
 
@@ -144,6 +145,7 @@ const BookByDay = () => {
   //dùng cái này để thay thế startOfWeek vì startOfWeek chỉ set về ngày hiện tại
   const [newWeekStart, setNewWeekStart] = useState(dayjs().startOf("week"));
   const selectBranchRef = useRef(selectedBranch);
+  const [showLogin, setShowLogin] = useState(false); // State to manage visibility of RequestLogin component
   useEffect(() => {
     selectBranchRef.current = selectedBranch;
   }, [selectedBranch]);
@@ -300,6 +302,12 @@ const BookByDay = () => {
   };
 
   const handleSubmitReview = async () => {
+    const token = localStorage.getItem('token');
+    if(!token){
+      setShowLogin(true);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
@@ -553,6 +561,12 @@ const BookByDay = () => {
   // xử lý khi click vào nút continue qua trang tiếp theo
   //(Nhân lấy về cần chú ý là chỉ lấy các slot đã click qua trang mới chứ chưa post api booking, và chưa lấy userid)
   const handleContinue = async () => {
+    const token = localStorage.getItem('token');
+    if(!token) {
+      setShowLogin(true);
+      return;
+    }
+
     if (!selectedBranch) {
       alert("Please select a branch first");
       return;
@@ -1165,6 +1179,26 @@ const BookByDay = () => {
             )}
           </div>
         </div>
+
+        {/* Login request */}
+        {showLogin && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <RequestLogin />
+        </Box>
+      )}
       </div>
     </>
   );

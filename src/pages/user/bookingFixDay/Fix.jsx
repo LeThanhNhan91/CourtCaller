@@ -1,10 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import { Box, Typography, Button, TextField, FormControl, FormControlLabel, Checkbox, Grid, Paper, ThemeProvider, createTheme } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  FormControl,
+  FormControlLabel,
+  Checkbox,
+  Grid,
+  Paper,
+  ThemeProvider,
+  createTheme,
+} from "@mui/material";
 import { MdOutlineLocalDrink } from "react-icons/md";
 import pic1 from "assets/users/images/byday/pic1.webp";
 import pic2 from "assets/users/images/byday/pic2.webp";
@@ -14,26 +26,27 @@ import { FaCar, FaStar } from "react-icons/fa";
 import { RiDrinks2Fill } from "react-icons/ri";
 import { IoLocationOutline } from "react-icons/io5";
 import { CiEdit } from "react-icons/ci";
-import CalendarView from './CalendarView';
-import { fetchPriceByBranchIDType } from 'api/priceApi';
+import CalendarView from "./CalendarView";
+import { fetchPriceByBranchIDType } from "api/priceApi";
 import DisplayMap from "map/DisplayMap";
+import RequestLogin from "../requestUserLogin";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#009B65',
+      main: "#009B65",
     },
     secondary: {
-      main: '#f50057',
+      main: "#f50057",
     },
   },
   typography: {
     h4: {
-      fontFamily: 'Roboto, sans-serif',
+      fontFamily: "Roboto, sans-serif",
       fontWeight: 500,
     },
     body1: {
-      fontFamily: 'Roboto, sans-serif',
+      fontFamily: "Roboto, sans-serif",
     },
   },
 });
@@ -46,7 +59,10 @@ const getOccurrencesOfDayInMonth = (year, month, day) => {
   let count = 0;
   const totalDays = calculateDaysInMonth(year, month);
   for (let date = 1; date <= totalDays; date++) {
-    const dayOfWeek = new Date(year, month - 1, date).toLocaleDateString('en-US', { weekday: 'long' });
+    const dayOfWeek = new Date(year, month - 1, date).toLocaleDateString(
+      "en-US",
+      { weekday: "long" }
+    );
     if (dayOfWeek === day) {
       count++;
     }
@@ -59,13 +75,17 @@ const getTotalDaysForWeekdays = (daysOfWeek, numberOfMonths, startDate) => {
   const startMonth = startDate.getMonth() + 1;
   const startYear = startDate.getFullYear();
 
-  daysOfWeek.forEach(day => totalDays[day] = 0);
+  daysOfWeek.forEach((day) => (totalDays[day] = 0));
 
   for (let i = 0; i < numberOfMonths; i++) {
-    const currentMonth = (startMonth + i - 1) % 12 + 1;
+    const currentMonth = ((startMonth + i - 1) % 12) + 1;
     const currentYear = startYear + Math.floor((startMonth + i - 1) / 12);
-    daysOfWeek.forEach(day => {
-      totalDays[day] += getOccurrencesOfDayInMonth(currentYear, currentMonth, day);
+    daysOfWeek.forEach((day) => {
+      totalDays[day] += getOccurrencesOfDayInMonth(
+        currentYear,
+        currentMonth,
+        day
+      );
     });
   }
 
@@ -73,15 +93,15 @@ const getTotalDaysForWeekdays = (daysOfWeek, numberOfMonths, startDate) => {
 };
 
 const FixedBooking = () => {
-  const [numberOfMonths, setNumberOfMonths] = useState('');
+  const [numberOfMonths, setNumberOfMonths] = useState("");
   const [daysOfWeek, setDaysOfWeek] = useState([]);
   const [startDate, setStartDate] = useState(new Date());
-  const [userId, setUserId] = useState('');
-  const [branchId, setBranchId] = useState('');
-  const [slotStartTime, setSlotStartTime] = useState('');
-  const [slotEndTime, setSlotEndTime] = useState('');
+  const [userId, setUserId] = useState("");
+  const [branchId, setBranchId] = useState("");
+  const [slotStartTime, setSlotStartTime] = useState("");
+  const [slotEndTime, setSlotEndTime] = useState("");
   const [fixedPrice, setFixedPrice] = useState(0);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
   const [highlightedStars, setHighlightedStars] = useState(0);
@@ -93,11 +113,11 @@ const FixedBooking = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { branch } = location.state;
-
+  const [showLogin, setShowLogin] = useState(false); // State to manage visibility of RequestLogin component
   const [selectedBranch, setSelectedBranch] = useState(branch.branchId);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       const decodedToken = jwtDecode(token);
       setUserId(decodedToken.Id);
@@ -150,53 +170,69 @@ const FixedBooking = () => {
 
   const handleSubmitReview = async () => {
     const token = localStorage.getItem("token");
-    const decodedToken = jwtDecode(token);
     if (!token) {
-      throw new Error("No token found");
+      setShowLogin(true);
+      return;
     }
 
-    const reviewData = {
-      reviewText,
-      rating: highlightedStars,
-      userId: userData.userId,
-      branchId: branch.branchId, // Đảm bảo rằng branchId đang được cung cấp ở đây nếu cần
-    };
-
     try {
-      await axios.post(
-        "https://courtcaller.azurewebsites.net/api/Reviews",
-        reviewData
-      );
-      setReviewFormVisible(false);
-      // Xử lý sau khi gửi đánh giá thành công (ví dụ: thông báo cho người dùng, cập nhật danh sách đánh giá, v.v.)
+      const token = localStorage.getItem("token");
+      const decodedToken = jwtDecode(token);
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const reviewData = {
+        reviewText,
+        rating: highlightedStars,
+        userId: userData.userId,
+        branchId: branch.branchId, // Đảm bảo rằng branchId đang được cung cấp ở đây nếu cần
+      };
+
+      try {
+        await axios.post(
+          "https://courtcaller.azurewebsites.net/api/Reviews",
+          reviewData
+        );
+        setReviewFormVisible(false);
+        // Xử lý sau khi gửi đánh giá thành công (ví dụ: thông báo cho người dùng, cập nhật danh sách đánh giá, v.v.)
+      } catch (error) {
+        console.error("Error submitting review", error);
+        // Xử lý lỗi khi gửi đánh giá
+      }
     } catch (error) {
-      console.error("Error submitting review", error);
-      // Xử lý lỗi khi gửi đánh giá
+      navigate("/login");
     }
   };
 
   const handleViewReviews = async () => {
     try {
-      const response = await axios.get(`https://courtcaller.azurewebsites.net/api/Reviews?branchId=${branch.branchId}`, {
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.get(
+        `https://courtcaller.azurewebsites.net/api/Reviews?branchId=${branch.branchId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       const reviewsWithDetails = await Promise.all(
         response.data.data.map(async (review) => {
-          console.log('review',review.id)
-          let userFullName = 'Unknown User';
+          console.log("review", review.id);
+          let userFullName = "Unknown User";
           if (review.id) {
             try {
-              const userDetailsResponse = await axios.get(`https://courtcaller.azurewebsites.net/api/UserDetails/${review.id}`, {
-                headers: {
-                  'Content-Type': 'application/json',
+              const userDetailsResponse = await axios.get(
+                `https://courtcaller.azurewebsites.net/api/UserDetails/${review.id}`,
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
                 }
-              });
+              );
               userFullName = userDetailsResponse.data.fullName;
             } catch (userDetailsError) {
-              console.error('Error fetching user details:', userDetailsError);
+              console.error("Error fetching user details:", userDetailsError);
             }
           }
           return { ...review, userFullName };
@@ -206,12 +242,12 @@ const FixedBooking = () => {
       setReviews(reviewsWithDetails);
       setReviewsVisible(true);
     } catch (error) {
-      console.error('Error fetching reviews:', error);
+      console.error("Error fetching reviews:", error);
     }
   };
 
-  console.log('user', user)
-  console.log('userData', userData)
+  console.log("user", user);
+  console.log("userData", userData);
 
   const handleEditReview = (review) => {
     setEditingReview(review);
@@ -221,7 +257,7 @@ const FixedBooking = () => {
 
   const handleUpdateReview = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("No token found");
       }
@@ -233,15 +269,19 @@ const FixedBooking = () => {
         branchId: editingReview.branchId,
       };
 
-      console.log('editingReview', editingReview)
+      console.log("editingReview", editingReview);
 
-      const response = await axios.put(`https://courtcaller.azurewebsites.net/api/Reviews/${editingReview.reviewId}`, updatedReviewData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await axios.put(
+        `https://courtcaller.azurewebsites.net/api/Reviews/${editingReview.reviewId}`,
+        updatedReviewData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      const updatedReviews = reviews.map(review =>
+      const updatedReviews = reviews.map((review) =>
         review.id === editingReview.id ? response.data : review
       );
       setReviews(updatedReviews);
@@ -249,19 +289,22 @@ const FixedBooking = () => {
       setReviewText("");
       setHighlightedStars(0);
     } catch (error) {
-      console.error('Error updating review:', error);
+      console.error("Error updating review:", error);
     }
   };
-
 
   useEffect(() => {
     const fetchBranchPrices = async () => {
       if (selectedBranch) {
         try {
-          const price = await fetchPriceByBranchIDType(selectedBranch, 'Fix', null);
+          const price = await fetchPriceByBranchIDType(
+            selectedBranch,
+            "Fix",
+            null
+          );
           setFixedPrice(price);
         } catch (error) {
-          console.error('Error fetching prices:', error);
+          console.error("Error fetching prices:", error);
         }
       }
     };
@@ -272,21 +315,34 @@ const FixedBooking = () => {
   const handleDayOfWeekChange = (event) => {
     const { value, checked } = event.target;
     setDaysOfWeek((prevDaysOfWeek) =>
-      checked ? [...prevDaysOfWeek, value] : prevDaysOfWeek.filter((day) => day !== value)
+      checked
+        ? [...prevDaysOfWeek, value]
+        : prevDaysOfWeek.filter((day) => day !== value)
     );
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const formattedStartDate = startDate.toISOString().split('T')[0];
 
-    const totalDays = getTotalDaysForWeekdays(daysOfWeek, numberOfMonths, startDate);
+    const token = localStorage.getItem('token');
+    if(!token){
+      setShowLogin(true);
+      return;
+    }
+
+    const formattedStartDate = startDate.toISOString().split("T")[0];
+
+    const totalDays = getTotalDaysForWeekdays(
+      daysOfWeek,
+      numberOfMonths,
+      startDate
+    );
 
     const totalPrice = daysOfWeek.reduce((total, day) => {
-      return total + (totalDays[day] * fixedPrice);
+      return total + totalDays[day] * fixedPrice;
     }, 0);
 
-    const bookingRequests = daysOfWeek.map(day => ({
+    const bookingRequests = daysOfWeek.map((day) => ({
       slotDate: formattedStartDate,
       timeSlot: {
         slotStartTime,
@@ -300,19 +356,19 @@ const FixedBooking = () => {
       bookingRequests,
       totalPrice,
       userId: userData.userId, // Truyền cả userId
-      email: user.email,  // và email
+      email: user.email, // và email
       numberOfMonths,
       daysOfWeek,
       startDate: formattedStartDate,
-      type: 'fix',
+      type: "fix",
       slotStartTime,
       slotEndTime,
     };
 
-    console.log('state:', state);
+    console.log("state:", state);
 
     navigate("/fixed-payment", {
-      state
+      state,
     });
   };
 
@@ -320,8 +376,8 @@ const FixedBooking = () => {
 
   return (
     <>
-     <div style={{ backgroundColor: "#EAECEE" }}>
-    <div className="header-container">
+      <div style={{ backgroundColor: "#EAECEE" }}>
+        <div className="header-container">
           <div className="brief-info">
             <h1>{branch.branchName}</h1>
             <p>
@@ -335,10 +391,9 @@ const FixedBooking = () => {
             <div className="branch-img">
               <div className="images">
                 {pictures.map((picture, index) => (
-                   <div key={index} className="inner-image">
-                   <img src={picture} alt="img-fluid" />
-                 </div>
-
+                  <div key={index} className="inner-image">
+                    <img src={picture} alt="img-fluid" />
+                  </div>
                 ))}
                 <div className="inner-image">
                   <img src={pic1} alt="img-fluid" />
@@ -349,7 +404,6 @@ const FixedBooking = () => {
                 <div className="inner-image">
                   <img src={pic3} alt="img-fluid" />
                 </div>
-                
               </div>
             </div>
 
@@ -404,100 +458,142 @@ const FixedBooking = () => {
           </div>
         </div>
 
-    <ThemeProvider theme={theme}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 4 }}>
-        <Box sx={{ flex: 2, marginRight: 4 }}>
-          <CalendarView selectedBranch={selectedBranch} setSelectedBranch={selectedBranch} />
-        </Box>
-        <Box sx={{ flex: 1, maxWidth: '400px', height: '100%' }}>
-          <form onSubmit={handleSubmit}>
-            <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: '100%' }}>
-              <Typography variant="h4" mb={2} sx={{ textAlign: 'center', color: 'primary.main', fontWeight: 'bold' }}>Fixed Booking</Typography>
-              <Grid container spacing={2}>
-                  <>
-                    <Grid item xs={12}>
-                      <FormControl fullWidth>
-                        <TextField
-                          label="Number of Months"
-                          type="number"
-                          value={numberOfMonths}
-                          onChange={(e) => setNumberOfMonths(e.target.value)}
+        <ThemeProvider theme={theme}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              p: 4,
+            }}
+          >
+            <Box sx={{ flex: 2, marginRight: 4 }}>
+              <CalendarView
+                selectedBranch={selectedBranch}
+                setSelectedBranch={selectedBranch}
+              />
+            </Box>
+            <Box sx={{ flex: 1, maxWidth: "400px", height: "100%" }}>
+              <form onSubmit={handleSubmit}>
+                <Paper
+                  elevation={3}
+                  sx={{ p: 3, borderRadius: 2, height: "100%" }}
+                >
+                  <Typography
+                    variant="h4"
+                    mb={2}
+                    sx={{
+                      textAlign: "center",
+                      color: "primary.main",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Fixed Booking
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <>
+                      <Grid item xs={12}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Number of Months"
+                            type="number"
+                            value={numberOfMonths}
+                            onChange={(e) => setNumberOfMonths(e.target.value)}
+                            required
+                            InputLabelProps={{ style: { color: "black" } }}
+                            InputProps={{ style: { color: "black" } }}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography sx={{ color: "black" }}>
+                          Day of Week:
+                        </Typography>
+                        {[
+                          "Monday",
+                          "Tuesday",
+                          "Wednesday",
+                          "Thursday",
+                          "Friday",
+                          "Saturday",
+                          "Sunday",
+                        ].map((day) => (
+                          <FormControlLabel
+                            key={day}
+                            control={
+                              <Checkbox
+                                value={day}
+                                onChange={handleDayOfWeekChange}
+                                checked={daysOfWeek.includes(day)}
+                                sx={{ color: "primary.main" }}
+                              />
+                            }
+                            label={day}
+                            sx={{ color: "black" }}
+                          />
+                        ))}
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography sx={{ color: "black" }}>
+                          Start Date:
+                        </Typography>
+                        <DatePicker
+                          selected={startDate}
+                          onChange={(date) => setStartDate(date)}
+                          dateFormat="yyyy-MM-dd"
                           required
-                          InputLabelProps={{ style: { color: 'black' } }}
-                          InputProps={{ style: { color: 'black' } }}
+                          popperPlacement="right-start"
+                          minDate={new Date()}
+                          customInput={<TextField sx={{ width: "100%" }} />}
                         />
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography sx={{ color: 'black' }}>Day of Week:</Typography>
-                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
-                        <FormControlLabel
-                          key={day}
-                          control={
-                            <Checkbox
-                              value={day}
-                              onChange={handleDayOfWeekChange}
-                              checked={daysOfWeek.includes(day)}
-                              sx={{ color: 'primary.main' }}
-                            />
-                          }
-                          label={day}
-                          sx={{ color: 'black' }}
-                        />
-                      ))}
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography sx={{ color: 'black' }}>Start Date:</Typography>
-                      <DatePicker
-                        selected={startDate}
-                        onChange={(date) => setStartDate(date)}
-                        dateFormat="yyyy-MM-dd"
-                        required
-                        popperPlacement="right-start"
-                        minDate={new Date()}
-                        customInput={<TextField sx={{ width: '100%' }} />}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormControl fullWidth>
-                        <TextField
-                          label="Slot Start Time"
-                          type="text"
-                          value={slotStartTime}
-                          onChange={(e) => setSlotStartTime(e.target.value)}
-                          required
-                          InputLabelProps={{ style: { color: 'black' } }}
-                          InputProps={{ style: { color: 'black' } }}
-                        />
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormControl fullWidth>
-                        <TextField
-                          label="Slot End Time"
-                          type="text"
-                          value={slotEndTime}
-                          onChange={(e) => setSlotEndTime(e.target.value)}
-                          required
-                          InputLabelProps={{ style: { color: 'black' } }}
-                          InputProps={{ style: { color: 'black' } }}
-                        />
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Button variant="contained" color="primary" type="submit" fullWidth>Continue</Button>
-                    </Grid>
-                  </>
-                {/* )} */}
-              </Grid>
-            </Paper>
-          </form>
-        </Box>
-      </Box>
-    </ThemeProvider>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Slot Start Time"
+                            type="text"
+                            value={slotStartTime}
+                            onChange={(e) => setSlotStartTime(e.target.value)}
+                            required
+                            InputLabelProps={{ style: { color: "black" } }}
+                            InputProps={{ style: { color: "black" } }}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <FormControl fullWidth>
+                          <TextField
+                            label="Slot End Time"
+                            type="text"
+                            value={slotEndTime}
+                            onChange={(e) => setSlotEndTime(e.target.value)}
+                            required
+                            InputLabelProps={{ style: { color: "black" } }}
+                            InputProps={{ style: { color: "black" } }}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          type="submit"
+                          fullWidth
+                        >
+                          Continue
+                        </Button>
+                      </Grid>
+                    </>
+                    {/* )} */}
+                  </Grid>
+                </Paper>
+              </form>
+            </Box>
+          </Box>
+        </ThemeProvider>
 
-    {/* Map */}
-    <div className="map-section">
+        {/* Map */}
+        <div className="map-section">
           <div className="map-form">
             <div className="map-header">
               <h2 className="map-title">Branch Location</h2>
@@ -518,153 +614,204 @@ const FixedBooking = () => {
         </div>
         {/* Rating form */}
         <div className="rating-form">
-      <div className="rating-container">
-        <h2>Rating this Branch</h2>
-        <div className="average-rating">
-          <div className="average-score">
-            <span className="score">5.0</span>
-            <span className="star">★</span>
-          </div>
-          <div>
-            <button
-              className="rating-button"
-              style={{ marginRight: 15 }}
-              onClick={() => setReviewFormVisible(true)}
-            >
-              Reviews and Comments
-            </button>
-            <button className="rating-button" onClick={handleViewReviews}>Viewing reviews</button>
-          </div>
-        </div>
-        <div className="rating-bars">
-          <div className="rating-bar">
-            <span className="stars">★★★★★</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★★★★☆</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★★★☆☆</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★★☆☆☆</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★☆☆☆☆</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-        </div>
-        {reviewFormVisible && (
-          <div id="review-form">
-            <h2>Tell us your experience</h2>
-            <div className="star-rating">
-              {[1, 2, 3, 4, 5].map((value) => (
-                <span
-                  key={value}
-                  className={`rating-star ${
-                    highlightedStars >= value ? "highlight" : ""
-                  }`}
-                  data-value={value}
-                  onClick={() => handleStarClick(value)}
+          <div className="rating-container">
+            <h2>Rating this Branch</h2>
+            <div className="average-rating">
+              <div className="average-score">
+                <span className="score">5.0</span>
+                <span className="star">★</span>
+              </div>
+              <div>
+                <button
+                  className="rating-button"
+                  style={{ marginRight: 15 }}
+                  onClick={() => setReviewFormVisible(true)}
                 >
-                  ★
-                </span>
-              ))}
-            </div>
-            <div className="rating-review">
-              <textarea
-                placeholder="Remarking this branch here...."
-                value={reviewText}
-                onChange={handleReviewTextChange}
-              ></textarea>
-            </div>
-            <button className="submit-rating" onClick={handleSubmitReview}>
-              Send Rating
-            </button>
-          </div>
-        )}
-        {reviewsVisible && (
-          <>
-            <div className="reviews-popup-overlay" onClick={() => setReviewsVisible(false)}></div>
-            <div className="reviews-popup">
-              <div className="reviewing-title">
-                <h2>All Reviews</h2>
+                  Reviews and Comments
+                </button>
+                <button className="rating-button" onClick={handleViewReviews}>
+                  Viewing reviews
+                </button>
               </div>
-              <div className="close-btn">
-                <button className="rating-button" onClick={() => setReviewsVisible(false)}>Close</button>
+            </div>
+            <div className="rating-bars">
+              <div className="rating-bar">
+                <span className="stars">★★★★★</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
               </div>
-              <div className="reviews-container" style={{ maxHeight: "300px", overflowY: "scroll" }}>
-                {reviews.map((review, index) => (
-                  <div key={index} className="review">
-                    <div className="review-header">
-                      <div className="name-rating">
-                      <span className="review-author">{review.userFullName}</span>
-                      <span className="review-rating">{review.rating}</span><FaStar style={{color:"gold"}}/>
-                      </div>
-                      {review.id ===userData.userId && (
-                        <CiEdit
-                          style={{ marginRight: "10px", fontSize: "23px", fontWeight: "bold" }}
-                          onClick={() => handleEditReview(review)}
-                        />
-                      )}
-                    </div>
-                    {editingReview?.id === review.id ? (
-                      <div className="review-body">
-                        <div className="star-rating">
-                          {[1, 2, 3, 4, 5].map((value) => (
-                            <span
-                              key={value}
-                              className={`rating-star ${
-                                highlightedStars >= value ? "highlight" : ""
-                              }`}
-                              data-value={value}
-                              onClick={() => handleStarClick(value)}
-                            >
-                              ★
-                            </span>
-                          ))}
-                        </div>
-                        <textarea
-                          value={reviewText}
-                          onChange={handleReviewTextChange}
-                        />
-                        <button style={{marginRight: "10px"}} className="submit-rating" onClick={handleUpdateReview}>Update</button>
-                        <button className="submit-rating" onClick={() => setEditingReview(null)}>Cancel</button>
-                      </div>
-                    ) : (
-                      <div className="review-body">
-                        <p>{review.reviewText}</p>
-                      </div>
-                    )}
+              <div className="rating-bar">
+                <span className="stars">★★★★☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★★☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★☆☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★☆☆☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+            </div>
+            {reviewFormVisible && (
+              <div id="review-form">
+                <h2>Tell us your experience</h2>
+                <div className="star-rating">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <span
+                      key={value}
+                      className={`rating-star ${
+                        highlightedStars >= value ? "highlight" : ""
+                      }`}
+                      data-value={value}
+                      onClick={() => handleStarClick(value)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <div className="rating-review">
+                  <textarea
+                    placeholder="Remarking this branch here...."
+                    value={reviewText}
+                    onChange={handleReviewTextChange}
+                  ></textarea>
+                </div>
+                <button className="submit-rating" onClick={handleSubmitReview}>
+                  Send Rating
+                </button>
+              </div>
+            )}
+            {reviewsVisible && (
+              <>
+                <div
+                  className="reviews-popup-overlay"
+                  onClick={() => setReviewsVisible(false)}
+                ></div>
+                <div className="reviews-popup">
+                  <div className="reviewing-title">
+                    <h2>All Reviews</h2>
                   </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+                  <div className="close-btn">
+                    <button
+                      className="rating-button"
+                      onClick={() => setReviewsVisible(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <div
+                    className="reviews-container"
+                    style={{ maxHeight: "300px", overflowY: "scroll" }}
+                  >
+                    {reviews.map((review, index) => (
+                      <div key={index} className="review">
+                        <div className="review-header">
+                          <div className="name-rating">
+                            <span className="review-author">
+                              {review.userFullName}
+                            </span>
+                            <span className="review-rating">
+                              {review.rating}
+                            </span>
+                            <FaStar style={{ color: "gold" }} />
+                          </div>
+                          {review.id === userData.userId && (
+                            <CiEdit
+                              style={{
+                                marginRight: "10px",
+                                fontSize: "23px",
+                                fontWeight: "bold",
+                              }}
+                              onClick={() => handleEditReview(review)}
+                            />
+                          )}
+                        </div>
+                        {editingReview?.id === review.id ? (
+                          <div className="review-body">
+                            <div className="star-rating">
+                              {[1, 2, 3, 4, 5].map((value) => (
+                                <span
+                                  key={value}
+                                  className={`rating-star ${
+                                    highlightedStars >= value ? "highlight" : ""
+                                  }`}
+                                  data-value={value}
+                                  onClick={() => handleStarClick(value)}
+                                >
+                                  ★
+                                </span>
+                              ))}
+                            </div>
+                            <textarea
+                              value={reviewText}
+                              onChange={handleReviewTextChange}
+                            />
+                            <button
+                              style={{ marginRight: "10px" }}
+                              className="submit-rating"
+                              onClick={handleUpdateReview}
+                            >
+                              Update
+                            </button>
+                            <button
+                              className="submit-rating"
+                              onClick={() => setEditingReview(null)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="review-body">
+                            <p>{review.reviewText}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
 
-    </div>
+        {showLogin && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <RequestLogin />
+        </Box>
+      )}
+      </div>
     </>
   );
 };
