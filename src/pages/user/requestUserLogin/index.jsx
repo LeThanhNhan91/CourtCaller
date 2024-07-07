@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './style.css';
 
 const RequestLogin = () => {
@@ -8,7 +9,7 @@ const RequestLogin = () => {
       <p className="requestDescription">
         You haven't signed in yet. Please log in to fully experience our application. Thanks a lot.
       </p>
-      <button className="acceptButton">Login</button>
+      <Link style={{textDecoration: "none"}} to="/login"><button className="acceptButton">Login</button></Link>
     </div>
   );
 };

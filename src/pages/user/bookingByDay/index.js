@@ -1,4 +1,4 @@
-import { memo, useState, useEffect , useRef} from "react";
+import { memo, useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaWifi, FaMotorcycle, FaBowlFood } from "react-icons/fa6";
 import { FaCar, FaStar } from "react-icons/fa";
@@ -32,9 +32,13 @@ import "./styles.scss";
 import "react-multi-carousel/lib/styles.css";
 import "./style.scss";
 import DisplayMap from "map/DisplayMap";
-import * as signalR from '@microsoft/signalr';
-import { HubConnectionBuilder, HttpTransportType, LogLevel } from '@microsoft/signalr';
-import { fetchUnavailableSlots } from '../../../api/timeSlotApi';
+import * as signalR from "@microsoft/signalr";
+import {
+  HubConnectionBuilder,
+  HttpTransportType,
+  LogLevel,
+} from "@microsoft/signalr";
+import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
 
 dayjs.extend(isSameOrBefore);
 
@@ -137,8 +141,8 @@ const BookByDay = () => {
   const [connection, setConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [unavailableSlots, setUnavailableSlot] = useState([]);
-  //dùng cái này để thay thế startOfWeek vì startOfWeek chỉ set về ngày hiện tại 
-  const [newWeekStart, setNewWeekStart] =  useState(dayjs().startOf('week'));
+  //dùng cái này để thay thế startOfWeek vì startOfWeek chỉ set về ngày hiện tại
+  const [newWeekStart, setNewWeekStart] = useState(dayjs().startOf("week"));
   const selectBranchRef = useRef(selectedBranch);
   useEffect(() => {
     selectBranchRef.current = selectedBranch;
@@ -149,7 +153,7 @@ const BookByDay = () => {
   }, [newWeekStart]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       const decodedToken = jwtDecode(token);
       setUserId(decodedToken.Id);
@@ -192,84 +196,100 @@ const BookByDay = () => {
     }
   }, []);
 
-
   //signalR
   useEffect(() => {
     const newConnection = new HubConnectionBuilder()
-        .withUrl("https://courtcaller.azurewebsites.net/timeslothub")
-        .withAutomaticReconnect()
-        .configureLogging(signalR.LogLevel.Information) 
-        .build();
-  
+      .withUrl("https://courtcaller.azurewebsites.net/timeslothub")
+      .withAutomaticReconnect()
+      .configureLogging(signalR.LogLevel.Information)
+      .build();
+
     newConnection.onreconnecting((error) => {
-        console.log(`Connection lost due to error "${error}". Reconnecting.`);
-        setIsConnected(false);
+      console.log(`Connection lost due to error "${error}". Reconnecting.`);
+      setIsConnected(false);
     });
-  
+
     newConnection.onreconnected((connectionId) => {
-        console.log(`Connection reestablished. Connected with connectionId "${connectionId}".`);
-        setIsConnected(true);
+      console.log(
+        `Connection reestablished. Connected with connectionId "${connectionId}".`
+      );
+      setIsConnected(true);
     });
-  
+
     newConnection.onclose((error) => {
-        console.log(`Connection closed due to error "${error}". Try refreshing this page to restart the connection.`);
-        setIsConnected(false);
+      console.log(
+        `Connection closed due to error "${error}". Try refreshing this page to restart the connection.`
+      );
+      setIsConnected(false);
     });
-  
+
     newConnection.on("DisableSlot", (slotCheckModel) => {
-        console.log('Received DisableSlot:', slotCheckModel);
-  
-        //check nếu mà slot trả về có branch và date trùng với branch và date mà mình đang chọn thì set lại unavailable slot
-        const startOfWeekDayjs = dayjs(newWeekStartRef.current); //lấy ra đúng cái ngày đầu tiên của tuần user chọn
-        console.log('startOfWeekDayjs:', startOfWeekDayjs.format('YYYY-MM-DD'));
-        
-        const fromDate = startOfWeekDayjs.add(1, 'day').startOf('day');
-        const toDate = startOfWeekDayjs.add(7, 'day').endOf('day');
-        const slotDate = dayjs(slotCheckModel.slotDate, 'YYYY-MM-DD');
-        
-        console.log('fromDate :', fromDate.format('YYYY-MM-DD'), 'toDate ', toDate.format('YYYY-MM-DD'), 'slotDate:', slotDate.format('YYYY-MM-DD'));
-        
-        //check lẻ dkien 
-        const isBranchMatch = slotCheckModel.branchId === selectBranchRef.current;
-        console.log('branch của signalR:', slotCheckModel.branchId, 'branch mình chọn:', selectBranchRef.current, 'check thử cái này ', selectBranchRef)
-        const isDateMatch = slotDate.isBetween(fromDate, toDate, 'day', '[]');
-        console.log('isBranchMatch:', isBranchMatch, 'isDateMatch:', isDateMatch);
-        if(isBranchMatch && isDateMatch) {
-          console.log('điều kiện là true' );
-          const { slotDate, timeSlot: { slotStartTime, slotEndTime } } = slotCheckModel;
+      console.log("Received DisableSlot:", slotCheckModel);
+
+      //check nếu mà slot trả về có branch và date trùng với branch và date mà mình đang chọn thì set lại unavailable slot
+      const startOfWeekDayjs = dayjs(newWeekStartRef.current); //lấy ra đúng cái ngày đầu tiên của tuần user chọn
+      console.log("startOfWeekDayjs:", startOfWeekDayjs.format("YYYY-MM-DD"));
+
+      const fromDate = startOfWeekDayjs.add(1, "day").startOf("day");
+      const toDate = startOfWeekDayjs.add(7, "day").endOf("day");
+      const slotDate = dayjs(slotCheckModel.slotDate, "YYYY-MM-DD");
+
+      console.log(
+        "fromDate :",
+        fromDate.format("YYYY-MM-DD"),
+        "toDate ",
+        toDate.format("YYYY-MM-DD"),
+        "slotDate:",
+        slotDate.format("YYYY-MM-DD")
+      );
+
+      //check lẻ dkien
+      const isBranchMatch = slotCheckModel.branchId === selectBranchRef.current;
+      console.log(
+        "branch của signalR:",
+        slotCheckModel.branchId,
+        "branch mình chọn:",
+        selectBranchRef.current,
+        "check thử cái này ",
+        selectBranchRef
+      );
+      const isDateMatch = slotDate.isBetween(fromDate, toDate, "day", "[]");
+      console.log("isBranchMatch:", isBranchMatch, "isDateMatch:", isDateMatch);
+      if (isBranchMatch && isDateMatch) {
+        console.log("điều kiện là true");
+        const {
+          slotDate,
+          timeSlot: { slotStartTime, slotEndTime },
+        } = slotCheckModel;
         const newSlot = { slotDate, slotStartTime, slotEndTime };
-  
+
         setUnavailableSlot((prev) => [...prev, newSlot]);
-       }
+      }
     });
-  
+
     setConnection(newConnection);
   }, []);
   //check unavailable slot
   useEffect(() => {
-    console.log('UnavailableSlot:', unavailableSlots);
+    console.log("UnavailableSlot:", unavailableSlots);
   }, [unavailableSlots]);
-  
+
   useEffect(() => {
     if (connection) {
-        const startConnection = async () => {
-            try {
-                await connection.start();
-                console.log("SignalR Connected.");
-                setIsConnected(true);
-            } catch (error) {
-                console.error("SignalR Connection Error:", error);
-                setIsConnected(false);
-                setTimeout(startConnection, 5000);
-            }
+      const startConnection = async () => {
+        try {
+          await connection.start();
+          console.log("SignalR Connected.");
+          setIsConnected(true);
+        } catch (error) {
+          console.error("SignalR Connection Error:", error);
+          setIsConnected(false);
+          setTimeout(startConnection, 5000);
         }
-        startConnection();
+      };
+      startConnection();
     }
   }, [connection]);
-    
-    
-
-
 
   const handleStarClick = (value) => {
     setHighlightedStars(value);
@@ -281,57 +301,63 @@ const BookByDay = () => {
 
   const handleSubmitReview = async () => {
     try {
-    const token = localStorage.getItem("token");
-    const decodedToken = jwtDecode(token);
-    if (!token) {
-      throw new Error("No token found");
-    }
+      const token = localStorage.getItem("token");
+      const decodedToken = jwtDecode(token);
+      if (!token) {
+        throw new Error("No token found");
+      }
 
-    const reviewData = {
-      reviewText,
-      rating: highlightedStars,
-      userId: userData.userId,
-      branchId: branch.branchId, // Đảm bảo rằng branchId đang được cung cấp ở đây nếu cần
-    };
+      const reviewData = {
+        reviewText,
+        rating: highlightedStars,
+        userId: userData.userId,
+        branchId: branch.branchId, // Đảm bảo rằng branchId đang được cung cấp ở đây nếu cần
+      };
 
-    try {
-      await axios.post(
-        "https://courtcaller.azurewebsites.net/api/Reviews",
-        reviewData
-      );
-      setReviewFormVisible(false);
-      // Xử lý sau khi gửi đánh giá thành công (ví dụ: thông báo cho người dùng, cập nhật danh sách đánh giá, v.v.)
+      try {
+        await axios.post(
+          "https://courtcaller.azurewebsites.net/api/Reviews",
+          reviewData
+        );
+        setReviewFormVisible(false);
+        // Xử lý sau khi gửi đánh giá thành công (ví dụ: thông báo cho người dùng, cập nhật danh sách đánh giá, v.v.)
+      } catch (error) {
+        console.error("Error submitting review", error);
+        // Xử lý lỗi khi gửi đánh giá
+      }
     } catch (error) {
-      console.error("Error submitting review", error);
-      // Xử lý lỗi khi gửi đánh giá
-    }} catch (error) {
-    navigate("/login");
+      navigate("/login");
     }
   };
 
   const handleViewReviews = async () => {
-   
     try {
-      const response = await axios.get(`https://courtcaller.azurewebsites.net/api/Reviews?branchId=${branch.branchId}`, {
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.get(
+        `https://courtcaller.azurewebsites.net/api/Reviews?branchId=${branch.branchId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       const reviewsWithDetails = await Promise.all(
         response.data.data.map(async (review) => {
-          console.log('review',review.id)
-          let userFullName = 'Unknown User';
+          console.log("review", review.id);
+          let userFullName = "Unknown User";
           if (review.id) {
             try {
-              const userDetailsResponse = await axios.get(`https://courtcaller.azurewebsites.net/api/UserDetails/${review.id}`, {
-                headers: {
-                  'Content-Type': 'application/json',
+              const userDetailsResponse = await axios.get(
+                `https://courtcaller.azurewebsites.net/api/UserDetails/${review.id}`,
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
                 }
-              });
+              );
               userFullName = userDetailsResponse.data.fullName;
             } catch (userDetailsError) {
-              console.error('Error fetching user details:', userDetailsError);
+              console.error("Error fetching user details:", userDetailsError);
             }
           }
           return { ...review, userFullName };
@@ -341,12 +367,10 @@ const BookByDay = () => {
       setReviews(reviewsWithDetails);
       setReviewsVisible(true);
     } catch (error) {
-      console.error('Error fetching reviews:', error);
-      
+      console.error("Error fetching reviews:", error);
     }
   };
 
-  
   const handleEditReview = (review) => {
     setEditingReview(review);
     setReviewText(review.reviewText);
@@ -355,7 +379,7 @@ const BookByDay = () => {
 
   const handleUpdateReview = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("No token found");
       }
@@ -367,15 +391,19 @@ const BookByDay = () => {
         branchId: editingReview.branchId,
       };
 
-      console.log('editingReview', editingReview)
+      console.log("editingReview", editingReview);
 
-      const response = await axios.put(`https://courtcaller.azurewebsites.net/api/Reviews/${editingReview.reviewId}`, updatedReviewData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await axios.put(
+        `https://courtcaller.azurewebsites.net/api/Reviews/${editingReview.reviewId}`,
+        updatedReviewData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      const updatedReviews = reviews.map(review =>
+      const updatedReviews = reviews.map((review) =>
         review.id === editingReview.id ? response.data : review
       );
       setReviews(updatedReviews);
@@ -383,7 +411,7 @@ const BookByDay = () => {
       setReviewText("");
       setHighlightedStars(0);
     } catch (error) {
-      console.error('Error updating review:', error);
+      console.error("Error updating review:", error);
     }
   };
 
@@ -481,39 +509,45 @@ const BookByDay = () => {
 
   // xử lý chỉ hiện 1 tuần trước và các tuần sau
   const handlePreviousWeek = async () => {
-
-    const currentWeekStart = dayjs().startOf('week');
-    const oneWeekBeforeCurrentWeek = dayjs().startOf('week').subtract(1, 'week');
-    const oneWeekBeforeStartOfWeek = dayjs(startOfWeek).subtract(1, 'week');
+    const currentWeekStart = dayjs().startOf("week");
+    const oneWeekBeforeCurrentWeek = dayjs()
+      .startOf("week")
+      .subtract(1, "week");
+    const oneWeekBeforeStartOfWeek = dayjs(startOfWeek).subtract(1, "week");
     // Không cho phép quay về tuần trước tuần hiện tại
-    if (oneWeekBeforeStartOfWeek.isBefore(currentWeekStart, 'week')) {
-     
-      return; 
+    if (oneWeekBeforeStartOfWeek.isBefore(currentWeekStart, "week")) {
+      return;
     }
-    if (!dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week') && oneWeekBeforeStartOfWeek.isAfter(oneWeekBeforeCurrentWeek)) {
+    if (
+      !dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week") &&
+      oneWeekBeforeStartOfWeek.isAfter(oneWeekBeforeCurrentWeek)
+    ) {
       setStartOfWeek(oneWeekBeforeStartOfWeek);
-    } else if (dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week')) {
+    } else if (dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week")) {
       setStartOfWeek(oneWeekBeforeCurrentWeek);
     }
 
-    const newWeekStart = oneWeekBeforeStartOfWeek.format('YYYY-MM-DD');
+    const newWeekStart = oneWeekBeforeStartOfWeek.format("YYYY-MM-DD");
     setNewWeekStart(newWeekStart);
-    const unavailableSlot = await fetchUnavailableSlots(newWeekStart, selectedBranch);
+    const unavailableSlot = await fetchUnavailableSlots(
+      newWeekStart,
+      selectedBranch
+    );
     const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
     setUnavailableSlot(slots);
-
   };
 
   const handleNextWeek = async () => {
-   
-    const newWeekStart = dayjs(startOfWeek).add(1, 'week').format('YYYY-MM-DD');
+    const newWeekStart = dayjs(startOfWeek).add(1, "week").format("YYYY-MM-DD");
     setNewWeekStart(newWeekStart);
-    setStartOfWeek(dayjs(startOfWeek).add(1, 'week'));
-    console.log('startOfWeek là dcm:', startOfWeek.format('YYYY-MM-DD'));
-    const unavailableSlot = await fetchUnavailableSlots(newWeekStart, selectedBranch);
+    setStartOfWeek(dayjs(startOfWeek).add(1, "week"));
+    console.log("startOfWeek là dcm:", startOfWeek.format("YYYY-MM-DD"));
+    const unavailableSlot = await fetchUnavailableSlots(
+      newWeekStart,
+      selectedBranch
+    );
     const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
     setUnavailableSlot(slots);
-   
   };
 
   // xử lý khi click vào nút continue qua trang tiếp theo
@@ -550,18 +584,22 @@ const BookByDay = () => {
     });
   };
   const isSlotUnavailable = (day, slot) => {
-    const formattedDay = day.format('YYYY-MM-DD'); 
-    const slotStartTime = slot.split(' - ')[0]; 
-    return unavailableSlots.some(unavailableSlot => {
+    const formattedDay = day.format("YYYY-MM-DD");
+    const slotStartTime = slot.split(" - ")[0];
+    return unavailableSlots.some((unavailableSlot) => {
       return (
-         unavailableSlot.slotDate === formattedDay &&
-            unavailableSlot.slotStartTime === `${slotStartTime}:00`
+        unavailableSlot.slotDate === formattedDay &&
+        unavailableSlot.slotStartTime === `${slotStartTime}:00`
       );
     });
   };
   const getSlotColor = (day, slot, isSelected) => {
-    const isPastSlot = day.isBefore(currentDate, 'day') || (day.isSame(currentDate, 'day') &&
-      timeStringToDecimal(currentDate.format('HH:mm:ss')) > timeStringToDecimal(slot.split(' - ')[0]) + 0.25) || isSlotUnavailable(day, slot);
+    const isPastSlot =
+      day.isBefore(currentDate, "day") ||
+      (day.isSame(currentDate, "day") &&
+        timeStringToDecimal(currentDate.format("HH:mm:ss")) >
+          timeStringToDecimal(slot.split(" - ")[0]) + 0.25) ||
+      isSlotUnavailable(day, slot);
 
     if (isSelected) return "#1976d2";
     if (isPastSlot) return "#E0E0E0";
@@ -569,12 +607,13 @@ const BookByDay = () => {
   };
   useEffect(() => {
     const fetchInitialUnavailableSlots = async () => {
-      
-      const currentWeekStart = dayjs(startOfWeek).format('YYYY-MM-DD');
-      const unavailableSlot = await fetchUnavailableSlots(currentWeekStart, selectedBranch);
+      const currentWeekStart = dayjs(startOfWeek).format("YYYY-MM-DD");
+      const unavailableSlot = await fetchUnavailableSlots(
+        currentWeekStart,
+        selectedBranch
+      );
       const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
       setUnavailableSlot(slots);
-     
     };
 
     if (selectedBranch) {
@@ -588,7 +627,6 @@ const BookByDay = () => {
   return (
     <>
       <div style={{ backgroundColor: "#EAECEE" }}>
-
         <div className="header-container">
           <div className="brief-info">
             <h1>{branch.branchName}</h1>
@@ -603,10 +641,9 @@ const BookByDay = () => {
             <div className="branch-img">
               <div className="images">
                 {pictures.map((picture, index) => (
-                   <div key={index} className="inner-image">
-                   <img src={picture} alt="img-fluid" />
-                 </div>
-
+                  <div key={index} className="inner-image">
+                    <img src={picture} alt="img-fluid" />
+                  </div>
                 ))}
                 <div className="inner-image">
                   <img src={pic1} alt="img-fluid" />
@@ -617,7 +654,6 @@ const BookByDay = () => {
                 <div className="inner-image">
                   <img src={pic3} alt="img-fluid" />
                 </div>
-                
               </div>
             </div>
 
@@ -820,8 +856,16 @@ const BookByDay = () => {
                           position: "relative",
                         }}
                         m="10px"
-                        disabled={day.isBefore(currentDate, 'day') || (day.isSame(currentDate, 'day') &&
-                          timeStringToDecimal(currentDate.format('HH:mm:ss')) > timeStringToDecimal(slot.split(' - ')[0]) + 0.25) || isSlotUnavailable(day, slot)}
+                        disabled={
+                          day.isBefore(currentDate, "day") ||
+                          (day.isSame(currentDate, "day") &&
+                            timeStringToDecimal(
+                              currentDate.format("HH:mm:ss")
+                            ) >
+                              timeStringToDecimal(slot.split(" - ")[0]) +
+                                0.25) ||
+                          isSlotUnavailable(day, slot)
+                        }
                       >
                         <Box>
                           <Typography
@@ -921,8 +965,8 @@ const BookByDay = () => {
             )}
           </>
         </Box>
-          {/* Map */}
-          <div className="map-section">
+        {/* Map */}
+        <div className="map-section">
           <div className="map-form">
             <div className="map-header">
               <h2 className="map-title">Branch Location</h2>
@@ -943,151 +987,184 @@ const BookByDay = () => {
         </div>
         {/* Rating form */}
         <div className="rating-form">
-      <div className="rating-container">
-        <h2>Rating this Branch</h2>
-        <div className="average-rating">
-          <div className="average-score">
-            <span className="score">5.0</span>
-            <span className="star">★</span>
-          </div>
-          <div>
-            <button
-              className="rating-button"
-              style={{ marginRight: 15 }}
-              onClick={() => setReviewFormVisible(true)}
-            >
-              Reviews and Comments
-            </button>
-            <button className="rating-button" onClick={handleViewReviews}>Viewing reviews</button>
-          </div>
-        </div>
-        <div className="rating-bars">
-          <div className="rating-bar">
-            <span className="stars">★★★★★</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★★★★☆</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★★★☆☆</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★★☆☆☆</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-          <div className="rating-bar">
-            <span className="stars">★☆☆☆☆</span>
-            <div className="bar">
-              <div className="fill" style={{ width: "0%" }}></div>
-            </div>
-            <span className="percentage">0%</span>
-          </div>
-        </div>
-        {reviewFormVisible && (
-          <div id="review-form">
-            <h2>Tell us your experience</h2>
-            <div className="star-rating">
-              {[1, 2, 3, 4, 5].map((value) => (
-                <span
-                  key={value}
-                  className={`rating-star ${
-                    highlightedStars >= value ? "highlight" : ""
-                  }`}
-                  data-value={value}
-                  onClick={() => handleStarClick(value)}
+          <div className="rating-container">
+            <h2>Rating this Branch</h2>
+            <div className="average-rating">
+              <div className="average-score">
+                <span className="score">5.0</span>
+                <span className="star">★</span>
+              </div>
+              <div>
+                <button
+                  className="rating-button"
+                  style={{ marginRight: 15 }}
+                  onClick={() => setReviewFormVisible(true)}
                 >
-                  ★
-                </span>
-              ))}
-            </div>
-            <div className="rating-review">
-              <textarea
-                placeholder="Remarking this branch here...."
-                value={reviewText}
-                onChange={handleReviewTextChange}
-              ></textarea>
-            </div>
-            <button className="submit-rating" onClick={handleSubmitReview}>
-              Send Rating
-            </button>
-          </div>
-        )}
-        {reviewsVisible && (
-          <>
-            <div className="reviews-popup-overlay" onClick={() => setReviewsVisible(false)}></div>
-            <div className="reviews-popup">
-              <div className="reviewing-title">
-                <h2>All Reviews</h2>
+                  Reviews and Comments
+                </button>
+                <button className="rating-button" onClick={handleViewReviews}>
+                  Viewing reviews
+                </button>
               </div>
-              <div className="close-btn">
-                <button className="rating-button" onClick={() => setReviewsVisible(false)}>Close</button>
+            </div>
+            <div className="rating-bars">
+              <div className="rating-bar">
+                <span className="stars">★★★★★</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
               </div>
-              <div className="reviews-container" style={{ maxHeight: "300px", overflowY: "scroll" }}>
-                {reviews.map((review, index) => (
-                  <div key={index} className="review">
-                    <div className="review-header">
-                      <div className="name-rating">
-                      <span className="review-author">{review.userFullName}</span>
-                      <span className="review-rating">{review.rating}</span><FaStar style={{color:"gold"}}/>
-                      </div>
-                      {userData && review.id ===userData.userId && (
-                        <CiEdit
-                          style={{ marginRight: "10px", fontSize: "23px", fontWeight: "bold" }}
-                          onClick={() => handleEditReview(review)}
-                        />
-                      )}
-                    </div>
-                    {editingReview?.id === review.id ? (
-                      <div className="review-body">
-                        <div className="star-rating">
-                          {[1, 2, 3, 4, 5].map((value) => (
-                            <span
-                              key={value}
-                              className={`rating-star ${
-                                highlightedStars >= value ? "highlight" : ""
-                              }`}
-                              data-value={value}
-                              onClick={() => handleStarClick(value)}
-                            >
-                              ★
-                            </span>
-                          ))}
-                        </div>
-                        <textarea
-                          value={reviewText}
-                          onChange={handleReviewTextChange}
-                        />
-                        <button style={{marginRight: "10px"}} className="submit-rating" onClick={handleUpdateReview}>Update</button>
-                        <button className="submit-rating" onClick={() => setEditingReview(null)}>Cancel</button>
-                      </div>
-                    ) : (
-                      <div className="review-body">
-                        <p>{review.reviewText}</p>
-                      </div>
-                    )}
+              <div className="rating-bar">
+                <span className="stars">★★★★☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★★☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★☆☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★☆☆☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+            </div>
+            {reviewFormVisible && (
+              <div id="review-form">
+                <h2>Tell us your experience</h2>
+                <div className="star-rating">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <span
+                      key={value}
+                      className={`rating-star ${
+                        highlightedStars >= value ? "highlight" : ""
+                      }`}
+                      data-value={value}
+                      onClick={() => handleStarClick(value)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <div className="rating-review">
+                  <textarea
+                    placeholder="Remarking this branch here...."
+                    value={reviewText}
+                    onChange={handleReviewTextChange}
+                  ></textarea>
+                </div>
+                <button className="submit-rating" onClick={handleSubmitReview}>
+                  Send Rating
+                </button>
+              </div>
+            )}
+            {reviewsVisible && (
+              <>
+                <div
+                  className="reviews-popup-overlay"
+                  onClick={() => setReviewsVisible(false)}
+                ></div>
+                <div className="reviews-popup">
+                  <div className="reviewing-title">
+                    <h2>All Reviews</h2>
                   </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+                  <div className="close-btn">
+                    <button
+                      className="rating-button"
+                      onClick={() => setReviewsVisible(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <div
+                    className="reviews-container"
+                    style={{ maxHeight: "300px", overflowY: "scroll" }}
+                  >
+                    {reviews.map((review, index) => (
+                      <div key={index} className="review">
+                        <div className="review-header">
+                          <div className="name-rating">
+                            <span className="review-author">
+                              {review.userFullName}
+                            </span>
+                            <span className="review-rating">
+                              {review.rating}
+                            </span>
+                            <FaStar style={{ color: "gold" }} />
+                          </div>
+                          {userData && review.id === userData.userId && (
+                            <CiEdit
+                              style={{
+                                marginRight: "10px",
+                                fontSize: "23px",
+                                fontWeight: "bold",
+                              }}
+                              onClick={() => handleEditReview(review)}
+                            />
+                          )}
+                        </div>
+                        {editingReview?.id === review.id ? (
+                          <div className="review-body">
+                            <div className="star-rating">
+                              {[1, 2, 3, 4, 5].map((value) => (
+                                <span
+                                  key={value}
+                                  className={`rating-star ${
+                                    highlightedStars >= value ? "highlight" : ""
+                                  }`}
+                                  data-value={value}
+                                  onClick={() => handleStarClick(value)}
+                                >
+                                  ★
+                                </span>
+                              ))}
+                            </div>
+                            <textarea
+                              value={reviewText}
+                              onChange={handleReviewTextChange}
+                            />
+                            <button
+                              style={{ marginRight: "10px" }}
+                              className="submit-rating"
+                              onClick={handleUpdateReview}
+                            >
+                              Update
+                            </button>
+                            <button
+                              className="submit-rating"
+                              onClick={() => setEditingReview(null)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="review-body">
+                            <p>{review.reviewText}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </>
   );
