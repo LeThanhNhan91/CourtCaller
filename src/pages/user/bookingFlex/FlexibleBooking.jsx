@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import pic1 from "assets/users/images/byday/pic1.webp";
+import pic2 from "assets/users/images/byday/pic2.webp";
+import pic3 from "assets/users/images/byday/pic3.webp";
+import { MdOutlineLocalDrink } from "react-icons/md";
+import { FaWifi, FaMotorcycle, FaBowlFood } from "react-icons/fa6";
+import { FaCar, FaStar } from "react-icons/fa";
+import { RiDrinks2Fill } from "react-icons/ri";
+import { IoLocationOutline } from "react-icons/io5";
+import { CiEdit } from "react-icons/ci";
 import { Box, Button, Grid, Typography, IconButton } from "@mui/material";
 import { fetchBranchById } from "api/branchApi";
+import { fetchPrice } from "api/priceApi";
 import dayjs from 'dayjs';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import DisplayMap from "map/DisplayMap";
 
 dayjs.extend(isSameOrBefore);
 
@@ -78,8 +91,7 @@ const FlexibleBooking = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { email, numberOfSlot, branchId, userName, userId, availableSlot, bookingId } = location.state;
-  console.log(email, numberOfSlot, branchId, userName, userId, availableSlot, bookingId)
+  const { email, numberOfSlot, branchId, userName, userId, availableSlot, bookingId, branchResponse } = location.state;
 
   const [branch, setBranch] = useState(null);
   const [startOfWeek, setStartOfWeek] = useState(dayjs().startOf('week'));
@@ -90,13 +102,25 @@ const FlexibleBooking = () => {
 
   const [showAfternoon, setShowAfternoon] = useState(false);
   const currentDate = dayjs();
+  const [weekdayPrice, setWeekdayPrice] = useState(0);
+  const [weekendPrice, setWeekendPrice] = useState(0);
+
+  const [userData, setUserData] = useState(null);
+  const [user, setUser] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState("");
+  const [highlightedStars, setHighlightedStars] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewFormVisible, setReviewFormVisible] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsVisible, setReviewsVisible] = useState(false);
+  const [editingReview, setEditingReview] = useState(null);
 
   useEffect(() => {
-    const fetchBranchDetails = async () => {
+    const fetchBranchResponses = async () => {
       try {
-        const branchDetails = await fetchBranchById(branchId);
-        if (branchDetails) {
-          setBranch(branchDetails);
+        const branchResponses = await fetchBranchById(branchId);
+        if (branchResponses) {
+          setBranch(branchResponses);
         } else {
           console.error('Invalid branch details');
         }
@@ -105,8 +129,196 @@ const FlexibleBooking = () => {
       }
     };
 
-    fetchBranchDetails();
+    fetchBranchResponses();
   }, [branchId]);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const prices = await fetchPrice(branchId);
+        setWeekdayPrice(prices.weekdayPrice);
+        setWeekendPrice(prices.weekendPrice);
+      } catch (error) {
+        console.error("Error fetching prices", error);
+      }
+    };
+
+    fetchPrices();
+  }, [branchId]);
+
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setCurrentUserId(decodedToken.Id);
+
+      const fetchUserData = async (id, isGoogle) => {
+        try {
+          if (isGoogle) {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
+            );
+            setUserData(response.data);
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
+            );
+            setUser(userResponse.data);
+          } else {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
+            );
+            setUserData(response.data);
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/${id}`
+            );
+            setUser(userResponse.data);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      if (decodedToken.iss !== "https://accounts.google.com") {
+        const userId = decodedToken.Id;
+        setCurrentUserId(userId);
+        fetchUserData(userId, false);
+      } else {
+        const userId = decodedToken.email;
+        setCurrentUserId(userId);
+        fetchUserData(userId, true);
+      }
+    }
+  }, []);
+
+  const handleStarClick = (value) => {
+    setHighlightedStars(value);
+  };
+
+  const handleReviewTextChange = (event) => {
+    setReviewText(event.target.value);
+  };
+
+  const handleSubmitReview = async () => {
+    
+    try {
+      const token = localStorage.getItem("token");
+      const decodedToken = jwtDecode(token);
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const reviewData = {
+        reviewText,
+        rating: highlightedStars,
+        userId: userData.userId,
+        branchId: branch.branchId, // Đảm bảo rằng branchId đang được cung cấp ở đây nếu cần
+      };
+
+      try {
+        await axios.post(
+          "https://courtcaller.azurewebsites.net/api/Reviews",
+          reviewData
+        );
+        setReviewFormVisible(false);
+        // Xử lý sau khi gửi đánh giá thành công (ví dụ: thông báo cho người dùng, cập nhật danh sách đánh giá, v.v.)
+      } catch (error) {
+        console.error("Error submitting review", error);
+        // Xử lý lỗi khi gửi đánh giá
+      }
+    } catch (error) {
+      navigate("/login");
+    }
+  };
+
+  const handleViewReviews = async () => {
+    try {
+      const response = await axios.get(
+        `https://courtcaller.azurewebsites.net/api/Reviews?branchId=${branch.branchId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const reviewsWithDetails = await Promise.all(
+        response.data.data.map(async (review) => {
+          console.log("review", review.id);
+          let userFullName = "Unknown User";
+          if (review.id) {
+            try {
+              const userDetailsResponse = await axios.get(
+                `https://courtcaller.azurewebsites.net/api/UserDetails/${review.id}`,
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+              userFullName = userDetailsResponse.data.fullName;
+            } catch (userDetailsError) {
+              console.error("Error fetching user details:", userDetailsError);
+            }
+          }
+          return { ...review, userFullName };
+        })
+      );
+
+      setReviews(reviewsWithDetails);
+      setReviewsVisible(true);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+  };
+
+  console.log("user", user);
+  console.log("userData", userData);
+
+  const handleEditReview = (review) => {
+    setEditingReview(review);
+    setReviewText(review.reviewText);
+    setHighlightedStars(review.rating);
+  };
+
+  const handleUpdateReview = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const updatedReviewData = {
+        reviewText,
+        rating: highlightedStars,
+        userId: editingReview.id,
+        branchId: editingReview.branchId,
+      };
+
+      console.log("editingReview", editingReview);
+
+      const response = await axios.put(
+        `https://courtcaller.azurewebsites.net/api/Reviews/${editingReview.reviewId}`,
+        updatedReviewData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const updatedReviews = reviews.map((review) =>
+        review.id === editingReview.id ? response.data : review
+      );
+      setReviews(updatedReviews);
+      setEditingReview(null);
+      setReviewText("");
+      setHighlightedStars(0);
+    } catch (error) {
+      console.error("Error updating review:", error);
+    }
+  };
+
 
   useEffect(() => {
     if (branch) {
@@ -193,11 +405,100 @@ const FlexibleBooking = () => {
     setShowAfternoon(true);
   };
 
+  const pictures = JSON.parse(branchResponse.branchPicture).slice(0, 5);
+
   return (
+    <>
+    <div style={{ backgroundColor: "#EAECEE" }}>
+        <div className="header-container">
+          <div className="brief-info">
+            <h1>{branchResponse.branchName}</h1>
+            <p>
+              <IoLocationOutline style={{ fontSize: 22 }} />{" "}
+              {branchResponse.branchAddress}
+            </p>
+            <p>{branchResponse.description}</p>
+          </div>
+
+          <div className="header-info">
+            <div className="branch-img">
+              <div className="images">
+                {pictures.map((picture, index) => (
+                  <div key={index} className="inner-image">
+                    <img src={picture} alt="img-fluid" />
+                  </div>
+                ))}
+                <div className="inner-image">
+                  <img src={pic1} alt="img-fluid" />
+                </div>
+                <div className="inner-image">
+                  <img src={pic2} alt="img-fluid" />
+                </div>
+                <div className="inner-image">
+                  <img src={pic3} alt="img-fluid" />
+                </div>
+              </div>
+            </div>
+
+            <div className="service">
+              <div className="title">Branch Information</div>
+              <div className="info">
+                <div className="item">
+                  <span>Open Time:</span>
+                  <span style={{ fontWeight: 700 }}>{branchResponse.openTime}</span>
+                </div>
+                <div className="item">
+                  <span>Close Time:</span>
+                  <span style={{ fontWeight: 700 }}>{branchResponse.closeTime}</span>
+                </div>
+                <div className="item">
+                  <span>Number of courts:</span>
+                  <span style={{ fontWeight: 700 }}>4</span>
+                </div>
+                <div className="item">
+                  <span>Weekday Price :</span>
+                  <span style={{ fontWeight: 700 }}>{weekdayPrice} VND</span>
+                </div>
+                <div className="item">
+                  <span>Weekend Price :</span>
+                  <span style={{ fontWeight: 700 }}>{weekendPrice} VND</span>
+                </div>
+                <div className="item">
+                  <span>Phone:</span>
+                  <span style={{ fontWeight: 700 }}>{branchResponse.branchPhone} </span>
+                </div>
+              </div>
+              <div className="services-info">
+                <div className="service-title">Convenient Service</div>
+                <div className="service-list">
+                  <span className="service-item">
+                    <FaWifi className="icon" /> Wifi
+                  </span>
+                  <span className="service-item">
+                    <FaMotorcycle className="icon" /> Motorbike Parking
+                  </span>
+                  <span className="service-item">
+                    <FaCar className="icon" /> Car Parking
+                  </span>
+                  <span className="service-item">
+                    <FaBowlFood className="icon" /> Food
+                  </span>
+                  <span className="service-item">
+                    <RiDrinks2Fill className="icon" /> Drinks
+                  </span>
+                  <span className="service-item">
+                    <MdOutlineLocalDrink className="icon" /> Free Ice Tea
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
     <Box m="20px" className="max-width-box" sx={{ backgroundColor: "#F5F5F5", borderRadius: 2, p: 2 }}>
       <Box display="flex" justifyContent="space-between" mb={2} alignItems="center">
         <Typography variant="h6" sx={{ color: "#0D1B34", mx: 1 }}>
-          <strong>Booking for User Id: {userName}</strong>
+          <strong>Booking for User: {userName}</strong>
         </Typography>
         <Box display="flex" alignItems="center" sx={{ backgroundColor: "#E0E0E0", p: 1, borderRadius: 2 }}>
           <IconButton onClick={handlePreviousWeek} size="small">
@@ -373,6 +674,209 @@ const FlexibleBooking = () => {
         </Button>
       </Box>
     </Box>
+
+    {/* Map */}
+    <div className="map-section">
+          <div className="map-form">
+            <div className="map-header">
+              <h2 className="map-title">Branch Location</h2>
+              <p className="map-address">{branchResponse.branchAddress}</p>
+            </div>
+            <div className="map-container">
+              <div className="map-wrapper">
+                <div className="map-overlay">
+                  <div className="map-legend">
+                    <div className="map-legend-icon"></div>
+                    <span>Branch Location</span>
+                  </div>
+                </div>
+                <DisplayMap address={branchResponse.branchAddress} />
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Rating form */}
+        <div className="rating-form">
+          <div className="rating-container">
+            <h2>Rating this Branch</h2>
+            <div className="average-rating">
+              <div className="average-score">
+                <span className="score">5.0</span>
+                <span className="star">★</span>
+              </div>
+              <div>
+                <button
+                  className="rating-button"
+                  style={{ marginRight: 15 }}
+                  onClick={() => setReviewFormVisible(true)}
+                >
+                  Reviews and Comments
+                </button>
+                <button className="rating-button" onClick={handleViewReviews}>
+                  Viewing reviews
+                </button>
+              </div>
+            </div>
+            <div className="rating-bars">
+              <div className="rating-bar">
+                <span className="stars">★★★★★</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★★★☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★★☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★★☆☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+              <div className="rating-bar">
+                <span className="stars">★☆☆☆☆</span>
+                <div className="bar">
+                  <div className="fill" style={{ width: "0%" }}></div>
+                </div>
+                <span className="percentage">0%</span>
+              </div>
+            </div>
+            {reviewFormVisible && (
+              <div id="review-form">
+                <h2>Tell us your experience</h2>
+                <div className="star-rating">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <span
+                      key={value}
+                      className={`rating-star ${
+                        highlightedStars >= value ? "highlight" : ""
+                      }`}
+                      data-value={value}
+                      onClick={() => handleStarClick(value)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <div className="rating-review">
+                  <textarea
+                    placeholder="Remarking this branch here...."
+                    value={reviewText}
+                    onChange={handleReviewTextChange}
+                  ></textarea>
+                </div>
+                <button className="submit-rating" onClick={handleSubmitReview}>
+                  Send Rating
+                </button>
+              </div>
+            )}
+            {reviewsVisible && (
+              <>
+                <div
+                  className="reviews-popup-overlay"
+                  onClick={() => setReviewsVisible(false)}
+                ></div>
+                <div className="reviews-popup">
+                  <div className="reviewing-title">
+                    <h2>All Reviews</h2>
+                  </div>
+                  <div className="close-btn">
+                    <button
+                      className="rating-button"
+                      onClick={() => setReviewsVisible(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <div
+                    className="reviews-container"
+                    style={{ maxHeight: "300px", overflowY: "scroll" }}
+                  >
+                    {reviews.map((review, index) => (
+                      <div key={index} className="review">
+                        <div className="review-header">
+                          <div className="name-rating">
+                            <span className="review-author">
+                              {review.userFullName}
+                            </span>
+                            <span className="review-rating">
+                              {review.rating}
+                            </span>
+                            <FaStar style={{ color: "gold" }} />
+                          </div>
+                          {review.id === userData.userId && (
+                            <CiEdit
+                              style={{
+                                marginRight: "10px",
+                                fontSize: "23px",
+                                fontWeight: "bold",
+                              }}
+                              onClick={() => handleEditReview(review)}
+                            />
+                          )}
+                        </div>
+                        {editingReview?.id === review.id ? (
+                          <div className="review-body">
+                            <div className="star-rating">
+                              {[1, 2, 3, 4, 5].map((value) => (
+                                <span
+                                  key={value}
+                                  className={`rating-star ${
+                                    highlightedStars >= value ? "highlight" : ""
+                                  }`}
+                                  data-value={value}
+                                  onClick={() => handleStarClick(value)}
+                                >
+                                  ★
+                                </span>
+                              ))}
+                            </div>
+                            <textarea
+                              value={reviewText}
+                              onChange={handleReviewTextChange}
+                            />
+                            <button
+                              style={{ marginRight: "10px" }}
+                              className="submit-rating"
+                              onClick={handleUpdateReview}
+                            >
+                              Update
+                            </button>
+                            <button
+                              className="submit-rating"
+                              onClick={() => setEditingReview(null)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="review-body">
+                            <p>{review.reviewText}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        </div>
+    </>
   );
 };
 

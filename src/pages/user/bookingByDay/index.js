@@ -684,14 +684,14 @@ const BookByDay = () => {
                 </div>
                 <div className="item">
                   <span>Number of courts:</span>
-                  <span style={{ fontWeight: 700 }}>{branch.branchId}</span>
+                  <span style={{ fontWeight: 700 }}>4</span>
                 </div>
                 <div className="item">
-                  <span>Price (Weekday):</span>
+                  <span>Weekday Price:</span>
                   <span style={{ fontWeight: 700 }}>{weekdayPrice} VND</span>
                 </div>
                 <div className="item">
-                  <span>Price (Weekend):</span>
+                  <span>Weekend Price:</span>
                   <span style={{ fontWeight: 700 }}>{weekendPrice} VND</span>
                 </div>
                 <div className="item">

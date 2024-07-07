@@ -12,9 +12,6 @@ const Flexible = () => {
   const [email, setEmail] = useState('');
   const [branches, setBranches] = useState([]);
   const [numberOfSlot, setNumberOfSlot] = useState('');
-  const [userExists, setUserExists] = useState(false);
-  const [userInfo, setUserInfo] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const [availableSlot, setAvailableSlot] = useState(null);
   const [bookingId, setBookingId] = useState(null);
   const [errors, setErrors] = useState({
@@ -30,6 +27,7 @@ const Flexible = () => {
   const [selectedBranch, setSelectedBranch] = useState(branch.branchId);
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
+  const [branchDetail, setBranchDetail] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -147,6 +145,7 @@ const Flexible = () => {
             branchId: selectedBranch,
             availableSlot,
             bookingId,
+            branchResponse,
           }
         });
       } else {
@@ -164,18 +163,11 @@ const Flexible = () => {
     }
   };
 
+  console.log('detail', branchDetail)
+
   return (
-    <Box
-      m="70px auto"
-      sx={{
-        backgroundColor: "#CEFCEC",
-        borderRadius: 2,
-        p: 4,
-        maxWidth: "800px",
-        position: "relative",
-      }}
-    >
-      <Typography
+    <Box sx={{backgroundColor: "rgb(234, 236, 238)"}}>
+    <Typography
         fontWeight="bold"
         mb="30px"
         variant="h2"
@@ -184,9 +176,17 @@ const Flexible = () => {
       >
         Flexible Court Booking
       </Typography>
-
-      <Box m="20px" className="max-width-box" sx={{ backgroundColor: "#F5F5F5", borderRadius: 2, p: 2 }}>
-        <Box display="flex" justifyContent="space-between" mb={2} alignItems="center">
+    <Box
+      // m="70px auto"
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        position: "relative"
+      }}
+    >
+      
+      <Box m="20px" className="max-width-box" sx={{ backgroundColor: "#F5F5F5", borderRadius: 2, p: 2, width: "400px", marginBottom: "30px", boxShadow: "2px 2px 20px rgba(0, 0, 0, 0.182)" }}>
+        <Box display="flex" justifyContent="space-between" mb={2} alignItems="center" sx={{width: "10px"}}>
           <FormControl sx={{ minWidth: 200, backgroundColor: "#0D1B34", borderRadius: 1 }}>
             <Typography
               labelid="branch-select-label"
@@ -243,6 +243,7 @@ const Flexible = () => {
               sx={{
                 padding: "10px 30px",
                 fontSize: "16px",
+                backgroundColor: "#2ecc71"
               }}
               onClick={handleSubmit}
             >
@@ -270,6 +271,7 @@ const Flexible = () => {
           <RequestLogin />
         </Box>
       )}
+    </Box>
     </Box>
   );
 };

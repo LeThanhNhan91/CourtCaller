@@ -420,7 +420,7 @@ const FixedBooking = () => {
                 </div>
                 <div className="item">
                   <span>Number of courts:</span>
-                  <span style={{ fontWeight: 700 }}>{branch.branchId}</span>
+                  <span style={{ fontWeight: 700 }}>4</span>
                 </div>
                 <div className="item">
                   <span>Price :</span>
