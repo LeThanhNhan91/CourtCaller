@@ -4,17 +4,37 @@ import axios from "axios";
 import { forgetPassword } from "api/userApi";
 import "./style.scss";
 import ClipLoader from "react-spinners/ClipLoader";
+import { validateEmail } from "./Validations";
 
 const ForgetPassword = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [emailValidation, setEmailValidation] = useState({
+    isValid: true,
+    message: "",
+  });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const emailValidation = await validateEmail(email);
+
+    setEmailValidation(emailValidation);
+
+    if (!emailValidation.isValid) {
+      setMessage("Please try again");
+      setMessageType("error");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
       const response = await forgetPassword(email);
       if (response.success) {
         setSuccess(response.message);
@@ -45,7 +65,9 @@ const ForgetPassword = () => {
             <div className="form-group">
               <p style={{ marginBottom: 10, fontSize: "larger" }}>Email</p>
               <input
-                className="forgot-input"
+                className={
+                  emailValidation.isValid ? "forgot-input" : "error-input"
+                }
                 type="email"
                 id="email"
                 name="email"
@@ -54,6 +76,9 @@ const ForgetPassword = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required="Please enter your email"
               />
+              {emailValidation.message && (
+                <p className="errorVal">{emailValidation.message}</p>
+              )}
             </div>
             <button className="forgot-submit-btn" type="submit">
               {loading ? (
