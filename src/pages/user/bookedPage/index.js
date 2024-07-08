@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import axios from "axios";
 import { FaRegCalendarCheck } from "react-icons/fa";
 import { GiShuttlecock } from "react-icons/gi";
@@ -11,7 +11,7 @@ import { red } from "@mui/material/colors";
 const BookedPage = () => {
   const [bookings, setBookings] = useState([]);
   const [overdueBookings, setOverdueBookings] = useState([]);
-  const [canceledBookings, setCanceledBookings] = useState([])
+  const [canceledBookings, setCanceledBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [slotInfo, setSlotInfo] = useState([]);
@@ -109,10 +109,14 @@ const BookedPage = () => {
 
   const handleCancelBooking = async () => {
     try {
-      await axios.delete(`https://courtcaller.azurewebsites.net/api/Bookings/cancelBooking/${bookingIdToCancel}`);
-      setBookings((prevBookings) => 
+      await axios.delete(
+        `https://courtcaller.azurewebsites.net/api/Bookings/cancelBooking/${bookingIdToCancel}`
+      );
+      setBookings((prevBookings) =>
         prevBookings.map((booking) =>
-          booking.bookingId === bookingIdToCancel ? { ...booking, status: "Canceled" } : booking
+          booking.bookingId === bookingIdToCancel
+            ? { ...booking, status: "Canceled" }
+            : booking
         )
       );
       setShowCancelModal(false);
@@ -124,7 +128,7 @@ const BookedPage = () => {
   const handleViewBooking = async (booking) => {
     setSelectedBooking(booking);
     setShowModal(true);
-    
+
     try {
       setQrcode(await fetchQrcode(booking.bookingId));
       const slotResponse = await axios.get(
@@ -153,7 +157,7 @@ const BookedPage = () => {
     }
   };
 
-  console.log('slotinfo', slotInfo)
+  console.log("slotinfo", slotInfo);
 
   const closeModal = () => {
     setShowModal(false);
@@ -189,155 +193,197 @@ const BookedPage = () => {
         </div>
       </div>
       <div className="booked-title">
-      <h1 className="btn-shine">BOOKED PAGE</h1>
+        <h1 className="btn-shine">BOOKED PAGE</h1>
       </div>
       {loading ? (
-           <BeatLoader style={{display: "flex", justifyContent: "center", alignItems: "center"}} size={40} color="#36D7B7"/>
-          ) : ( 
-      <div style={{ height: "100%" }}>
-        <main>
-          <h2 style={{color: "#2ecc71", fontStyle: "italic"}}>Upcoming Schedule</h2>
-          <div style={{ overflowY: "scroll", maxHeight: "200px", border: "solid #2ecc71", marginBottom: 40 }}>
-            <table className="upcoming-booking">
-              <thead>
-                <tr>
-                  <th>BookingID</th>
-                  <th>Date</th>
-                  <th>Number of slots</th>
-                  <th>Booking Type</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th>Details</th>
-                  <th>Cancel</th>
-                </tr>
-              </thead>
-              {bookings.length > 0 ? (
-                bookings.map((booked, index) => (
-                  <tbody key={index}>
-                    <tr>
-                      <td>{booked.bookingId}</td>
-                      <td>{formatDate(booked.bookingDate)}</td>
-                      <td>{booked.numberOfSlot}</td>
-                      <td>{booked.bookingType}</td>
-                      <td>{booked.totalPrice} VND</td>
-                      <td>{booked.status}</td>
-                      <td>
-                        {booked.status !== "Canceled" && (
-                          <button className="view-button" onClick={() => handleViewBooking(booked)}>
-                            View
-                          </button>
-                        )}
-                      </td>
-                      <td>
-                        {booked.status !== "Canceled" && (
-                          <button className="cancel-button" onClick={() => handleCancelClick(booked.bookingId)}>
-                            Cancel
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  </tbody>
-                ))
-              ) : (
-                <tbody>
+        <BeatLoader
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          size={40}
+          color="#36D7B7"
+        />
+      ) : (
+        <div style={{ height: "100%" }}>
+          <main>
+            <h2 style={{ color: "#2ecc71", fontStyle: "italic" }}>
+              Upcoming Schedule
+            </h2>
+            <div
+              style={{
+                overflowY: "scroll",
+                maxHeight: "200px",
+                border: "solid #2ecc71",
+                marginBottom: 40,
+              }}
+            >
+              <table className="upcoming-booking">
+                <thead>
                   <tr>
-                    <td colSpan="8" style={{ textAlign: "center" }}>
-                      No upcoming bookings found
-                    </td>
+                    <th>BookingID</th>
+                    <th>Date</th>
+                    <th>Number of slots</th>
+                    <th>Booking Type</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                    <th>Cancel</th>
                   </tr>
-                </tbody>
-              )}
-            </table>
-            </div>
-
-          <h2 style={{color: "red", fontStyle: "italic"}}>Overdue Schedule</h2>
-          <div style={{ overflowY: "scroll", maxHeight: "200px", border: "solid red", marginBottom: 40 }}>
-            <table className="overdue-booking">
-              <thead>
-                <tr>
-                  <th>BookingID</th>
-                  <th>Date</th>
-                  <th>Number of slots</th>
-                  <th>Booking Type</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              {overdueBookings.length > 0 ? (
-                overdueBookings.map((booked, index) => (
-                  <tbody key={index}>
+                </thead>
+                {bookings.length > 0 ? (
+                  bookings.map((booked, index) => (
+                    <tbody key={index}>
+                      <tr>
+                        <td>{booked.bookingId}</td>
+                        <td>{formatDate(booked.bookingDate)}</td>
+                        <td>{booked.numberOfSlot}</td>
+                        <td>{booked.bookingType}</td>
+                        <td>{booked.totalPrice} VND</td>
+                        <td>{booked.status}</td>
+                        <td>
+                          {booked.status !== "Canceled" && (
+                            <button
+                              className="view-button"
+                              onClick={() => handleViewBooking(booked)}
+                            >
+                              View
+                            </button>
+                          )}
+                        </td>
+                        <td>
+                          {booked.status !== "Canceled" && (
+                            <button
+                              className="cancel-button"
+                              onClick={() => handleCancelClick(booked.bookingId)}
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    </tbody>
+                  ))
+                ) : (
+                  <tbody>
                     <tr>
-                      <td>{booked.bookingId}</td>
-                      <td>{formatDate(booked.bookingDate)}</td>
-                      <td>{booked.numberOfSlot}</td>
-                      <td>{booked.bookingType}</td>
-                      <td>{booked.totalPrice} VND</td>
-                      <td>{booked.status}</td>
-                      <td>
-                        {booked.status !== "Canceled" && (
-                          <button className="view-button" onClick={() => handleViewBooking(booked)}>
-                            View
-                          </button>
-                        )}
+                      <td colSpan="8" style={{ textAlign: "center" }}>
+                        No upcoming bookings found
                       </td>
                     </tr>
                   </tbody>
-                ))
-              ) : (
-                <tbody>
-                  <tr>
-                    <td colSpan="8" style={{ textAlign: "center" }}>
-                      No overdue bookings found
-                    </td>
-                  </tr>
-                </tbody>
-              )}
-            </table>
+                )}
+              </table>
             </div>
-
-            <h2 style={{color: "#DC7633", fontStyle: "italic"}}>Canceled Bookings</h2>
-            <div style={{ overflowY: "scroll", maxHeight: "200px", border: "solid #DC7633" }}>
-            <table className="canceled-booking">
-              <thead>
-                <tr>
-                  <th>BookingID</th>
-                  <th>Date</th>
-                  <th>Number of slots</th>
-                  <th>Booking Type</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              {canceledBookings.length > 0 ? (
-                canceledBookings.map((booked, index) => (
-                  <tbody key={index}>
+            <h2 style={{ color: "#2ecc71", fontStyle: "italic", color: "red" }}>
+              Overdue Bookings
+            </h2>
+            <div
+              style={{
+                overflowY: "scroll",
+                maxHeight: "200px",
+                border: "solid red",
+                marginBottom: 40,
+              }}
+            >
+              <table className="overdue-booking">
+                <thead>
+                  <tr>
+                    <th>BookingID</th>
+                    <th>Date</th>
+                    <th>Number of slots</th>
+                    <th>Booking Type</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                {overdueBookings.length > 0 ? (
+                  overdueBookings.map((booked, index) => (
+                    <tbody key={index}>
+                      <tr>
+                        <td>{booked.bookingId}</td>
+                        <td>{formatDate(booked.bookingDate)}</td>
+                        <td>{booked.numberOfSlot}</td>
+                        <td>{booked.bookingType}</td>
+                        <td>{booked.totalPrice} VND</td>
+                        <td>{booked.status}</td>
+                        <td>
+                          {booked.status !== "Canceled" && (
+                            <button
+                              className="view-button"
+                              onClick={() => handleViewBooking(booked)}
+                            >
+                              View
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    </tbody>
+                  ))
+                ) : (
+                  <tbody>
                     <tr>
-                      <td>{booked.bookingId}</td>
-                      <td>{formatDate(booked.bookingDate)}</td>
-                      <td>{booked.numberOfSlot}</td>
-                      <td>{booked.bookingType}</td>
-                      <td>{booked.totalPrice} VND</td>
-                      <td>{booked.status}</td>
+                      <td colSpan="8" style={{ textAlign: "center" }}>
+                        No overdue bookings found
+                      </td>
                     </tr>
                   </tbody>
-                ))
-              ) : (
-                <tbody>
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: "center" }}>
-                      No canceled bookings found
-                    </td>
-                  </tr>
-                </tbody>
-              )}
-            </table>
+                )}
+              </table>
             </div>
-        </main>
-      </div>
-      )} 
+            <h2 style={{ color: "#2ecc71", fontStyle: "italic" }}>
+              Canceled Bookings
+            </h2>
+            <div
+              style={{
+                overflowY: "scroll",
+                maxHeight: "200px",
+                border: "solid #DC7633",
+                marginBottom: 40,
+              }}
+            >
+              <table className="canceled-booking">
+                <thead>
+                  <tr>
+                    <th>BookingID</th>
+                    <th>Date</th>
+                    <th>Number of slots</th>
+                    <th>Booking Type</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                {canceledBookings.length > 0 ? (
+                  canceledBookings.map((booked, index) => (
+                    <tbody key={index}>
+                      <tr>
+                        <td>{booked.bookingId}</td>
+                        <td>{formatDate(booked.bookingDate)}</td>
+                        <td>{booked.numberOfSlot}</td>
+                        <td>{booked.bookingType}</td>
+                        <td>{booked.totalPrice} VND</td>
+                        <td>{booked.status}</td>
+                      </tr>
+                    </tbody>
+                  ))
+                ) : (
+                  <tbody>
+                    <tr>
+                      <td colSpan="8" style={{ textAlign: "center" }}>
+                        No canceled bookings found
+                      </td>
+                    </tr>
+                  </tbody>
+                )}
+              </table>
+            </div>
+          </main>
+        </div>
+      )}
 
-      {showModal && selectedBooking && (
+{showModal && selectedBooking && (
         <div className="modal-container">
           <div className="modal-content">
             <span className="close" onClick={closeModal}>
@@ -430,51 +476,19 @@ const BookedPage = () => {
       )}
 
       {showCancelModal && (
-        <div className="cancel-confirm-container">
-          <div className="card">
-            <div className="cancel-header">
-              <div className="cancel-image">
-                <svg
-                  aria-hidden="true"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                  ></path>
-                </svg>
-              </div>
-              <div className="cancel-content">
-                <span className="cancel-title">Cancel Booking</span>
-                <p className="cancel-message">
-                  Are you sure you want to cancel your booking? 
-                  Your balance will only be refunded half. 
-                  However, your membership points remain the same. 
-                  This action cannot be undone.
-                </p>
-              </div>
-              <div className="cancel-actions">
-                <button
-                  className="cancel-desactivate"
-                  type="button"
-                  style={{ cursor: "pointer" }}
-                  onClick={handleCancelBooking}
-                >
-                  YES
-                </button>
-                <button
-                  className="cancel-button2"
-                  type="button"
-                  style={{ cursor: "pointer" }}
-                  onClick={closeCancelModal}
-                >
-                  Back
-                </button>
-              </div>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2 style={{ color: "#2ecc71", textAlign: "center", color: "#DC7633" }}>
+              Cancel Booking
+            </h2>
+            <p>Are you sure you want to cancel this booking?</p>
+            <div style={{ textAlign: "center" }}>
+              <button className="cancel-confirm-button" onClick={handleCancelBooking}>
+                Yes
+              </button>
+              <button className="cancel-close-button" onClick={closeCancelModal}>
+                No
+              </button>
             </div>
           </div>
         </div>
