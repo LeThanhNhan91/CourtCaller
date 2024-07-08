@@ -231,10 +231,12 @@ const FlexibleBooking = () => {
     }
   };
 
+  console.log("branchResponse", branchResponse)
+
   const handleViewReviews = async () => {
     try {
       const response = await axios.get(
-        `https://courtcaller.azurewebsites.net/api/Reviews?branchId=${branch.branchId}`,
+        `https://courtcaller.azurewebsites.net/api/Reviews/GetReviewsByBranch/${branchResponse.branchId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -243,7 +245,7 @@ const FlexibleBooking = () => {
       );
 
       const reviewsWithDetails = await Promise.all(
-        response.data.data.map(async (review) => {
+        response.data.map(async (review) => {
           console.log("review", review.id);
           let userFullName = "Unknown User";
           if (review.id) {

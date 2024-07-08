@@ -341,7 +341,7 @@ const BookByDay = () => {
   const handleViewReviews = async () => {
     try {
       const response = await axios.get(
-        `https://courtcaller.azurewebsites.net/api/Reviews?branchId=${branch.branchId}`,
+        `https://courtcaller.azurewebsites.net/api/Reviews/GetReviewsByBranch/${selectedBranch}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -350,7 +350,7 @@ const BookByDay = () => {
       );
 
       const reviewsWithDetails = await Promise.all(
-        response.data.data.map(async (review) => {
+        response.data.map(async (review) => {
           console.log("review", review.id);
           let userFullName = "Unknown User";
           if (review.id) {
