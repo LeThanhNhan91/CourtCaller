@@ -119,11 +119,20 @@ const PaymentDetailFixed = () => {
         const bookingId = response.bookingId;
         const tokenResponse = await generatePaymentToken(bookingId);
         const token = tokenResponse.token;
-        const paymentResponse = paymentMethod === "Balance"
-            ? await processBalancePayment(token)
-            : await processPayment(token);
-        const paymentUrl = paymentResponse;
-        window.location.href = paymentUrl;
+        if (paymentMethod === "Balance") {
+          try {
+            await processBalancePayment(token);
+            navigate("/confirm");
+          } catch (error) {
+            console.error("Balance payment failed:", error);
+            navigate("/reject");
+          }
+        } else {
+          const paymentResponse = await processPayment(token);
+          const paymentUrl = paymentResponse;
+          window.location.href = paymentUrl;
+          return;
+        }
 
       } catch (error) {
         console.error('Error processing payment:', error);

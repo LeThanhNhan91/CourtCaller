@@ -55,8 +55,6 @@ const PaymentDetail = () => {
   const [userId, setUserId] = useState("");
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [userExists, setUserExists] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState("");
@@ -192,12 +190,13 @@ const PaymentDetail = () => {
     try {
       await sendUnavailableSlotCheck();
 
-      if (availableSlot !== 0 && bookingId) {
+      if (type === "flexible" && availableSlot !== 0 && bookingId) {
         const bookingForm = bookingRequests.map((request) => ({
           courtId: null,
           branchId: branchId,
           slotDate: request.slotDate,
           timeSlot: {
+            slotDate: request.slotDate,
             slotStartTime: request.timeSlot.slotStartTime,
             slotEndTime: request.timeSlot.slotEndTime,
           },
@@ -212,7 +211,7 @@ const PaymentDetail = () => {
         return;
       }
 
-      if (type === "flexible" && availableSlot === 0) {
+      else if (type === "flexible" && availableSlot === 0) {
         let id = null;
         try {
           setIsLoading(true);
@@ -237,13 +236,20 @@ const PaymentDetail = () => {
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
           const tokenResponse = await generatePaymentToken(booking.bookingId);
           const token = tokenResponse.token;
-          const paymentResponse = paymentMethod === "Balance"
-            ? await processBalancePayment(token)
-            : await processPayment(token);
-          const paymentUrl = paymentResponse;
-
-          window.location.href = paymentUrl;
-          return;
+          if (paymentMethod === "Balance") {
+            try {
+              await processBalancePayment(token);
+              navigate("/confirm");
+            } catch (error) {
+              console.error("Balance payment failed:", error);
+              navigate("/reject");
+            }
+          } else {
+            const paymentResponse = await processPayment(token);
+            const paymentUrl = paymentResponse;
+            window.location.href = paymentUrl;
+            return;
+          }
         } catch (error) {
           console.error("Error processing payment:", error);
           setErrorMessage("Error processing payment. Please try again.");
@@ -281,12 +287,20 @@ const PaymentDetail = () => {
           const tokenResponse = await generatePaymentToken(booking.bookingId);
           const token = tokenResponse.token;
 
-          const paymentResponse = paymentMethod === "Balance"
-            ? await processBalancePayment(token)
-            : await processPayment(token);
-          const paymentUrl = paymentResponse;
-
-          window.location.href = paymentUrl;
+          if (paymentMethod === "Balance") {
+            try {
+              await processBalancePayment(token);
+              navigate("/confirm");
+            } catch (error) {
+              console.error("Balance payment failed:", error);
+              navigate("/reject");
+            }
+          } else {
+            const paymentResponse = await processPayment(token);
+            const paymentUrl = paymentResponse;
+            window.location.href = paymentUrl;
+            return;
+          }
         } catch (error) {
           console.error("Error processing payment:", error);
           setErrorMessage("Error processing payment. Please try again.");
