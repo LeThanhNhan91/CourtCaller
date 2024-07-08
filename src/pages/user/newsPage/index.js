@@ -10,7 +10,7 @@ const NewsPage = () => {
   const [error, setError] = useState(null);
   const [totalNews, setTotalNews] = useState(0);
 
-  const itemsPerPage = 5;
+  const itemsPerPage = 6;
 
   useEffect(() => {
     const fetchNews = async () => {

@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { FaRegCalendarCheck } from "react-icons/fa";
 import { GiShuttlecock } from "react-icons/gi";
@@ -152,6 +152,8 @@ const BookedPage = () => {
       console.error("Error fetching slot or branch data:", error);
     }
   };
+
+  console.log('slotinfo', slotInfo)
 
   const closeModal = () => {
     setShowModal(false);
@@ -420,7 +422,7 @@ const BookedPage = () => {
                   <img src={`data:image/png;base64,${qrcode}`} alt="QR Code" style={{ width: '300px', height: '310px' }} />
                 </div>
                 <p style={{ marginTop: '6px' }}>QR Code for Checking In</p>
-                <p style={{ margin: 0, color: "#00c853" }}>Checked</p>
+                <p style={{ margin: "10px 0", color: "#00c853" }}>Checked in</p>
               </div>
             </div>
           </div>

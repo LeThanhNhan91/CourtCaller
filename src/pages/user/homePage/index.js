@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from "react";
-import { useNavigate, BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import "react-multi-carousel/lib/styles.css";
 import feature1Img from "assets/users/images/featured/images.jpg";
@@ -11,9 +11,7 @@ import cat4Img from "assets/users/images/categories/cat-4.png";
 import { AiOutlineSearch } from "react-icons/ai";
 import "./style.scss";
 import { fetchPrice } from "api/priceApi";
-//thêm thư viện scroll cuộn cho pro
 import { animateScroll as scroll } from 'react-scroll';
-import { Slide } from "react-toastify";
 import SlideShowHomePage from "./SlideShow/SlideShow";
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
@@ -32,8 +30,6 @@ const HomePage = () => {
   const [totalBranches, setTotalBranches] = useState(0);
   const navigate = useNavigate();
 
-
-
   useEffect(() => {
     const fetchBranches = async () => {
       setLoading(true);
@@ -43,7 +39,6 @@ const HomePage = () => {
           `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=${pageNumber}&pageSize=${itemsPerPage}`
         );
         const data = await response.json();
-        console.log("data", data)
         setBranches(data.data); // Assuming the API returns branches in an array called "data"
         setTotalBranches(data.total); // Assuming the API returns total count of branches
         await fetchPrices(data.data);
@@ -82,9 +77,22 @@ const HomePage = () => {
     setPrices(pricesData);
   };
 
-  const handleSearch = () => {
-    console.log("Searching for", district, city, searchQuery);
-    // Implement search functionality here
+  const handleSearch = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=1&pageSize=${itemsPerPage}&searchQuery=${searchQuery || city || district}`
+      );
+      const data = await response.json();
+      setBranches(data.data); // Assuming the API returns branches in an array called "data"
+      setTotalBranches(data.total); // Assuming the API returns total count of branches
+      await fetchPrices(data.data);
+    } catch (err) {
+      setError("Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePageChange = (page) => {
@@ -107,7 +115,6 @@ const HomePage = () => {
       duration: 1000,
       smooth: 'easeInOutQuart',
     });
-
   };
 
   const handleFixBooking = () => {
@@ -116,8 +123,7 @@ const HomePage = () => {
       duration: 1000,
       smooth: 'easeInOutQuart',
     });
-
-  }
+  };
 
   const handleFlexBooking = () => {
     navigate("/flexible", { state: { branch: selectedBranch } });
@@ -125,37 +131,22 @@ const HomePage = () => {
       duration: 1000,
       smooth: 'easeInOutQuart',
     });
-
-  }
+  };
 
   return (
     <>
       <div style={{ backgroundColor: "#EAECEE" }}>
         <div className="container">
-          {/* <div className="hero_banner_container">
-            <div className="hero_banner">
-              <div className="hero_text">
-                <span>WELCOME TO</span>
-                <h2>
-                  {" "}
-                  COURT CALLER
-                  <br />
-                  HAVE FUN
-                </h2>
-              </div>
-            </div>
-          </div> */}
           <div className="slideshow-container">
             <SlideShowHomePage />
           </div>
         </div>
 
-
         {/* Search Begin */}
         <div className="select_bar container">
           <select value={city} onChange={(e) => setCity(e.target.value)}>
             <option value="">City</option>
-            <option value="Ho Chi Minh City">Thành phố Hồ Chí Minh</option>
+            <option value="Hồ Chí Minh">Hồ Chí Minh</option>
             <option value="Hanoi">Hà Nội</option>
             <option value="Da Nang">Đà Nẵng</option>
           </select>
@@ -165,6 +156,7 @@ const HomePage = () => {
             <option value="District 1">Quận 1</option>
             <option value="District 2">Quận 2</option>
             <option value="District 3">Quận 3</option>
+            <option value="Bình Thạnh">Bình Thạnh</option>
           </select>
           <button onClick={handleSearch}>Search</button>
         </div>
@@ -228,7 +220,6 @@ const HomePage = () => {
           </div>
         </div>
         {/* Booking branch End */}
-
 
         {/* Introduction Begin */}
         <div className="container">
