@@ -94,6 +94,23 @@ const HomePage = () => {
       setLoading(false);
     }
   };
+  const handleSortByDistance = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `https://localhost:7104/api/Branches/sortBranchByDistance?Latitude=12&Longitude=102&pageNumber=${pageNumber}&pageSize=${itemsPerPage}`
+      );
+      const data = await response.json();
+      setBranches(data.data); // Assuming the API returns branches in an array called "data"
+      setTotalBranches(data.total); // Assuming the API returns total count of branches
+      await fetchPrices(data.data);
+    } catch (err) {
+      setError("Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePageChange = (page) => {
     setPageNumber(page);
@@ -159,6 +176,10 @@ const HomePage = () => {
             <option value="Bình Thạnh">Bình Thạnh</option>
           </select>
           <button onClick={handleSearch}>Search</button>
+
+          <div className="sort_btn">
+            <button onClick={handleSortByDistance}>Sort By Distance</button>
+          </div>
         </div>
 
         {/* Search End */}
