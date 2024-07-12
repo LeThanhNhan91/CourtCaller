@@ -115,6 +115,15 @@ export const fetchRoleByUserId = async (userId) => {
   }
 };
 
+export const fetchUserById = async (userId) => {
+  try {
+    const response = await axios.get(`${url}/Users/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(`Failed to fetch user by id: ${error.message}`);
+  }
+}
+
 
 export const updateUserRole = async (userId, role) => {
   try {

@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import "./loginTest.scss";
 import { FaGoogle, FaFacebookF } from "react-icons/fa";
 import { loginApi } from "api/usersApi";
-import { registerApi } from "api/registerApi";
 import {
   validateFullName,
   validateEmail,
@@ -14,14 +13,13 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GoogleLogin } from "@react-oauth/google";
-import { LoginSocialFacebook } from "reactjs-social-login";
-import { FacebookLoginButton } from "react-social-login-buttons";
 import ClipLoader from "react-spinners/ClipLoader";
 import { ROUTERS } from "utils/router";
 import { FacebookAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "firebase.js";
 import { useAuth } from "AuthContext.js";
 import { jwtDecode } from "jwt-decode";
+import { fetchUserById, fetchRoleByUserId } from "api/userApi";
 
 const Login = () => {
   const [password, setPassword] = useState("");
@@ -90,13 +88,14 @@ const Login = () => {
         localStorage.setItem("token", res.token);
         console.log('token: ', res.token)
         var decode = jwtDecode(res.token);
+        localStorage.setItem("userRole", decode.role);
         const userData = {
           email: decode.email,
+          role: decode.role
         };
-        console.log('data: ',userData)
         login(userData); // Lưu thông tin người dùng vào context
-        //toast.success("Login successful!");
-        navigate(ROUTERS.USER.HOME);
+        toast.success("Login successful!");
+        navigate(ROUTERS.USER.HOME); 
       } else if (res && res.status === 401) {
         //toast.error(res.error);
         setMessage("Login failed!");
@@ -313,23 +312,6 @@ const Login = () => {
           <div className="form-container sign-up">
             <form onSubmit={handleRegister}>
               <h1>Create Account</h1>
-              {/* <div className="social-icons">
-                <GoogleLogin
-                  onSuccess={loginGoogle}
-                  onError={() => {
-                    console.log("Login Failed");
-                    toast.error("Google login failed");
-                  }}
-                />
-                <a
-                  onClick={loginFacebook}
-                  className="icon"
-                  style={{ color: "white" }}
-                >
-                  <FaFacebookF />{" "}
-                  <span style={{ marginLeft: 5 }}>Login with Facebook</span>
-                </a>
-              </div> */}
               <span>or use your email for registration</span>
               <input
                 type="text"
