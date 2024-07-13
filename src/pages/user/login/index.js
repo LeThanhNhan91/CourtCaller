@@ -94,13 +94,24 @@ const Login = () => {
           role: decode.role
         };
         login(userData); // Lưu thông tin người dùng vào context
-        toast.success("Login successful!");
         navigate(ROUTERS.USER.HOME); 
       } else if (res && res.status === 401) {
         //toast.error(res.error);
         setMessage("Login failed!");
         setMessageType("error");
-      }
+      } else if(res && res.data.status === "Error" && res.data.message == "User is banned!"){
+        toast.error('This account is banned!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          });
+          return;
+      } 
     } catch (error) {
       //toast.error("Login failed!");
       setMessage("Login failed!");
