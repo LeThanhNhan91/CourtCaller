@@ -47,6 +47,7 @@ const PaymentDetailFixed = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
   console.log('bookdata: ', branchId, bookingRequests, totalPrice, numberOfMonths, daysOfWeek, startDate, bookingRequests[0].slotDate, slotStartTime, slotEndTime)
 
@@ -148,6 +149,10 @@ const PaymentDetailFixed = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  const handlePaymentMethodChange = (event) => {
+    setSelectedPaymentMethod(event.target.value);
+  };
+
   const getStepContent = (step) => {
     switch (step) {
       case 0:
@@ -177,6 +182,8 @@ const PaymentDetailFixed = () => {
                       <RadioGroup
                         aria-label="payment method"
                         name="paymentMethod"
+                        value={selectedPaymentMethod}
+                        onChange={handlePaymentMethodChange}
                       >
                         <FormControlLabel
                           value="creditCard"
@@ -184,11 +191,6 @@ const PaymentDetailFixed = () => {
                           label="Credit Card"
                           sx={{ color: "black" }}
                         />
-                      </RadioGroup>
-                      <RadioGroup
-                        aria-label="payment method"
-                        name="paymentMethod"
-                      >
                         <FormControlLabel
                           value="Balance"
                           control={<Radio />}
@@ -262,11 +264,11 @@ const PaymentDetailFixed = () => {
             Back
           </Button>
           <Button
-          style={{marginLeft: "1125px"}}
+            style={{ marginLeft: "1125px" }}
             variant="contained"
             color="primary"
             onClick={() => handleNext("Balance")}
-            disabled={isLoading} // Disable button while loading
+            disabled={isLoading || selectedPaymentMethod !== 'Balance'} // Disable button while loading or if Balance is not selected
           >
             {activeStep === steps.length - 1 ? "Finish" : "By Balance"}
           </Button>
@@ -274,7 +276,7 @@ const PaymentDetailFixed = () => {
             variant="contained"
             color="primary"
             onClick={() => handleNext("CreditCard")}
-            disabled={isLoading} // Disable button while loading
+            disabled={isLoading || selectedPaymentMethod !== 'creditCard'} // Disable button while loading or if Credit Card is not selected
           >
             {activeStep === steps.length - 1 ? "Finish" : "VNPay"}
           </Button>
