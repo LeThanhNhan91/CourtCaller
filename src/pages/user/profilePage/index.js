@@ -20,7 +20,7 @@ import {
   validateAddress,
   validatePhone,
   validateYob,
-} from "../login/formValidation";
+} from "../Validations/formValidation";
 const Profile = () => {
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);

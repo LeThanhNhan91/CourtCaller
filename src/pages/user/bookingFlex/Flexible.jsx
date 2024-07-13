@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Button, TextField, FormControl } from "@mui/material";
-import { validateRequired, validateNumber } from "../login/formValidation";
+import { validateRequired, validateNumber } from "../Validations/formValidation";
 import { fetchBranches, fetchBranchById } from 'api/branchApi';
 import { checkBookingTypeFlex } from "api/bookingApi";
 import axios from "axios";
 import {jwtDecode} from "jwt-decode";
 import { useNavigate, useLocation } from "react-router-dom";
 import RequestLogin from "../requestUserLogin";
+import { flexValidation } from "../Validations/bookingValidation";
+
 
 const Flexible = () => {
   const [email, setEmail] = useState('');
@@ -28,6 +30,13 @@ const Flexible = () => {
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
   const [branchDetail, setBranchDetail] = useState('');
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
+
+  const [flexValidate, setFlexValidate] = useState({
+    isValid: true,
+    message: "",
+});
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -108,30 +117,25 @@ const Flexible = () => {
     fetchBranchesData();
   }, []);
 
-  const handleChange = (field, value) => {
-    let error = '';
-    if (field === 'numberOfSlot') {
-      const validation = validateNumber(value);
-      error = validation.isValid ? '' : validation.message;
-    } else if (field === 'email') {
-      const validation = validateRequired(value);
-      error = validation.isValid ? '' : validation.message;
-    }
-    setErrors(prevErrors => ({ ...prevErrors, [field]: error }));
 
-    if (field === 'email') setEmail(value);
-    if (field === 'numberOfSlot') setNumberOfSlot(value);
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleSubmit = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       setShowLogin(true); // Show the RequestLogin component if no token is found
       return;
     }
 
-    const numberOfSlotValidation = validateNumber(numberOfSlot);
-    const branchIdValidation = validateRequired(selectedBranch);
+    const flexValidate = flexValidation(numberOfSlot)
+
+    setFlexValidate(flexValidate);
+
+    if(!flexValidate.isValid){
+      setMessage("Please try again");
+      setMessageType("error");
+      return;
+    }
 
     try {
       const branchResponse = await fetchBranchById(selectedBranch);
@@ -187,7 +191,7 @@ const Flexible = () => {
       
       <Box m="20px" className="max-width-box" sx={{ backgroundColor: "#F5F5F5", borderRadius: 2, p: 2, width: "400px", marginBottom: "30px", boxShadow: "2px 2px 20px rgba(0, 0, 0, 0.182)" }}>
         <Box display="flex" justifyContent="space-between" mb={2} alignItems="center" sx={{width: "10px"}}>
-          <FormControl sx={{ minWidth: 200, backgroundColor: "#0D1B34", borderRadius: 1 }}>
+          <FormControl sx={{ minWidth: 120, backgroundColor: "#0D1B34", borderRadius: 1 }}>
             <Typography
               labelid="branch-select-label"
               value={selectedBranch}
@@ -215,10 +219,13 @@ const Flexible = () => {
                 Number of Slots
               </Typography>
               <TextField
+              className={
+                flexValidate.isValid ? "" : "error-input"
+              }
                 placeholder="Enter Number of Slots"
                 fullWidth
                 value={numberOfSlot}
-                onChange={(e) => handleChange('numberOfSlot', e.target.value)}
+                onChange={(e) => setNumberOfSlot(e.target.value)}
                 error={Boolean(errors.numberOfSlot)}
                 helperText={errors.numberOfSlot}
                 InputProps={{
@@ -233,6 +240,9 @@ const Flexible = () => {
                   border: "1px solid #e0e0e0",
                 }}
               />
+              {flexValidate.message && (
+                <p className="errorVal">{flexValidate.message}</p>
+              )}
             </>
           )}
 

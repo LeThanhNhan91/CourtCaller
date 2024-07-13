@@ -7,7 +7,7 @@ import { resetPassword } from "api/userApi";
 import {
   validatePassword,
   validateConfirmPassword,
-} from "../login/formValidation";
+} from "../Validations/formValidation";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
