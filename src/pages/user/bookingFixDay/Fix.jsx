@@ -30,6 +30,7 @@ import CalendarView from "./CalendarView";
 import { fetchPriceByBranchIDType } from "api/priceApi";
 import DisplayMap from "map/DisplayMap";
 import RequestLogin from "../requestUserLogin";
+import { fixMonthValidation, fixStartTimeValidation, fixEndTimeValidation } from "../Validations/bookingValidation";
 
 const theme = createTheme({
   palette: {
@@ -115,6 +116,20 @@ const FixedBooking = () => {
   const { branch } = location.state;
   const [showLogin, setShowLogin] = useState(false); // State to manage visibility of RequestLogin component
   const [selectedBranch, setSelectedBranch] = useState(branch.branchId);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
+  const [monthValidation, setMonthValidation] = useState({
+    isValid: true,
+    message: ""
+  });
+  const [startTimeValidation, setStartTimeValidation] = useState({
+    isValid: true,
+    message: ""
+  });
+  const [endTimeValidation, setEndTimeValidation] = useState({
+    isValid: true,
+    message: ""
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -310,7 +325,7 @@ const FixedBooking = () => {
     };
 
     fetchBranchPrices();
-  }, [branchId]);
+  }, [selectedBranch]);
 
   const handleDayOfWeekChange = (event) => {
     const { value, checked } = event.target;
@@ -327,6 +342,19 @@ const FixedBooking = () => {
     const token = localStorage.getItem('token');
     if(!token){
       setShowLogin(true);
+      return;
+    }
+
+    const monthValidation = fixMonthValidation(numberOfMonths);
+    const startTimeValidation = fixStartTimeValidation(slotStartTime);
+    const endTimeValidation = fixEndTimeValidation(slotStartTime, slotEndTime);
+    setMonthValidation(monthValidation);
+    setStartTimeValidation(startTimeValidation);
+    setEndTimeValidation(endTimeValidation);
+
+    if(!monthValidation.isValid || !startTimeValidation.isValid || !endTimeValidation.isValid){
+      setMessage("Please try again");
+      setMessageType("error");
       return;
     }
 
@@ -503,6 +531,9 @@ const FixedBooking = () => {
                             InputLabelProps={{ style: { color: "black" } }}
                             InputProps={{ style: { color: "black" } }}
                           />
+                          {monthValidation.message && (
+                <p className="errorVal">{monthValidation.message}</p>
+              )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>
@@ -558,6 +589,9 @@ const FixedBooking = () => {
                             InputLabelProps={{ style: { color: "black" } }}
                             InputProps={{ style: { color: "black" } }}
                           />
+                          {startTimeValidation.message && (
+                <p className="errorVal">{startTimeValidation.message}</p>
+              )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>
@@ -571,6 +605,9 @@ const FixedBooking = () => {
                             InputLabelProps={{ style: { color: "black" } }}
                             InputProps={{ style: { color: "black" } }}
                           />
+                          {endTimeValidation.message && (
+                <p className="errorVal">{endTimeValidation.message}</p>
+              )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>

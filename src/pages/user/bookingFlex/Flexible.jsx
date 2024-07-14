@@ -5,7 +5,7 @@ import { fetchBranches, fetchBranchById } from 'api/branchApi';
 import { checkBookingTypeFlex } from "api/bookingApi";
 import axios from "axios";
 import {jwtDecode} from "jwt-decode";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import RequestLogin from "../requestUserLogin";
 import { flexValidation } from "../Validations/bookingValidation";
 
@@ -247,6 +247,20 @@ const Flexible = () => {
           )}
 
           <Box display="flex" justifyContent="flex-end" mt="30px">
+          
+          <Link to="/"><Button
+              variant="contained"
+              color="secondary"
+              sx={{
+                padding: "10px 30px",
+                fontSize: "16px",
+                backgroundColor: "#2ecc71",
+                marginRight: 3
+              }}
+            >
+              Back
+            </Button></Link>
+
             <Button
               variant="contained"
               color="secondary"

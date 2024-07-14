@@ -4,7 +4,7 @@ import axios from "axios";
 import { forgetPassword } from "api/userApi";
 import "./style.scss";
 import ClipLoader from "react-spinners/ClipLoader";
-import { validateEmail } from "./Validations";
+import { validateEmail } from "../Validations/Validations";
 
 const ForgetPassword = () => {
   const [email, setEmail] = useState("");
