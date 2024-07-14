@@ -221,6 +221,7 @@ const PaymentDetail = () => {
             branchId: branchId,
             slotDate: request.slotDate,
             timeSlot: {
+              slotDate: request.slotDate,
               slotStartTime: request.timeSlot.slotStartTime,
               slotEndTime: request.timeSlot.slotEndTime,
             },

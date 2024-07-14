@@ -14,11 +14,13 @@ import { CiEdit } from "react-icons/ci";
 import { Box, Button, Grid, Typography, IconButton } from "@mui/material";
 import { fetchBranchById } from "api/branchApi";
 import { fetchPrice } from "api/priceApi";
+import { fetchBookingByUserId } from "api/bookingApi";
 import dayjs from 'dayjs';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import DisplayMap from "map/DisplayMap";
+import RequestBooking from "../requestUserBooking";
 
 dayjs.extend(isSameOrBefore);
 
@@ -114,6 +116,7 @@ const FlexibleBooking = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsVisible, setReviewsVisible] = useState(false);
   const [editingReview, setEditingReview] = useState(null);
+  const [showRequestBooking, setShowRequestBooking] = useState(false);
 
   useEffect(() => {
     const fetchBranchResponses = async () => {
@@ -200,10 +203,20 @@ const FlexibleBooking = () => {
   };
 
   const handleSubmitReview = async () => {
-    
+    const token = localStorage.getItem('token');
+
+    if (!userData || !userData.userId) {
+      console.error("User data is not available");
+      return;
+    }
+
+    const checkBooking = await fetchBookingByUserId(userData.userId);
+    if(checkBooking.length == 0){
+      setShowRequestBooking(true);
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
-      const decodedToken = jwtDecode(token);
       if (!token) {
         throw new Error("No token found");
       }
@@ -877,6 +890,26 @@ const FlexibleBooking = () => {
             )}
           </div>
         </div>
+
+         {/* Booking request */}
+      {showRequestBooking && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <RequestBooking />
+        </Box>
+      )}
         </div>
     </>
   );

@@ -67,6 +67,17 @@ export const fetchBookingById = async (bookingId) => {
   }
 };
 
+export const fetchBookingByUserId = async (userId) => {
+  try {
+    const response = await axios.get(`${url}/Bookings/userId/${userId}`);
+    console.log('fetchBookingByUserId', response.data)
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching booking by UserID:', error);
+    throw error;
+  }
+};
+
 // Create a flexible booking
 export const createBookingFlex = async (userId, numberOfSlot, branchId) => {
   try {

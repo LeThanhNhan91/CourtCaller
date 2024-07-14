@@ -21,7 +21,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { fetchBranches, fetchBranchById } from "api/branchApi";
-import { reserveSlots } from "api/bookingApi";
+import { fetchBookingByUserId } from "api/bookingApi";
 import { fetchPrice } from "api/priceApi";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -40,6 +40,7 @@ import {
 } from "@microsoft/signalr";
 import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
 import RequestLogin from "../requestUserLogin";
+import RequestBooking from "../requestUserBooking";
 
 dayjs.extend(isSameOrBefore);
 
@@ -146,6 +147,7 @@ const BookByDay = () => {
   const [newWeekStart, setNewWeekStart] = useState(dayjs().startOf("week"));
   const selectBranchRef = useRef(selectedBranch);
   const [showLogin, setShowLogin] = useState(false); // State to manage visibility of RequestLogin component
+  const [showRequestBooking, setShowRequestBooking] = useState(false);
   useEffect(() => {
     selectBranchRef.current = selectedBranch;
   }, [selectedBranch]);
@@ -308,9 +310,18 @@ const BookByDay = () => {
       return;
     }
 
+    if (!userData || !userData.userId) {
+      console.error("User data is not available");
+      return;
+    }
+
+    const checkBooking = await fetchBookingByUserId(userData.userId);
+    if(checkBooking.length == 0){
+      setShowRequestBooking(true);
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
-      const decodedToken = jwtDecode(token);
       if (!token) {
         throw new Error("No token found");
       }
@@ -1197,6 +1208,26 @@ const BookByDay = () => {
           }}
         >
           <RequestLogin />
+        </Box>
+      )}
+
+      {/* Booking request */}
+      {showRequestBooking && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <RequestBooking />
         </Box>
       )}
       </div>

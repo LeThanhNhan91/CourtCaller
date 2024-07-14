@@ -28,8 +28,10 @@ import { IoLocationOutline } from "react-icons/io5";
 import { CiEdit } from "react-icons/ci";
 import CalendarView from "./CalendarView";
 import { fetchPriceByBranchIDType } from "api/priceApi";
+import { fetchBookingByUserId } from "api/bookingApi";
 import DisplayMap from "map/DisplayMap";
 import RequestLogin from "../requestUserLogin";
+import RequestBooking from "../requestUserBooking";
 import { fixMonthValidation, fixStartTimeValidation, fixEndTimeValidation } from "../Validations/bookingValidation";
 
 const theme = createTheme({
@@ -115,6 +117,7 @@ const FixedBooking = () => {
   const location = useLocation();
   const { branch } = location.state;
   const [showLogin, setShowLogin] = useState(false); // State to manage visibility of RequestLogin component
+  const [showRequestBooking, setShowRequestBooking] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState(branch.branchId);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
@@ -184,15 +187,24 @@ const FixedBooking = () => {
   };
 
   const handleSubmitReview = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const token = localStorage.getItem('token');
+    if(!token){
       setShowLogin(true);
       return;
     }
 
+    if (!userData || !userData.userId) {
+      console.error("User data is not available");
+      return;
+    }
+
+    const checkBooking = await fetchBookingByUserId(userData.userId);
+    if(checkBooking.length == 0){
+      setShowRequestBooking(true);
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
-      const decodedToken = jwtDecode(token);
       if (!token) {
         throw new Error("No token found");
       }
@@ -846,6 +858,26 @@ const FixedBooking = () => {
           }}
         >
           <RequestLogin />
+        </Box>
+      )}
+
+       {/* Booking request */}
+       {showRequestBooking && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <RequestBooking />
         </Box>
       )}
       </div>

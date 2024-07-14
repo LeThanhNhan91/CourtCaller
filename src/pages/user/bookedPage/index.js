@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { FaRegCalendarCheck } from "react-icons/fa";
 import { GiShuttlecock } from "react-icons/gi";
@@ -256,7 +256,9 @@ const BookedPage = () => {
                           {booked.status !== "Canceled" && (
                             <button
                               className="cancel-button"
-                              onClick={() => handleCancelClick(booked.bookingId)}
+                              onClick={() =>
+                                handleCancelClick(booked.bookingId)
+                              }
                             >
                               Cancel
                             </button>
@@ -383,7 +385,7 @@ const BookedPage = () => {
         </div>
       )}
 
-{showModal && selectedBooking && (
+      {showModal && selectedBooking && (
         <div className="modal-container">
           <div className="modal-content">
             <span className="close" onClick={closeModal}>
@@ -464,10 +466,22 @@ const BookedPage = () => {
 
             <div className="user-qr-checking">
               <div className="user-qr">
-                <div className="qr-placeholder" style={{ margin: '5px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <img src={`data:image/png;base64,${qrcode}`} alt="QR Code" style={{ width: '300px', height: '310px' }} />
+                <div
+                  className="qr-placeholder"
+                  style={{
+                    margin: "5px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <img
+                    src={`data:image/png;base64,${qrcode}`}
+                    alt="QR Code"
+                    style={{ width: "300px", height: "310px" }}
+                  />
                 </div>
-                <p style={{ marginTop: '6px' }}>QR Code for Checking In</p>
+                <p style={{ marginTop: "6px" }}>QR Code for Checking In</p>
                 <p style={{ margin: "10px 0", color: "#00c853" }}>Checked in</p>
               </div>
             </div>
@@ -476,19 +490,50 @@ const BookedPage = () => {
       )}
 
       {showCancelModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2 style={{ color: "#2ecc71", textAlign: "center", color: "#DC7633" }}>
-              Cancel Booking
-            </h2>
-            <p>Are you sure you want to cancel this booking?</p>
-            <div style={{ textAlign: "center" }}>
-              <button className="cancel-confirm-button" onClick={handleCancelBooking}>
-                Yes
-              </button>
-              <button className="cancel-close-button" onClick={closeCancelModal}>
-                No
-              </button>
+        <div className="cancel-confirm-container">
+          <div className="card">
+            <div className="cancel-header">
+              <div className="cancel-image">
+                <svg
+                  aria-hidden="true"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                    stroke-linejoin="round"
+                    stroke-linecap="round"
+                  ></path>
+                </svg>
+              </div>
+              <div className="cancel-content">
+                <span className="cancel-title">Cancel Booking</span>
+                <p className="cancel-message">
+                  Are you sure you want to cancel your booking? Your balance
+                  will only be refunded half. However, your membership points
+                  remain the same. This action cannot be undone.
+                </p>
+              </div>
+              <div className="cancel-actions">
+                <button
+                  className="cancel-desactivate"
+                  type="button"
+                  style={{ cursor: "pointer" }}
+                  onClick={handleCancelBooking}
+                >
+                  YES
+                </button>
+                <button
+                  className="cancel-button2"
+                  type="button"
+                  style={{ cursor: "pointer" }}
+                  onClick={closeCancelModal}
+                >
+                  Back
+                </button>
+              </div>
             </div>
           </div>
         </div>
