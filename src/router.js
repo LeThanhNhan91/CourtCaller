@@ -23,7 +23,7 @@ import FlexibleBooking from 'pages/user/bookingFlex/FlexibleBooking';
 const ProtectedRoute = ({ component: Component, allowedRoles, ...rest }) => {
   const userRole = localStorage.getItem('userRole');
 
-  if (!userRole || !allowedRoles.includes(userRole)) {
+  if (userRole && !allowedRoles.includes(userRole)) {
     return <Navigate to={ROUTERS.USER.LOGIN} />;
   }
 
@@ -55,7 +55,7 @@ const renderUserRouter = () => {
             key={key}
             path={item.path}
             element={
-              <ProtectedRoute component={item.component} allowedRoles={['Customer']} />
+              <ProtectedRoute component={item.component} allowedRoles={['Customer', '']} />
             }
           />
         ))}
