@@ -82,7 +82,7 @@ const HomePage = () => {
     setError(null);
     try {
       const response = await fetch(
-        `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=1&pageSize=${itemsPerPage}&searchQuery=${searchQuery || city || district}`
+        `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=${pageNumber}&pageSize=${itemsPerPage}&searchQuery=${searchQuery || city || district}`
       );
       const data = await response.json();
       setBranches(data.data); // Assuming the API returns branches in an array called "data"

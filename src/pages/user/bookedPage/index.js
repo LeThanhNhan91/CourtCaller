@@ -6,7 +6,7 @@ import { GiShuttlecock } from "react-icons/gi";
 import { fetchQrcode } from "api/bookingApi";
 import BeatLoader from "react-spinners/BeatLoader";
 import "./style.scss";
-import { red } from "@mui/material/colors";
+
 
 const BookedPage = () => {
   const [bookings, setBookings] = useState([]);
@@ -20,19 +20,61 @@ const BookedPage = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [bookingIdToCancel, setBookingIdToCancel] = useState(null);
   const [qrcode, setQrcode] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setUserId(decodedToken.Id);
+
+      const fetchUserData = async (id, isGoogle) => {
+        try {
+          if (isGoogle) {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
+            );
+            setUserData(response.data);
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
+            );
+            setUser(userResponse.data);
+          } else {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
+            );
+            setUserData(response.data);
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/${id}`
+            );
+            setUser(userResponse.data);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      if (decodedToken.iss !== "https://accounts.google.com") {
+        const userId = decodedToken.Id;
+        setUserId(userId);
+        fetchUserData(userId, false);
+      } else {
+        const userId = decodedToken.email;
+        setUserId(userId);
+        fetchUserData(userId, true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchBookings = async () => {
+      if (!userData || !userData.userId) return;
+
       try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No token found");
-
-        const decodedToken = jwtDecode(token);
-        const userId = decodedToken.id || decodedToken.Id;
-        if (!userId) throw new Error("User ID not found in token");
-
         const bookingsResponse = await axios.get(
-          `https://courtcaller.azurewebsites.net/api/Bookings/userId/${userId}`
+          `https://courtcaller.azurewebsites.net/api/Bookings/userId/${userData.userId}`
         );
         const allBookings = bookingsResponse.data;
 
@@ -95,7 +137,7 @@ const BookedPage = () => {
     };
 
     fetchBookings();
-  }, []);
+  }, [userData]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

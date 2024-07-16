@@ -197,11 +197,12 @@ const Login = () => {
 
       if (res.ok) {
         // console.log("Login successful:", data);
-        localStorage.setItem("token", token);
-        var decode = jwtDecode(token);
-
+        localStorage.setItem("token", data.token);
+        var decode = jwtDecode(data.token);
+        localStorage.setItem("userRole", decode.role);
         const userData = {
           email: decode.email,
+          role: decode.role
         };
         login(userData); // Lưu thông tin người dùng vào context
         toast.success("Login Successfully");
