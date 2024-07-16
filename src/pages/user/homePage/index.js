@@ -13,6 +13,7 @@ import "./style.scss";
 import { fetchPrice } from "api/priceApi";
 import { animateScroll as scroll } from 'react-scroll';
 import SlideShowHomePage from "./SlideShow/SlideShow";
+import getUserLocation from "map/Geolocation";
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
 
@@ -98,13 +99,14 @@ const HomePage = () => {
     setLoading(true);
     setError(null);
     try {
+      let position = await getUserLocation();
       const response = await fetch(
-        `https://courtcaller.azurewebsites.net/api/Branches/sortBranchByDistance?Latitude=12&Longitude=102&pageNumber=${pageNumber}&pageSize=${itemsPerPage}`
+        `https://courtcaller.azurewebsites.net/api/Branches/sortBranchByDistance?Latitude=${position.coords.latitude}&Longitude=${position.coords.longitude}&pageNumber=1&pageSize=${itemsPerPage}`
       );
       const data = await response.json();
-      setBranches(data.data); // Assuming the API returns branches in an array called "data"
+      setBranches(data.data.map(item => item.branch));
       setTotalBranches(data.total); // Assuming the API returns total count of branches
-      await fetchPrices(data.data);
+      await fetchPrices(data.data.branch);
     } catch (err) {
       setError("Failed to fetch data");
     } finally {
