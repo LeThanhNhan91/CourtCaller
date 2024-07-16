@@ -99,7 +99,7 @@ const HomePage = () => {
     setError(null);
     try {
       const response = await fetch(
-        `https://localhost:7104/api/Branches/sortBranchByDistance?Latitude=12&Longitude=102&pageNumber=${pageNumber}&pageSize=${itemsPerPage}`
+        `https://courtcaller.azurewebsites.net/api/Branches/sortBranchByDistance?Latitude=12&Longitude=102&pageNumber=${pageNumber}&pageSize=${itemsPerPage}`
       );
       const data = await response.json();
       setBranches(data.data); // Assuming the API returns branches in an array called "data"
