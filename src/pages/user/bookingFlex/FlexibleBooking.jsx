@@ -107,6 +107,7 @@ const FlexibleBooking = () => {
   const currentDate = dayjs();
   const [weekdayPrice, setWeekdayPrice] = useState(0);
   const [weekendPrice, setWeekendPrice] = useState(0);
+  const [numberOfCourt, setNumberOfCourts] = useState('');
   const [unavailableSlots, setUnavailableSlot] = useState([]);
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
@@ -149,6 +150,19 @@ const FlexibleBooking = () => {
 
     fetchPrices();
   }, [branchId]);
+
+  useEffect(() => {
+    const fetchNumberOfCourts = async () => {
+        try {
+          const response = await fetch(`https://courtcaller.azurewebsites.net/numberOfCourt/${branchId}`);
+          const data = await response.json();
+          setNumberOfCourts(data);
+        } catch (err) {
+          console.error(`Failed to fetch number of courts for branch ${branchId}`);
+        }
+    };
+      fetchNumberOfCourts();
+    }, [branchId]);
 
 
   useEffect(() => {
@@ -502,7 +516,7 @@ const FlexibleBooking = () => {
                 </div>
                 <div className="item">
                   <span>Number of courts:</span>
-                  <span style={{ fontWeight: 700 }}>4</span>
+                  <span style={{ fontWeight: 700 }}>{numberOfCourt}</span>
                 </div>
                 <div className="item">
                   <span>Weekday Price :</span>
