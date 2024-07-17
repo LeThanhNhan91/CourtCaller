@@ -41,6 +41,7 @@ import {
 import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
 import RequestLogin from "../requestUserLogin";
 import RequestBooking from "../requestUserBooking";
+import {fetchPercentRatingByBranch} from "../../../api/reviewApi";
 
 dayjs.extend(isSameOrBefore);
 
@@ -143,6 +144,7 @@ const BookByDay = () => {
   const [user, setUser] = useState(null);
   const [connection, setConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [AverageRating, setAverageRating] = useState(null);
   const [unavailableSlots, setUnavailableSlot] = useState([]);
   //dùng cái này để thay thế startOfWeek vì startOfWeek chỉ set về ngày hiện tại
   const [newWeekStart, setNewWeekStart] = useState(dayjs().startOf("week"));
@@ -477,11 +479,9 @@ const BookByDay = () => {
     if (openTime && "14:00:00") {
       const decimalOpenTime = timeStringToDecimal(openTime);
       const decimalCloseTime = timeStringToDecimal("14:00:00");
-      //console.log('decimalOpenTime:', decimalOpenTime);
-      //console.log('decimalCloseTime:', decimalCloseTime);
       const timeSlots = generateTimeSlots(decimalOpenTime, decimalCloseTime);
       setMorningTimeSlots(timeSlots);
-      //console.log('generate timeSlots:', timeSlots);
+  
     }
   }, [openTime]);
 
@@ -659,6 +659,23 @@ const BookByDay = () => {
       fetchInitialUnavailableSlots();
     }
   }, [selectedBranch, startOfWeek]);
+
+  //fetch rating tổng
+  useEffect(() => {
+    const fetchRating = async () => {
+        try {
+          console.log('selectedBranch của rating:', selectedBranch);
+            const data = await fetchPercentRatingByBranch(selectedBranch);
+            setAverageRating(data);
+        } catch (error) {
+            console.error('Error fetching rating', error);
+        }
+    };
+
+    fetchRating();
+}, [selectedBranch]);
+
+
 
   const days = weekDays;
   const pictures = JSON.parse(branch.branchPicture).slice(0, 5);
@@ -1030,7 +1047,7 @@ const BookByDay = () => {
             <h2>Rating this Branch</h2>
             <div className="average-rating">
               <div className="average-score">
-                <span className="score">5.0</span>
+                <span className="score">{AverageRating}</span>
                 <span className="star">★</span>
               </div>
               <div>
