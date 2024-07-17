@@ -21,6 +21,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import DisplayMap from "map/DisplayMap";
 import RequestBooking from "../requestUserBooking";
+import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
 
 dayjs.extend(isSameOrBefore);
 
@@ -106,7 +107,7 @@ const FlexibleBooking = () => {
   const currentDate = dayjs();
   const [weekdayPrice, setWeekdayPrice] = useState(0);
   const [weekendPrice, setWeekendPrice] = useState(0);
-
+  const [unavailableSlots, setUnavailableSlot] = useState([]);
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
   const [currentUserId, setCurrentUserId] = useState("");
@@ -373,11 +374,33 @@ const FlexibleBooking = () => {
     setSelectedSlots(newSelectedSlots);
   };
 
-  const handlePreviousWeek = () => {
-    const oneWeekBeforeCurrentWeek = dayjs().startOf('week').subtract(1, 'week');
-    if (!dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week')) {
+  const handlePreviousWeek = async () => {
+    const currentWeekStart = dayjs().startOf("week");
+    const oneWeekBeforeCurrentWeek = dayjs()
+      .startOf("week")
+      .subtract(1, "week");
+    const oneWeekBeforeStartOfWeek = dayjs(startOfWeek).subtract(1, "week");
+    // Không cho phép quay về tuần trước tuần hiện tại
+    if (oneWeekBeforeStartOfWeek.isBefore(currentWeekStart, "week")) {
+      return;
+    }
+    if (
+      !dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week") &&
+      oneWeekBeforeStartOfWeek.isAfter(oneWeekBeforeCurrentWeek)
+    ) {
+      setStartOfWeek(oneWeekBeforeStartOfWeek);
+    } else if (dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week")) {
       setStartOfWeek(oneWeekBeforeCurrentWeek);
     }
+
+    const newWeekStart = oneWeekBeforeStartOfWeek.format("YYYY-MM-DD");
+    // setNewWeekStart(newWeekStart);
+    // const unavailableSlot = await fetchUnavailableSlots(
+    //   newWeekStart,
+    //   selectedBranch
+    // );
+    // const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+    // setUnavailableSlot(slots);
   };
 
   const handleNextWeek = () => {
@@ -409,6 +432,17 @@ const FlexibleBooking = () => {
         type: 'flexible',
         numberOfSlot
       }
+    });
+  };
+
+  const isSlotUnavailable = (day, slot) => {
+    const formattedDay = day.format("YYYY-MM-DD");
+    const slotStartTime = slot.split(" - ")[0];
+    return unavailableSlots.some((unavailableSlot) => {
+      return (
+        unavailableSlot.slotDate === formattedDay &&
+        unavailableSlot.slotStartTime === `${slotStartTime}:00`
+      );
     });
   };
 
@@ -584,8 +618,14 @@ const FlexibleBooking = () => {
           {(showAfternoon ? afternoonTimeSlots : morningTimeSlots).map((slot, slotIndex) => {
             const slotId = `${day.format('YYYY-MM-DD')}_${slot}`;
             const slotCount = selectedSlots.filter(selectedSlot => selectedSlot.slotId === slotId).length;
-            const isSelected = slotCount > 0;
-            const isPast = day.isBefore(currentDate, 'day') || (day.isSame(currentDate, 'day') && timeStringToDecimal(slot.split(' - ')[1]) <= timeStringToDecimal(currentDate.format('HH:mm:ss')));
+            const isSelected = selectedSlots.some(
+              (selectedSlot) => selectedSlot.slotId === slotId
+            );
+            const isPast =  day.isBefore(currentDate, "day") ||
+            (day.isSame(currentDate, "day") &&
+              timeStringToDecimal(currentDate.format("HH:mm:ss")) >
+                timeStringToDecimal(slot.split(" - ")[0]) + 0.25) ||
+            isSlotUnavailable(day, slot);
 
             return (
               <Grid item xs key={slotIndex}>
