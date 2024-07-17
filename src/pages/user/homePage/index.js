@@ -31,6 +31,12 @@ const HomePage = () => {
   const [totalBranches, setTotalBranches] = useState(0);
   const navigate = useNavigate();
 
+  const cityDistricts = {
+    "Hồ Chí Minh": ["Quận 1", "Quận 2", "Bình Thạnh", "Bình Tân"],
+    "Hà Nội": ["Hai Bà Trưng", "Ba Đình", "Đống Đa", "Hoàn Kiếm"],
+    "Đà Nẵng": ["Cẩm Lệ", "Hải Châu", "Liên Chiểu", "Ngũ Hành Sơn"],
+  };
+
   useEffect(() => {
     const fetchBranches = async () => {
       setLoading(true);
@@ -163,22 +169,32 @@ const HomePage = () => {
 
         {/* Search Begin */}
         <div className="select_bar container">
-          <select value={city} onChange={(e) => setCity(e.target.value)}>
-            <option value="">City</option>
-            <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-            <option value="Hanoi">Hà Nội</option>
-            <option value="Da Nang">Đà Nẵng</option>
-          </select>
+          <div className="searching_bar">
+            <select value={city} onChange={(e) => { setCity(e.target.value); setDistrict(""); }}>
+              <option value="">City</option>
+              <option value="Hồ Chí Minh">Hồ Chí Minh</option>
+              <option value="Hà Nội">Hà Nội</option>
+              <option value="Đà Nẵng">Đà Nẵng</option>
+            </select>
 
-          <select value={district} onChange={(e) => setDistrict(e.target.value)}>
-            <option value="">District</option>
-            <option value="District 1">Quận 1</option>
-            <option value="District 2">Quận 2</option>
-            <option value="District 3">Quận 3</option>
-            <option value="Bình Thạnh">Bình Thạnh</option>
-          </select>
-          <button onClick={handleSearch}>Search</button>
+            <select value={district} onChange={(e) => setDistrict(e.target.value)}>
+              <option value="">District</option>
+              {city && cityDistricts[city].map((dist, index) => (
+                <option key={index} value={dist}>{dist}</option>
+              ))}
+            </select>
 
+            <div className="search_bar">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Searching branch by name"
+              />
+            </div>
+
+            <button onClick={handleSearch}><AiOutlineSearch /></button>
+          </div>
           <div className="sort_btn">
             <button onClick={handleSortByDistance}>Sort By Distance</button>
           </div>
@@ -189,17 +205,7 @@ const HomePage = () => {
         {/* Booking branch */}
         <div className="container booking_branch">
           <h1>Booking Now</h1>
-          <div className="search_bar">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Searching branch by name"
-            />
-            <button onClick={handleSearch}>
-              <AiOutlineSearch />
-            </button>
-          </div>
+          
           <div className="row booking_branch_container">
             {branches.map((branch, index) => (
               <div

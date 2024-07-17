@@ -520,7 +520,7 @@ const PaymentDetail = () => {
             variant="contained"
             color="primary"
             onClick={() => handleNext("Balance")}
-            disabled={isLoading || selectedPaymentMethod === 'creditCard'} // Disable button while loading or if Credit Card is selected
+            disabled={isLoading || selectedPaymentMethod !== 'Balance'} // Disable button while loading or if Credit Card is selected
           >
             {activeStep === steps.length - 1 ? "Finish" : "By Balance"}
           </Button>
@@ -528,7 +528,7 @@ const PaymentDetail = () => {
             variant="contained"
             color="primary"
             onClick={() => handleNext("CreditCard")}
-            disabled={isLoading || selectedPaymentMethod === 'Balance'} // Disable button while loading or if Balance is selected
+            disabled={isLoading || selectedPaymentMethod !== 'creditCard'} // Disable button while loading or if Balance is selected
           >
             {activeStep === steps.length - 1 ? "Finish" : "VNPay"}
           </Button>

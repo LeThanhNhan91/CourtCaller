@@ -53,9 +53,15 @@ $bannerImg: "/assets/users/images/hero/banner.jpg";
     }
 }
 
+.searching_bar{
+    display: flex;
+    align-items: center;
+}
+
 .select_bar {
     display: flex;
     align-items: center; 
+    justify-content: space-between;
     margin-bottom: 30px !important; 
 
     select {
@@ -63,7 +69,7 @@ $bannerImg: "/assets/users/images/hero/banner.jpg";
         margin: 0 10px;
         border: 1px solid #ddd;
         border-radius: 5px;
-        width: 250px;
+        width: 130px;
         background-color: #fff;
         color: #333;
         appearance: none;
@@ -75,6 +81,7 @@ $bannerImg: "/assets/users/images/hero/banner.jpg";
     }
 
     button {
+        height: 44px;
         padding: 15px 20px;
         border: none;
         background-color: map.get($theme-colors, "main");
@@ -128,7 +135,6 @@ $bannerImg: "/assets/users/images/hero/banner.jpg";
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 60px !important;
 
     input {
         padding: 15px;
