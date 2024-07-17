@@ -41,7 +41,7 @@ import {
 import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
 import RequestLogin from "../requestUserLogin";
 import RequestBooking from "../requestUserBooking";
-import {fetchPercentRatingByBranch} from "../../../api/reviewApi";
+import {fetchPercentRatingByBranch, fetchEachPercentRatingByBranch} from "../../../api/reviewApi";
 
 dayjs.extend(isSameOrBefore);
 
@@ -145,6 +145,7 @@ const BookByDay = () => {
   const [connection, setConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [AverageRating, setAverageRating] = useState(null);
+  const [listRating, setListRating] = useState([]);
   const [unavailableSlots, setUnavailableSlot] = useState([]);
   //dùng cái này để thay thế startOfWeek vì startOfWeek chỉ set về ngày hiện tại
   const [newWeekStart, setNewWeekStart] = useState(dayjs().startOf("week"));
@@ -666,7 +667,7 @@ const BookByDay = () => {
     }
   }, [selectedBranch, startOfWeek]);
 
-  //fetch rating tổng
+  //fetch rating tổng xong rồi đưa vào averageRating
   useEffect(() => {
     const fetchRating = async () => {
         try {
@@ -680,6 +681,21 @@ const BookByDay = () => {
 
     fetchRating();
 }, [selectedBranch]);
+
+  //fetch rating nhỏ 
+useEffect(() => { 
+  const fetchEachPercentRating = async () => {
+    try {
+      const data = await fetchEachPercentRatingByBranch(selectedBranch);
+      console.log('data:', data);
+      setListRating(data);
+    } catch (error) {
+      console.error('Error fetching rating', error);
+    }
+  };
+  fetchEachPercentRating();
+}, [selectedBranch]);
+  
 
 
 
@@ -1073,37 +1089,38 @@ const BookByDay = () => {
               <div className="rating-bar">
                 <span className="stars">★★★★★</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div className="fill" style={{ width:  `${listRating[4]}%` }}></div>
                 </div>
-                <span className="percentage">0%</span>
+                {/* làm tròn đơn vị math round được chưa nhân*/}
+                <span className="percentage">{Math.round(listRating[4])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★★★★☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div className="fill" style={{ width: `${listRating[3]}%` }}></div>
                 </div>
-                <span className="percentage">0%</span>
+                <span className="percentage">{Math.round(listRating[3])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★★★☆☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div className="fill" style={{ width: `${listRating[2]}%` }}></div>
                 </div>
-                <span className="percentage">0%</span>
+                <span className="percentage">{Math.round(listRating[2])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★★☆☆☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div className="fill" style={{ width: `${listRating[1]}%` }}></div>
                 </div>
-                <span className="percentage">0%</span>
+                <span className="percentage">{Math.round(listRating[1])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★☆☆☆☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div className="fill" style={{ width: `${listRating[0]}%` }}></div>
                 </div>
-                <span className="percentage">0%</span>
+                <span className="percentage">{Math.round(listRating[0])}%</span>
               </div>
             </div>
             {reviewFormVisible && (

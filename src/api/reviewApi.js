@@ -2,10 +2,10 @@ import axios from 'axios';
 
 const url = 'https://courtcaller.azurewebsites.net/api';
 
-export const fetchEachPercentRatingByBranch = async (rating,branchId) => {
+export const fetchEachPercentRatingByBranch = async (branchId) => {
     try {
        
-      const response = await axios.post(`${url}/Reviews/GetRatingPercentageOfABranch/${branchId}` );
+      const response = await axios.get(`${url}/Reviews/GetRatingPercentageOfABranch/${branchId}` );
   
       return response.data;
     } catch (error) {
