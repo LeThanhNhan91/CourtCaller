@@ -89,7 +89,7 @@ const HomePage = () => {
     setError(null);
     try {
       const response = await fetch(
-        `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=${pageNumber}&pageSize=${itemsPerPage}&searchQuery=${searchQuery || city || district}`
+        `https://courtcaller.azurewebsites.net/api/Branches?pageNumber=${pageNumber}&pageSize=${itemsPerPage}&searchQuery=${district + ", " + city}`
       );
       const data = await response.json();
       setBranches(data.data); // Assuming the API returns branches in an array called "data"
@@ -184,14 +184,14 @@ const HomePage = () => {
               ))}
             </select>
 
-            <div className="search_bar">
+            {/* <div className="search_bar">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Searching branch by name"
               />
-            </div>
+            </div> */}
 
             <button onClick={handleSearch}><AiOutlineSearch /></button>
           </div>
