@@ -317,6 +317,12 @@ const BookByDay = () => {
     }
 
     const checkBooking = await fetchBookingByUserId(userData.userId);
+    const listBranchId = checkBooking.map((booking) => booking.branchId);
+    if(!listBranchId.includes(selectedBranch)){
+      setShowRequestBooking(true);
+      return;
+    }
+
     if(checkBooking.length == 0){
       setShowRequestBooking(true);
       return;

@@ -161,7 +161,7 @@ const Login = () => {
         }
       );
       toast.success("Registration successful!");
-      setMessage("SIGN UP SUCCESSFULLY - LOG IN NOW !");
+      setMessage("SIGN UP SUCCESSFULLY - LOG IN NOW");
       setMessageType("success");
       setIsLogin(true);
     } catch (error) {
