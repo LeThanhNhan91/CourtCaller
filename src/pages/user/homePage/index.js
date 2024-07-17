@@ -24,6 +24,7 @@ const HomePage = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [branches, setBranches] = useState([]);
   const [prices, setPrices] = useState({});
+  const [numberOfCourts, setNumberOfCourts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -49,6 +50,7 @@ const HomePage = () => {
         setBranches(data.data); // Assuming the API returns branches in an array called "data"
         setTotalBranches(data.total); // Assuming the API returns total count of branches
         await fetchPrices(data.data);
+        await fetchNumberOfCourts(data.data);
       } catch (err) {
         setError("Failed to fetch data");
       } finally {
@@ -69,6 +71,22 @@ const HomePage = () => {
       return false
     }
     return true
+  }
+
+  console.log("branches", branches)
+
+  const fetchNumberOfCourts = async (branchData) => {
+    const courtsData = {};
+    for (const branch of branchData) {
+      try {
+        const response = await fetch(`https://courtcaller.azurewebsites.net/numberOfCourt/${branch.branchId}`);
+        const data = await response.json();
+        courtsData[branch.branchId] = data;
+      } catch (err) {
+        console.error(`Failed to fetch number of courts for branch ${branch.branchId}`);
+      }
+    }
+    setNumberOfCourts(courtsData);
   }
 
   const fetchPrices = async (branchData) => {
@@ -95,12 +113,14 @@ const HomePage = () => {
       setBranches(data.data); // Assuming the API returns branches in an array called "data"
       setTotalBranches(data.total); // Assuming the API returns total count of branches
       await fetchPrices(data.data);
+      await fetchNumberOfCourts(data.data);
     } catch (err) {
       setError("Failed to fetch data");
     } finally {
       setLoading(false);
     }
   };
+
   const handleSortByDistance = async () => {
     setLoading(true);
     setError(null);
@@ -113,6 +133,7 @@ const HomePage = () => {
       setBranches(data.data.map(item => item.branch));
       setTotalBranches(data.total); // Assuming the API returns total count of branches
       await fetchPrices(data.data.branch);
+      await fetchNumberOfCourts(data.data.branch);
     } catch (err) {
       setError("Failed to fetch data");
     } finally {
@@ -219,7 +240,7 @@ const HomePage = () => {
                     <img className="home-img" src={branch.branchPicture} alt="no pic" />)
                 )}
                 <h3>{branch.branchName}</h3>
-                <p>Number of courts: 4</p>
+                <p>Number of courts: {numberOfCourts[branch.branchId] || 'No court'}</p>
                 <p>Address: {branch.branchAddress}</p>
                 <p>
                   {prices[branch.branchId]

@@ -122,6 +122,7 @@ const BookByDay = () => {
   const [startOfWeek, setStartOfWeek] = useState(dayjs().startOf("week"));
   const [weekdayPrice, setWeekdayPrice] = useState(0);
   const [weekendPrice, setWeekendPrice] = useState(0);
+  const [numberOfCourt, setNumberOfCourts] = useState('');
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [openTime, setOpentime] = useState(branch.openTime);
   const [closeTime, setClosetime] = useState(branch.closeTime);
@@ -449,6 +450,19 @@ const BookByDay = () => {
     fetchPrices();
   }, [selectedBranch]);
 
+  useEffect(() => {
+  const fetchNumberOfCourts = async () => {
+      try {
+        const response = await fetch(`https://courtcaller.azurewebsites.net/numberOfCourt/${selectedBranch}`);
+        const data = await response.json();
+        setNumberOfCourts(data);
+      } catch (err) {
+        console.error(`Failed to fetch number of courts for branch ${selectedBranch}`);
+      }
+  };
+    fetchNumberOfCourts();
+  }, [selectedBranch]);
+
   // Parse openDay và lấy ngày trong tuần
   useEffect(() => {
     if (openDay) {
@@ -695,7 +709,7 @@ const BookByDay = () => {
                 </div>
                 <div className="item">
                   <span>Number of courts:</span>
-                  <span style={{ fontWeight: 700 }}>4</span>
+                  <span style={{ fontWeight: 700 }}>{numberOfCourt}</span>
                 </div>
                 <div className="item">
                   <span>Weekday Price:</span>

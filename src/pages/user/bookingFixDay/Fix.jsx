@@ -104,6 +104,7 @@ const FixedBooking = () => {
   const [slotStartTime, setSlotStartTime] = useState("");
   const [slotEndTime, setSlotEndTime] = useState("");
   const [fixedPrice, setFixedPrice] = useState(0);
+  const [numberOfCourt, setNumberOfCourts] = useState('');
   const [email, setEmail] = useState("");
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
@@ -339,6 +340,19 @@ const FixedBooking = () => {
     fetchBranchPrices();
   }, [selectedBranch]);
 
+  useEffect(() => {
+    const fetchNumberOfCourts = async () => {
+        try {
+          const response = await fetch(`https://courtcaller.azurewebsites.net/numberOfCourt/${selectedBranch}`);
+          const data = await response.json();
+          setNumberOfCourts(data);
+        } catch (err) {
+          console.error(`Failed to fetch number of courts for branch ${selectedBranch}`);
+        }
+    };
+      fetchNumberOfCourts();
+    }, [selectedBranch]);
+
   const handleDayOfWeekChange = (event) => {
     const { value, checked } = event.target;
     setDaysOfWeek((prevDaysOfWeek) =>
@@ -460,7 +474,7 @@ const FixedBooking = () => {
                 </div>
                 <div className="item">
                   <span>Number of courts:</span>
-                  <span style={{ fontWeight: 700 }}>4</span>
+                  <span style={{ fontWeight: 700 }}>{numberOfCourt}</span>
                 </div>
                 <div className="item">
                   <span>Price :</span>

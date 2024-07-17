@@ -377,7 +377,7 @@ const BookedPage = () => {
                 )}
               </table>
             </div>
-            <h2 style={{ color: "#2ecc71", fontStyle: "italic" }}>
+            <h2 style={{ color: "#DC7633", fontStyle: "italic" }}>
               Canceled Bookings
             </h2>
             <div

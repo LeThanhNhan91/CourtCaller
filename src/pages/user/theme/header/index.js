@@ -93,7 +93,6 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully!");
     navigate(ROUTERS.USER.LOGIN);
   };
 

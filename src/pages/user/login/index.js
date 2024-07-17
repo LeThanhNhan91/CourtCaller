@@ -198,6 +198,7 @@ const Login = () => {
       if (res.ok) {
         // console.log("Login successful:", data);
         localStorage.setItem("token", data.token);
+        localStorage.setItem("ggToken", token)
         var decode = jwtDecode(data.token);
         localStorage.setItem("userRole", decode.role);
         const userData = {
@@ -205,7 +206,7 @@ const Login = () => {
           role: decode.role
         };
         login(userData); // Lưu thông tin người dùng vào context
-        toast.success("Login Successfully");
+        // toast.success("Login Successfully");
         navigate(ROUTERS.USER.HOME);
       } else {
         console.error("Backend error:", data);
@@ -250,7 +251,7 @@ const Login = () => {
           email: decode.email,
         };
         login(userData); // Lưu thông tin người dùng vào context
-        toast.success("Login Successfully");
+        // toast.success("Login Successfully");
         navigate(ROUTERS.USER.HOME);
       } else {
         console.error("Backend error:", data);
