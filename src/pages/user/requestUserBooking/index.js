@@ -15,11 +15,10 @@ const RequestBooking = () => {
             <div className="success-prompt-wrap">
               <p className="success-prompt-heading">Request Booking!
               </p><div className="success-prompt-prompt">
-                <p style={{margin: 0}}>You need to have already booking(s) in order to make a review.</p>
+                <p style={{margin: 0}}>You need to book first or already have booking(s) in this branch in order to make a review.</p>
               </div>
                 <div className="success-button-container">
                   <Link to="/booked"><button type="button" className="success-button-main">View history</button></Link>
-                  <button type="button" className="success-button-secondary">Back</button>
                 </div>
             </div>
           </div>
