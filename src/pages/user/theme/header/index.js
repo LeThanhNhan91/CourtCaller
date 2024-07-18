@@ -151,10 +151,7 @@ const Header = () => {
                         <MdOutlineGridView style={{fontSize: 20}} />
                         <Link to="/profile">View profile</Link>
                         </li>
-                        <li>
-                        <LuHeartHandshake style={{fontSize: 20}} />
-                        <Link to="/assign-member">Assign member (flexible time)</Link>
-                        </li>
+                        
                         <li onClick={handleLogout}>
                         <RiLogoutBoxRFill style={{fontSize: 20}} />
                           <a>Log out</a>
