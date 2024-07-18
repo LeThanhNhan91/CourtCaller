@@ -7,7 +7,6 @@ import { fetchQrcode } from "api/bookingApi";
 import BeatLoader from "react-spinners/BeatLoader";
 import "./style.scss";
 
-
 const BookedPage = () => {
   const [bookings, setBookings] = useState([]);
   const [overdueBookings, setOverdueBookings] = useState([]);
@@ -525,6 +524,11 @@ const BookedPage = () => {
                 </div>
                 <p style={{ marginTop: "6px" }}>QR Code for Checking In</p>
                 <p style={{ margin: "10px 0", color: "#00c853" }}>Checked in</p>
+              </div>
+              <div className="reschedule-prompt">
+                <p>
+                  *If you want to reschedule, please contact to our staffs via <strong> courtcaller@gmail.com</strong> or via hotline <strong> 0332748325</strong>.
+                </p>
               </div>
             </div>
           </div>
