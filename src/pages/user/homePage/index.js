@@ -14,6 +14,9 @@ import { fetchPrice } from "api/priceApi";
 import { animateScroll as scroll } from 'react-scroll';
 import SlideShowHomePage from "./SlideShow/SlideShow";
 import getUserLocation from "map/Geolocation";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
 
@@ -31,6 +34,10 @@ const HomePage = () => {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [totalBranches, setTotalBranches] = useState(0);
   const navigate = useNavigate();
+  const [isUserVip, setUserVip] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [user, setUser] = useState(null);
 
   const cityDistricts = {
     "Hồ Chí Minh": ["Quận 1", "Quận 2", "Bình Thạnh", "Bình Tân"],
@@ -49,7 +56,7 @@ const HomePage = () => {
         const data = await response.json();
         setBranches(data.data); // Assuming the API returns branches in an array called "data"
         setTotalBranches(data.total); // Assuming the API returns total count of branches
-        await fetchPrices(data.data);
+        await fetchPrices(isUserVip,data.data);
         await fetchNumberOfCourts(data.data);
       } catch (err) {
         setError("Failed to fetch data");
@@ -89,11 +96,60 @@ const HomePage = () => {
     setNumberOfCourts(courtsData);
   }
 
-  const fetchPrices = async (branchData) => {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      setUserId(decodedToken.Id);
+
+      const fetchUserData = async (id, isGoogle) => {
+        try {
+          if (isGoogle) {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
+            );
+            setUserData(response.data);
+            setUserVip(response.data.isVip);
+           
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
+            );
+            setUser(userResponse.data);
+        
+          } else {
+            const response = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
+            );
+            setUserData(response.data);
+       console.log('response nè:', response.data.isVip); 
+            setUserVip(response.data.isVip);
+            const userResponse = await axios.get(
+              `https://courtcaller.azurewebsites.net/api/Users/${id}`
+            );
+            setUser(userResponse.data);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      if (decodedToken.iss !== "https://accounts.google.com") {
+        const userId = decodedToken.Id;
+        setUserId(userId);
+        fetchUserData(userId, false);
+      } else {
+        const userId = decodedToken.email;
+        setUserId(userId);
+        fetchUserData(userId, true);
+      }
+    }
+  }, []);
+
+  const fetchPrices = async (isUserVip,branchData) => {
     const pricesData = {};
     for (const branch of branchData) {
       try {
-        const { weekdayPrice, weekendPrice } = await fetchPrice(branch.branchId);
+        const { weekdayPrice, weekendPrice } = await fetchPrice(isUserVip,branch.branchId);
         pricesData[branch.branchId] = { weekdayPrice, weekendPrice };
       } catch (err) {
         console.error(`Failed to fetch price for branch ${branch.branchId}`);
