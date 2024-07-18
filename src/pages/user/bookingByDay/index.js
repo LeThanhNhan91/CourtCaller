@@ -41,7 +41,10 @@ import {
 import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
 import RequestLogin from "../requestUserLogin";
 import RequestBooking from "../requestUserBooking";
-import {fetchPercentRatingByBranch, fetchEachPercentRatingByBranch} from "../../../api/reviewApi";
+import {
+  fetchPercentRatingByBranch,
+  fetchEachPercentRatingByBranch,
+} from "../../../api/reviewApi";
 
 dayjs.extend(isSameOrBefore);
 
@@ -123,7 +126,7 @@ const BookByDay = () => {
   const [startOfWeek, setStartOfWeek] = useState(dayjs().startOf("week"));
   const [weekdayPrice, setWeekdayPrice] = useState(0);
   const [weekendPrice, setWeekendPrice] = useState(0);
-  const [numberOfCourt, setNumberOfCourts] = useState('');
+  const [numberOfCourt, setNumberOfCourts] = useState("");
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [openTime, setOpentime] = useState(branch.openTime);
   const [closeTime, setClosetime] = useState(branch.closeTime);
@@ -308,8 +311,8 @@ const BookByDay = () => {
   };
 
   const handleSubmitReview = async () => {
-    const token = localStorage.getItem('token');
-    if(!token){
+    const token = localStorage.getItem("token");
+    if (!token) {
       setShowLogin(true);
       return;
     }
@@ -321,12 +324,12 @@ const BookByDay = () => {
 
     const checkBooking = await fetchBookingByUserId(userData.userId);
     const listBranchId = checkBooking.map((booking) => booking.branchId);
-    if(!listBranchId.includes(selectedBranch)){
+    if (!listBranchId.includes(selectedBranch)) {
       setShowRequestBooking(true);
       return;
     }
 
-    if(checkBooking.length == 0){
+    if (checkBooking.length == 0) {
       setShowRequestBooking(true);
       return;
     }
@@ -460,15 +463,19 @@ const BookByDay = () => {
   }, [selectedBranch]);
 
   useEffect(() => {
-  const fetchNumberOfCourts = async () => {
+    const fetchNumberOfCourts = async () => {
       try {
-        const response = await fetch(`https://courtcaller.azurewebsites.net/numberOfCourt/${selectedBranch}`);
+        const response = await fetch(
+          `https://courtcaller.azurewebsites.net/numberOfCourt/${selectedBranch}`
+        );
         const data = await response.json();
         setNumberOfCourts(data);
       } catch (err) {
-        console.error(`Failed to fetch number of courts for branch ${selectedBranch}`);
+        console.error(
+          `Failed to fetch number of courts for branch ${selectedBranch}`
+        );
       }
-  };
+    };
     fetchNumberOfCourts();
   }, [selectedBranch]);
 
@@ -488,7 +495,6 @@ const BookByDay = () => {
       const decimalCloseTime = timeStringToDecimal("14:00:00");
       const timeSlots = generateTimeSlots(decimalOpenTime, decimalCloseTime);
       setMorningTimeSlots(timeSlots);
-  
     }
   }, [openTime]);
 
@@ -593,8 +599,8 @@ const BookByDay = () => {
   // xử lý khi click vào nút continue qua trang tiếp theo
   //(Nhân lấy về cần chú ý là chỉ lấy các slot đã click qua trang mới chứ chưa post api booking, và chưa lấy userid)
   const handleContinue = async () => {
-    const token = localStorage.getItem('token');
-    if(!token) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       setShowLogin(true);
       return;
     }
@@ -670,34 +676,31 @@ const BookByDay = () => {
   //fetch rating tổng xong rồi đưa vào averageRating
   useEffect(() => {
     const fetchRating = async () => {
-        try {
-          console.log('selectedBranch của rating:', selectedBranch);
-            const data = await fetchPercentRatingByBranch(selectedBranch);
-            setAverageRating(data);
-        } catch (error) {
-            console.error('Error fetching rating', error);
-        }
+      try {
+        console.log("selectedBranch của rating:", selectedBranch);
+        const data = await fetchPercentRatingByBranch(selectedBranch);
+        setAverageRating(data);
+      } catch (error) {
+        console.error("Error fetching rating", error);
+      }
     };
 
     fetchRating();
-}, [selectedBranch]);
+  }, [selectedBranch]);
 
-  //fetch rating nhỏ 
-useEffect(() => { 
-  const fetchEachPercentRating = async () => {
-    try {
-      const data = await fetchEachPercentRatingByBranch(selectedBranch);
-      console.log('data:', data);
-      setListRating(data);
-    } catch (error) {
-      console.error('Error fetching rating', error);
-    }
-  };
-  fetchEachPercentRating();
-}, [selectedBranch]);
-  
-
-
+  //fetch rating nhỏ
+  useEffect(() => {
+    const fetchEachPercentRating = async () => {
+      try {
+        const data = await fetchEachPercentRatingByBranch(selectedBranch);
+        console.log("data:", data);
+        setListRating(data);
+      } catch (error) {
+        console.error("Error fetching rating", error);
+      }
+    };
+    fetchEachPercentRating();
+  }, [selectedBranch]);
 
   const days = weekDays;
   const pictures = JSON.parse(branch.branchPicture).slice(0, 5);
@@ -1069,7 +1072,9 @@ useEffect(() => {
             <h2>Rating this Branch</h2>
             <div className="average-rating">
               <div className="average-score">
-                <span className="score">{AverageRating}</span>
+                <span className="score">
+                  {Math.round(AverageRating * 10) / 10}
+                </span>
                 <span className="star">★</span>
               </div>
               <div>
@@ -1089,7 +1094,10 @@ useEffect(() => {
               <div className="rating-bar">
                 <span className="stars">★★★★★</span>
                 <div className="bar">
-                  <div className="fill" style={{ width:  `${listRating[4]}%` }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[4]}%` }}
+                  ></div>
                 </div>
                 {/* làm tròn đơn vị math round được chưa nhân*/}
                 <span className="percentage">{Math.round(listRating[4])}%</span>
@@ -1097,28 +1105,40 @@ useEffect(() => {
               <div className="rating-bar">
                 <span className="stars">★★★★☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: `${listRating[3]}%` }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[3]}%` }}
+                  ></div>
                 </div>
                 <span className="percentage">{Math.round(listRating[3])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★★★☆☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: `${listRating[2]}%` }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[2]}%` }}
+                  ></div>
                 </div>
                 <span className="percentage">{Math.round(listRating[2])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★★☆☆☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: `${listRating[1]}%` }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[1]}%` }}
+                  ></div>
                 </div>
                 <span className="percentage">{Math.round(listRating[1])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★☆☆☆☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: `${listRating[0]}%` }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[0]}%` }}
+                  ></div>
                 </div>
                 <span className="percentage">{Math.round(listRating[0])}%</span>
               </div>
@@ -1247,43 +1267,43 @@ useEffect(() => {
 
         {/* Login request */}
         {showLogin && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.85)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <RequestLogin />
-        </Box>
-      )}
+          <Box
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.85)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1000,
+            }}
+          >
+            <RequestLogin />
+          </Box>
+        )}
 
-      {/* Booking request */}
-      {showRequestBooking && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.85)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <RequestBooking />
-        </Box>
-      )}
+        {/* Booking request */}
+        {showRequestBooking && (
+          <Box
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.85)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1000,
+            }}
+          >
+            <RequestBooking />
+          </Box>
+        )}
       </div>
     </>
   );

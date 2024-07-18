@@ -29,10 +29,18 @@ import { CiEdit } from "react-icons/ci";
 import CalendarView from "./CalendarView";
 import { fetchPriceByBranchIDType } from "api/priceApi";
 import { fetchBookingByUserId } from "api/bookingApi";
+import {
+  fetchPercentRatingByBranch,
+  fetchEachPercentRatingByBranch,
+} from "api/reviewApi";
 import DisplayMap from "map/DisplayMap";
 import RequestLogin from "../requestUserLogin";
 import RequestBooking from "../requestUserBooking";
-import { fixMonthValidation, fixStartTimeValidation, fixEndTimeValidation } from "../Validations/bookingValidation";
+import {
+  fixMonthValidation,
+  fixStartTimeValidation,
+  fixEndTimeValidation,
+} from "../Validations/bookingValidation";
 
 const theme = createTheme({
   palette: {
@@ -104,7 +112,7 @@ const FixedBooking = () => {
   const [slotStartTime, setSlotStartTime] = useState("");
   const [slotEndTime, setSlotEndTime] = useState("");
   const [fixedPrice, setFixedPrice] = useState(0);
-  const [numberOfCourt, setNumberOfCourts] = useState('');
+  const [numberOfCourt, setNumberOfCourts] = useState("");
   const [email, setEmail] = useState("");
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
@@ -122,17 +130,19 @@ const FixedBooking = () => {
   const [selectedBranch, setSelectedBranch] = useState(branch.branchId);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
+  const [AverageRating, setAverageRating] = useState(null);
+  const [listRating, setListRating] = useState([]);
   const [monthValidation, setMonthValidation] = useState({
     isValid: true,
-    message: ""
+    message: "",
   });
   const [startTimeValidation, setStartTimeValidation] = useState({
     isValid: true,
-    message: ""
+    message: "",
   });
   const [endTimeValidation, setEndTimeValidation] = useState({
     isValid: true,
-    message: ""
+    message: "",
   });
 
   useEffect(() => {
@@ -188,8 +198,8 @@ const FixedBooking = () => {
   };
 
   const handleSubmitReview = async () => {
-    const token = localStorage.getItem('token');
-    if(!token){
+    const token = localStorage.getItem("token");
+    if (!token) {
       setShowLogin(true);
       return;
     }
@@ -201,12 +211,12 @@ const FixedBooking = () => {
 
     const checkBooking = await fetchBookingByUserId(userData.userId);
     const listBranchId = checkBooking.map((booking) => booking.branchId);
-    if(!listBranchId.includes(selectedBranch)){
+    if (!listBranchId.includes(selectedBranch)) {
       setShowRequestBooking(true);
       return;
     }
 
-    if(checkBooking.length == 0){
+    if (checkBooking.length == 0) {
       setShowRequestBooking(true);
       return;
     }
@@ -251,7 +261,7 @@ const FixedBooking = () => {
       );
 
       const reviewsWithDetails = await Promise.all(
-        response.data.data.map(async (review) => {
+        response.data.map(async (review) => {
           console.log("review", review.id);
           let userFullName = "Unknown User";
           if (review.id) {
@@ -348,16 +358,20 @@ const FixedBooking = () => {
 
   useEffect(() => {
     const fetchNumberOfCourts = async () => {
-        try {
-          const response = await fetch(`https://courtcaller.azurewebsites.net/numberOfCourt/${selectedBranch}`);
-          const data = await response.json();
-          setNumberOfCourts(data);
-        } catch (err) {
-          console.error(`Failed to fetch number of courts for branch ${selectedBranch}`);
-        }
+      try {
+        const response = await fetch(
+          `https://courtcaller.azurewebsites.net/numberOfCourt/${selectedBranch}`
+        );
+        const data = await response.json();
+        setNumberOfCourts(data);
+      } catch (err) {
+        console.error(
+          `Failed to fetch number of courts for branch ${selectedBranch}`
+        );
+      }
     };
-      fetchNumberOfCourts();
-    }, [selectedBranch]);
+    fetchNumberOfCourts();
+  }, [selectedBranch]);
 
   const handleDayOfWeekChange = (event) => {
     const { value, checked } = event.target;
@@ -371,8 +385,8 @@ const FixedBooking = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const token = localStorage.getItem('token');
-    if(!token){
+    const token = localStorage.getItem("token");
+    if (!token) {
       setShowLogin(true);
       return;
     }
@@ -384,7 +398,11 @@ const FixedBooking = () => {
     setStartTimeValidation(startTimeValidation);
     setEndTimeValidation(endTimeValidation);
 
-    if(!monthValidation.isValid || !startTimeValidation.isValid || !endTimeValidation.isValid){
+    if (
+      !monthValidation.isValid ||
+      !startTimeValidation.isValid ||
+      !endTimeValidation.isValid
+    ) {
       setMessage("Please try again");
       setMessageType("error");
       return;
@@ -431,6 +449,35 @@ const FixedBooking = () => {
       state,
     });
   };
+
+  //fetch rating tổng xong rồi đưa vào averageRating
+  useEffect(() => {
+    const fetchRating = async () => {
+      try {
+        console.log("selectedBranch của rating:", selectedBranch);
+        const data = await fetchPercentRatingByBranch(selectedBranch);
+        setAverageRating(data);
+      } catch (error) {
+        console.error("Error fetching rating", error);
+      }
+    };
+
+    fetchRating();
+  }, [selectedBranch]);
+
+  //fetch rating nhỏ
+  useEffect(() => {
+    const fetchEachPercentRating = async () => {
+      try {
+        const data = await fetchEachPercentRatingByBranch(selectedBranch);
+        console.log("data:", data);
+        setListRating(data);
+      } catch (error) {
+        console.error("Error fetching rating", error);
+      }
+    };
+    fetchEachPercentRating();
+  }, [selectedBranch]);
 
   const pictures = JSON.parse(branch.branchPicture).slice(0, 5);
 
@@ -564,8 +611,10 @@ const FixedBooking = () => {
                             InputProps={{ style: { color: "black" } }}
                           />
                           {monthValidation.message && (
-                <p className="errorVal">{monthValidation.message}</p>
-              )}
+                            <p className="errorVal">
+                              {monthValidation.message}
+                            </p>
+                          )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>
@@ -622,8 +671,10 @@ const FixedBooking = () => {
                             InputProps={{ style: { color: "black" } }}
                           />
                           {startTimeValidation.message && (
-                <p className="errorVal">{startTimeValidation.message}</p>
-              )}
+                            <p className="errorVal">
+                              {startTimeValidation.message}
+                            </p>
+                          )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>
@@ -638,8 +689,10 @@ const FixedBooking = () => {
                             InputProps={{ style: { color: "black" } }}
                           />
                           {endTimeValidation.message && (
-                <p className="errorVal">{endTimeValidation.message}</p>
-              )}
+                            <p className="errorVal">
+                              {endTimeValidation.message}
+                            </p>
+                          )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>
@@ -687,7 +740,9 @@ const FixedBooking = () => {
             <h2>Rating this Branch</h2>
             <div className="average-rating">
               <div className="average-score">
-                <span className="score">5.0</span>
+                <span className="score">
+                  {Math.round(AverageRating * 10) / 10}
+                </span>
                 <span className="star">★</span>
               </div>
               <div>
@@ -707,37 +762,53 @@ const FixedBooking = () => {
               <div className="rating-bar">
                 <span className="stars">★★★★★</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[4]}%` }}
+                  ></div>
                 </div>
-                <span className="percentage">0%</span>
+                {/* làm tròn đơn vị math round được chưa nhân*/}
+                <span className="percentage">{Math.round(listRating[4])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★★★★☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[3]}%` }}
+                  ></div>
                 </div>
-                <span className="percentage">0%</span>
+                <span className="percentage">{Math.round(listRating[3])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★★★☆☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[2]}%` }}
+                  ></div>
                 </div>
-                <span className="percentage">0%</span>
+                <span className="percentage">{Math.round(listRating[2])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★★☆☆☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[1]}%` }}
+                  ></div>
                 </div>
-                <span className="percentage">0%</span>
+                <span className="percentage">{Math.round(listRating[1])}%</span>
               </div>
               <div className="rating-bar">
                 <span className="stars">★☆☆☆☆</span>
                 <div className="bar">
-                  <div className="fill" style={{ width: "0%" }}></div>
+                  <div
+                    className="fill"
+                    style={{ width: `${listRating[0]}%` }}
+                  ></div>
                 </div>
-                <span className="percentage">0%</span>
+                <span className="percentage">{Math.round(listRating[0])}%</span>
               </div>
             </div>
             {reviewFormVisible && (
@@ -803,7 +874,7 @@ const FixedBooking = () => {
                             </span>
                             <FaStar style={{ color: "gold" }} />
                           </div>
-                          {review.id === userData.userId && (
+                          {userData && review.id === userData.userId && (
                             <CiEdit
                               style={{
                                 marginRight: "10px",
@@ -863,43 +934,43 @@ const FixedBooking = () => {
         </div>
 
         {showLogin && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.85)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <RequestLogin />
-        </Box>
-      )}
+          <Box
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.85)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1000,
+            }}
+          >
+            <RequestLogin />
+          </Box>
+        )}
 
-       {/* Booking request */}
-       {showRequestBooking && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.85)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <RequestBooking />
-        </Box>
-      )}
+        {/* Booking request */}
+        {showRequestBooking && (
+          <Box
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.85)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1000,
+            }}
+          >
+            <RequestBooking />
+          </Box>
+        )}
       </div>
     </>
   );
