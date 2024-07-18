@@ -2,10 +2,11 @@ import axios from 'axios';
 
 
 const url = 'https://courtcaller.azurewebsites.net/api';
-export const fetchPrice = async (branchId) => {
+export const fetchPrice = async (isVip,branchId) => {
   try {
     const response = await axios.post(`${url}/Prices/showprice`, null, {
       params: {
+        isVip,
         branchId
       }
     });

@@ -140,6 +140,7 @@ const BookByDay = () => {
   const [reviewsVisible, setReviewsVisible] = useState(false);
   const [editingReview, setEditingReview] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [isUserVip, setUserVip] = useState(false);
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
   const [connection, setConnection] = useState(null);
@@ -173,15 +174,20 @@ const BookByDay = () => {
               `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
             );
             setUserData(response.data);
+           
+           
             const userResponse = await axios.get(
               `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
             );
             setUser(userResponse.data);
+        
           } else {
             const response = await axios.get(
               `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
             );
             setUserData(response.data);
+       console.log('response nè:', response.data.isVip); 
+            setUserVip(response.data.isVip);
             const userResponse = await axios.get(
               `https://courtcaller.azurewebsites.net/api/Users/${id}`
             );
@@ -448,16 +454,18 @@ const BookByDay = () => {
   useEffect(() => {
     const fetchPrices = async () => {
       try {
-        const prices = await fetchPrice(selectedBranch);
+        console.log("isUserVip:", isUserVip);
+        const prices = await fetchPrice(isUserVip,selectedBranch);
         setWeekdayPrice(prices.weekdayPrice);
         setWeekendPrice(prices.weekendPrice);
+        console.log("prices:", prices); 
       } catch (error) {
         console.error("Error fetching prices", error);
       }
     };
 
     fetchPrices();
-  }, [selectedBranch]);
+  }, [selectedBranch,isUserVip]);
 
   useEffect(() => {
   const fetchNumberOfCourts = async () => {
