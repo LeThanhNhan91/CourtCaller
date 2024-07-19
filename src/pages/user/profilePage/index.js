@@ -280,7 +280,7 @@ const Profile = () => {
               <p className="info">{user.userName}</p>
             </div>
             <div className="form-group">
-              <p className="info-field">Date of Birth</p>
+              <p className="info-field">Year of Birth</p>
               <p className="info">{userData.yearOfBirth}</p>
             </div>
             <div className="form-group">

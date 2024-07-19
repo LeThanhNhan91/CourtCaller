@@ -631,6 +631,7 @@ const FixedBooking = () => {
                             required
                             InputLabelProps={{ style: { color: "black" } }}
                             InputProps={{ style: { color: "black" } }}
+                            inputProps={{min: 1}}
                           />
                           {monthValidation.message && (
                             <p className="errorVal">

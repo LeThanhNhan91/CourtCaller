@@ -41,6 +41,10 @@ export const validateAddress = (address) => {
 
 export const validateYob = (yob) => {
   const currentYear = new Date().getFullYear();
+  const yobRegex = /^\d{4}$/;
+  if (!yobRegex.test(yob)) {
+    return { isValid: false, message: "Yob must be a number with 4 digits" };
+  }
 
   if (yob > currentYear) {
     return {
