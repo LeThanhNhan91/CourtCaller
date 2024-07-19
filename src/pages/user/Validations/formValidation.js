@@ -1,5 +1,5 @@
 const API_URL =
-  "https://courtcaller.azurewebsites.net/api/Users?pageNumber=1&pageSize=100";
+  "https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/";
 
 export const validateFullName = (fullName) => {
   if (fullName.length >= 6) return { isValid: true, message: "" };
@@ -65,16 +65,13 @@ export const validateEmail = async (email) => {
 
   // Fetch registered emails from the API
   try {
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error("Failed to fetch registered emails");
-    }
+    const response = await fetch(`${API_URL}/${email}`);
 
-    const users = await response.json();
-    const registeredEmails = users.data.map((user) => user.email.toLowerCase());
-
-    if (registeredEmails.includes(email.toLowerCase())) {
-      return { isValid: false, message: "Email is already existed" };
+    if (response.status === 200) {
+      return {
+        isValid: false,
+        message: "Email is already existed",
+      };
     }
 
     return { isValid: true, message: "" };
