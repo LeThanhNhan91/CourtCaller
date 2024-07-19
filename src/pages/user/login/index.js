@@ -315,7 +315,7 @@ const Login = () => {
                 {loading ? <ClipLoader size={15} color="#fff" /> : "Sign In"}
               </button>
               {message && (
-                <p className={messageType === "error" ? "error-message" : ""}>
+                <p style={{marginTop: 10, fontSize: "small"}} className={messageType === "error" ? "error-message" : ""}>
                   {message}
                 </p>
               )}

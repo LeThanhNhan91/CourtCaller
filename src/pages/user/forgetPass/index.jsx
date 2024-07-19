@@ -90,7 +90,7 @@ const ForgetPassword = () => {
           </form>
 
           <>
-            <p style={{ fontSize: "large" }} classNames="signup-link">
+            <p style={{ fontSize: "large" }} className="signup-link">
               Don't have an account?
               <Link style={{ textDecoration: "none" }} to="/login">
                 <a href="#" className="signup-link link">
