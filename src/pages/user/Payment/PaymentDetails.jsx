@@ -1,11 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button, TextField, Stepper, Step, StepLabel, Typography, Divider, Card, CardContent, CardHeader, Grid,} from "@mui/material";
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Button,
+  TextField,
+  Stepper,
+  Step,
+  StepLabel,
+  Typography,
+  Divider,
+  Card,
+  CardContent,
+  CardHeader,
+  Grid,
+} from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import PaymentIcon from "@mui/icons-material/Payment";
-import { generatePaymentToken, processPayment, processBalancePayment } from "api/paymentApi";
+import {
+  generatePaymentToken,
+  processPayment,
+  processBalancePayment,
+} from "api/paymentApi";
 import LoadingPage from "./LoadingPage";
-import { reserveSlots, createBookingFlex, deleteBookingInFlex, } from "api/bookingApi";
+import {
+  reserveSlots,
+  createBookingFlex,
+  deleteBookingInFlex,
+} from "api/bookingApi";
 import { addTimeSlotIfExistBooking } from "api/timeSlotApi";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -60,7 +86,7 @@ const PaymentDetail = () => {
   const [userName, setUserName] = useState("");
   const [connection, setConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [showFlexPayment, setShowFlexPayment] = useState(false);
 
   useEffect(() => {
@@ -164,12 +190,12 @@ const PaymentDetail = () => {
   }, [connection]);
 
   useEffect(() => {
-    if(type === "flexible" && availableSlot !== 0){
+    if (type === "flexible" && availableSlot !== 0) {
       setShowFlexPayment(true);
-    }else{
+    } else {
       setShowFlexPayment(false);
     }
-  }, [])
+  }, []);
 
   // gửi slot để backend signalr nó check
   const sendUnavailableSlotCheck = async () => {
@@ -219,9 +245,7 @@ const PaymentDetail = () => {
           },
         });
         return;
-      }
-
-      else if (type === "flexible" && availableSlot === 0) {
+      } else if (type === "flexible" && availableSlot === 0) {
         let id = null;
         try {
           setIsLoading(true);
@@ -323,7 +347,6 @@ const PaymentDetail = () => {
     }
   };
 
-
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
@@ -366,30 +389,35 @@ const PaymentDetail = () => {
               }}
             >
               <Grid container spacing={2}>
-                {showFlexPayment ? (<Grid item xs={12} md={6}>
-                  <Box
-                    sx={{
-                      backgroundColor: "#E0E0E0",
-                      padding: "20px",
-                      borderRadius: 2,
-                      maxHeight: "400px",
-                      overflowY: "auto",
-                    }}
-                  >
-                    <Typography
-                      variant="h5"
-                      gutterBottom
-                      color="black"
-                      display="flex"
-                      alignItems="center"
+                {showFlexPayment ? (
+                  <Grid item xs={12} md={6}>
+                    <Box
+                      sx={{
+                        backgroundColor: "#E0E0E0",
+                        padding: "20px",
+                        borderRadius: 2,
+                        maxHeight: "400px",
+                        overflowY: "auto",
+                      }}
                     >
-                      <PaymentIcon sx={{ marginRight: "8px" }} /> Payment Method
-                    </Typography>
-                    <FormControl component="fieldset">
-                      <FormLabel component="legend" sx={{ color: "black" }}>
-                        <strong>You don't need to select payment method because you have {availableSlot} slot(s) now !</strong>
-                      </FormLabel>
-                      {/* <RadioGroup
+                      <Typography
+                        variant="h5"
+                        gutterBottom
+                        color="black"
+                        display="flex"
+                        alignItems="center"
+                      >
+                        <PaymentIcon sx={{ marginRight: "8px" }} /> Payment
+                        Method
+                      </Typography>
+                      <FormControl component="fieldset">
+                        <FormLabel component="legend" sx={{ color: "black" }}>
+                          <strong>
+                            You don't need to select payment method because you
+                            have {availableSlot} slot(s) now !
+                          </strong>
+                        </FormLabel>
+                        {/* <RadioGroup
                         aria-label="payment method"
                         name="paymentMethod"
                         value={selectedPaymentMethod}
@@ -408,57 +436,58 @@ const PaymentDetail = () => {
                           sx={{ color: "black" }}
                         />
                       </RadioGroup> */}
-                    </FormControl>
-                  </Box>
-                </Grid>
-              ) : (
-                <Grid item xs={12} md={6}>
-                  <Box
-                    sx={{
-                      backgroundColor: "#E0E0E0",
-                      padding: "20px",
-                      borderRadius: 2,
-                      maxHeight: "400px",
-                      overflowY: "auto",
-                    }}
-                  >
-                    <Typography
-                      variant="h5"
-                      gutterBottom
-                      color="black"
-                      display="flex"
-                      alignItems="center"
+                      </FormControl>
+                    </Box>
+                  </Grid>
+                ) : (
+                  <Grid item xs={12} md={6}>
+                    <Box
+                      sx={{
+                        backgroundColor: "#E0E0E0",
+                        padding: "20px",
+                        borderRadius: 2,
+                        maxHeight: "400px",
+                        overflowY: "auto",
+                      }}
                     >
-                      <PaymentIcon sx={{ marginRight: "8px" }} /> Payment Method
-                    </Typography>
-                    <FormControl component="fieldset">
-                      <FormLabel component="legend" sx={{ color: "black" }}>
-                        Select Payment Method
-                      </FormLabel>
-                      <RadioGroup
-                        aria-label="payment method"
-                        name="paymentMethod"
-                        value={selectedPaymentMethod}
-                        onChange={handlePaymentMethodChange}
+                      <Typography
+                        variant="h5"
+                        gutterBottom
+                        color="black"
+                        display="flex"
+                        alignItems="center"
                       >
-                        <FormControlLabel
-                          value="creditCard"
-                          control={<Radio />}
-                          label="Credit Card"
-                          sx={{ color: "black" }}
-                        />
-                        <FormControlLabel
-                          value="Balance"
-                          control={<Radio />}
-                          label="Balance"
-                          sx={{ color: "black" }}
-                        />
-                      </RadioGroup>
-                    </FormControl>
-                  </Box>
-                </Grid>
-              )}
-                
+                        <PaymentIcon sx={{ marginRight: "8px" }} /> Payment
+                        Method
+                      </Typography>
+                      <FormControl component="fieldset">
+                        <FormLabel component="legend" sx={{ color: "black" }}>
+                          Select Payment Method
+                        </FormLabel>
+                        <RadioGroup
+                          aria-label="payment method"
+                          name="paymentMethod"
+                          value={selectedPaymentMethod}
+                          onChange={handlePaymentMethodChange}
+                        >
+                          <FormControlLabel
+                            value="creditCard"
+                            control={<Radio />}
+                            label="Credit Card"
+                            sx={{ color: "black" }}
+                          />
+                          <FormControlLabel
+                            value="Balance"
+                            control={<Radio />}
+                            label="Balance"
+                            sx={{ color: "black" }}
+                          />
+                        </RadioGroup>
+                      </FormControl>
+                    </Box>
+                  </Grid>
+                )}
+
                 <Grid item xs={12} md={6}>
                   <Box
                     sx={{
@@ -504,13 +533,13 @@ const PaymentDetail = () => {
                             {request.timeSlot.slotEndTime}
                           </Typography>
                           <Typography variant="body1" color="black">
-                            <strong>Price:</strong> {request.price} USD
+                            <strong>Price:</strong> {request.price} VND
                           </Typography>
                         </Box>
                       ))}
                     <Divider sx={{ marginY: "10px" }} />
                     <Typography variant="h6" color="black">
-                      <strong>Total Price:</strong> {totalPrice} USD
+                      <strong>Total Price:</strong> {totalPrice} VND
                     </Typography>
                   </Box>
                 </Grid>
@@ -542,38 +571,39 @@ const PaymentDetail = () => {
 
   return (
     <>
-    {showFlexPayment ? (<ThemeProvider theme={theme}>
-      <Box
-        m="20px"
-        p="20px"
-        sx={{ backgroundColor: "#F5F5F5", borderRadius: 2 }}
-      >
-        <Typography variant="h4" gutterBottom color="black">
-          Payment Details
-        </Typography>
-        <Stepper activeStep={activeStep} sx={{ marginBottom: "20px" }}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-        {isLoading ? <LoadingPage /> : getStepContent(activeStep)}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: "20px",
-          }}
-        >
-          <Button
-            disabled={activeStep === 0}
-            onClick={handleBack}
-            sx={{ marginRight: "20px" }}
+      {showFlexPayment ? (
+        <ThemeProvider theme={theme}>
+          <Box
+            m="20px"
+            p="20px"
+            sx={{ backgroundColor: "#F5F5F5", borderRadius: 2 }}
           >
-            Back
-          </Button>
-          {/* <Button
+            <Typography variant="h4" gutterBottom color="black">
+              Payment Details
+            </Typography>
+            <Stepper activeStep={activeStep} sx={{ marginBottom: "20px" }}>
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            {isLoading ? <LoadingPage /> : getStepContent(activeStep)}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "20px",
+              }}
+            >
+              <Button
+                disabled={activeStep === 0}
+                onClick={handleBack}
+                sx={{ marginRight: "20px" }}
+              >
+                Back
+              </Button>
+              {/* <Button
             style={{ marginLeft: "1125px" }}
             variant="contained"
             color="primary"
@@ -582,73 +612,73 @@ const PaymentDetail = () => {
           >
             {activeStep === steps.length - 1 ? "Finish" : "By Balance"}
           </Button> */}
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleNext("CreditCard")}
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleNext("CreditCard")}
+              >
+                {activeStep === steps.length - 1 ? "Finish" : "Next"}
+              </Button>
+            </Box>
+          </Box>
+        </ThemeProvider>
+      ) : (
+        <ThemeProvider theme={theme}>
+          <Box
+            m="20px"
+            p="20px"
+            sx={{ backgroundColor: "#F5F5F5", borderRadius: 2 }}
           >
-            {activeStep === steps.length - 1 ? "Finish" : "Next"}
-          </Button>
-        </Box>
-      </Box>
-    </ThemeProvider>
-    ) : (
-      <ThemeProvider theme={theme}>
-      <Box
-        m="20px"
-        p="20px"
-        sx={{ backgroundColor: "#F5F5F5", borderRadius: 2 }}
-      >
-        <Typography variant="h4" gutterBottom color="black">
-          Payment Details
-        </Typography>
-        <Stepper activeStep={activeStep} sx={{ marginBottom: "20px" }}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-        {isLoading ? <LoadingPage /> : getStepContent(activeStep)}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: "20px",
-          }}
-        >
-          <Button
-            disabled={activeStep === 0}
-            onClick={handleBack}
-            sx={{ marginRight: "20px" }}
-          >
-            Back
-          </Button>
-          <Button
-            style={{ marginLeft: "1125px" }}
-            variant="contained"
-            color="primary"
-            onClick={() => handleNext("Balance")}
-            disabled={isLoading || selectedPaymentMethod !== 'Balance'} // Disable button while loading or if Credit Card is selected
-          >
-            {activeStep === steps.length - 1 ? "Finish" : "By Balance"}
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleNext("CreditCard")}
-            disabled={isLoading || selectedPaymentMethod !== 'creditCard'} // Disable button while loading or if Balance is selected
-          >
-            {activeStep === steps.length - 1 ? "Finish" : "VNPay"}
-          </Button>
-        </Box>
-      </Box>
-    </ThemeProvider>
-    )}
+            <Typography variant="h4" gutterBottom color="black">
+              Payment Details
+            </Typography>
+            <Stepper activeStep={activeStep} sx={{ marginBottom: "20px" }}>
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            {isLoading ? <LoadingPage /> : getStepContent(activeStep)}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "20px",
+              }}
+            >
+              <Button
+                disabled={activeStep === 0}
+                onClick={handleBack}
+                sx={{ marginRight: "20px" }}
+              >
+                Back
+              </Button>
+              <Button
+                style={{ marginLeft: "1125px" }}
+                variant="contained"
+                color="primary"
+                onClick={() => handleNext("Balance")}
+                disabled={isLoading || selectedPaymentMethod !== "Balance"} // Disable button while loading or if Credit Card is selected
+              >
+                {activeStep === steps.length - 1 ? "Finish" : "By Balance"}
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleNext("CreditCard")}
+                disabled={isLoading || selectedPaymentMethod !== "creditCard"} // Disable button while loading or if Balance is selected
+              >
+                {activeStep === steps.length - 1 ? "Finish" : "VNPay"}
+              </Button>
+            </Box>
+          </Box>
+        </ThemeProvider>
+      )}
     </>
   );
 };
 
 export default PaymentDetail;
 
-//hãy chỉnh cho tôi nếu 
+//hãy chỉnh cho tôi nếu

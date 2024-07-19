@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Modal from "react-modal";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -26,6 +27,14 @@ import {
   fetchEachPercentRatingByBranch,
   fetchPercentRatingByBranch,
 } from "api/reviewApi";
+
+import {
+  reviewTextValidation,
+  valueValidation,
+} from "../Validations/reviewValidation";
+import RequestForReviewing from "../requestForReviewing";
+
+Modal.setAppElement("#root");
 
 dayjs.extend(isSameOrBefore);
 
@@ -134,6 +143,7 @@ const FlexibleBooking = () => {
   const [showRequestBooking, setShowRequestBooking] = useState(false);
   const [AverageRating, setAverageRating] = useState(null);
   const [listRating, setListRating] = useState([]);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchBranchResponses = async () => {
@@ -244,14 +254,23 @@ const FlexibleBooking = () => {
     }
 
     const checkBooking = await fetchBookingByUserId(userData.userId);
+
+    if (checkBooking.length == 0) {
+      setShowRequestBooking(true);
+      return;
+    }
+
     const listBranchId = checkBooking.map((booking) => booking.branchId);
     if (!listBranchId.includes(branchId)) {
       setShowRequestBooking(true);
       return;
     }
 
-    if (checkBooking.length == 0) {
-      setShowRequestBooking(true);
+    const starValidation = valueValidation(highlightedStars);
+    const remarkValidation = reviewTextValidation(reviewText);
+
+    if (!starValidation.isValid || !remarkValidation.isValid) {
+      setModalIsOpen(true);
       return;
     }
 
@@ -283,7 +302,9 @@ const FlexibleBooking = () => {
     }
   };
 
-  console.log("branchResponse", branchResponse);
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
 
   const handleViewReviews = async () => {
     try {
@@ -1067,6 +1088,18 @@ const FlexibleBooking = () => {
           >
             <RequestBooking />
           </Box>
+        )}
+
+        {/* Review request */}
+        {modalIsOpen && (
+          <Modal
+            isOpen={modalIsOpen}
+            onRequestClose={closeModal}
+            className="review-modal"
+            overlayClassName="review-modal-overlay"
+          >
+            <RequestForReviewing />
+          </Modal>
         )}
       </div>
     </>

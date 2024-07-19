@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Modal from "react-modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -41,6 +42,13 @@ import {
   fixStartTimeValidation,
   fixEndTimeValidation,
 } from "../Validations/bookingValidation";
+import {
+  reviewTextValidation,
+  valueValidation,
+} from "../Validations/reviewValidation";
+import RequestForReviewing from "../requestForReviewing";
+
+Modal.setAppElement("#root");
 
 const theme = createTheme({
   palette: {
@@ -132,6 +140,7 @@ const FixedBooking = () => {
   const [messageType, setMessageType] = useState("");
   const [AverageRating, setAverageRating] = useState(null);
   const [listRating, setListRating] = useState([]);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
   const [monthValidation, setMonthValidation] = useState({
     isValid: true,
     message: "",
@@ -210,14 +219,23 @@ const FixedBooking = () => {
     }
 
     const checkBooking = await fetchBookingByUserId(userData.userId);
+
+    if (checkBooking.length == 0) {
+      setShowRequestBooking(true);
+      return;
+    }
+
     const listBranchId = checkBooking.map((booking) => booking.branchId);
     if (!listBranchId.includes(selectedBranch)) {
       setShowRequestBooking(true);
       return;
     }
 
-    if (checkBooking.length == 0) {
-      setShowRequestBooking(true);
+    const starValidation = valueValidation(highlightedStars);
+    const remarkValidation = reviewTextValidation(reviewText);
+
+    if (!starValidation.isValid || !remarkValidation.isValid) {
+      setModalIsOpen(true);
       return;
     }
 
@@ -247,6 +265,10 @@ const FixedBooking = () => {
     } catch (error) {
       navigate("/login");
     }
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
   };
 
   const handleViewReviews = async () => {
@@ -970,6 +992,18 @@ const FixedBooking = () => {
           >
             <RequestBooking />
           </Box>
+        )}
+
+        {/* Review request */}
+        {modalIsOpen && (
+          <Modal
+            isOpen={modalIsOpen}
+            onRequestClose={closeModal}
+            className="review-modal"
+            overlayClassName="review-modal-overlay"
+          >
+            <RequestForReviewing />
+          </Modal>
         )}
       </div>
     </>

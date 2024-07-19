@@ -30,6 +30,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { CiEdit } from "react-icons/ci";
 import "./styles.scss";
 import "react-multi-carousel/lib/styles.css";
+import Modal from "react-modal";
 import "./style.scss";
 import DisplayMap from "map/DisplayMap";
 import * as signalR from "@microsoft/signalr";
@@ -45,6 +46,13 @@ import {
   fetchPercentRatingByBranch,
   fetchEachPercentRatingByBranch,
 } from "../../../api/reviewApi";
+import {
+  reviewTextValidation,
+  valueValidation,
+} from "../Validations/reviewValidation";
+import RequestForReviewing from "../requestForReviewing";
+
+Modal.setAppElement("#root");
 
 dayjs.extend(isSameOrBefore);
 
@@ -156,6 +164,8 @@ const BookByDay = () => {
   const selectBranchRef = useRef(selectedBranch);
   const [showLogin, setShowLogin] = useState(false); // State to manage visibility of RequestLogin component
   const [showRequestBooking, setShowRequestBooking] = useState(false);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
   useEffect(() => {
     selectBranchRef.current = selectedBranch;
   }, [selectedBranch]);
@@ -177,19 +187,17 @@ const BookByDay = () => {
               `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
             );
             setUserData(response.data);
-           
-           
+
             const userResponse = await axios.get(
               `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
             );
             setUser(userResponse.data);
-        
           } else {
             const response = await axios.get(
               `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
             );
             setUserData(response.data);
-       console.log('response nè:', response.data.isVip); 
+            console.log("response nè:", response.data.isVip);
             setUserVip(response.data.isVip);
             const userResponse = await axios.get(
               `https://courtcaller.azurewebsites.net/api/Users/${id}`
@@ -329,14 +337,23 @@ const BookByDay = () => {
     }
 
     const checkBooking = await fetchBookingByUserId(userData.userId);
+
+    if (checkBooking.length == 0) {
+      setShowRequestBooking(true);
+      return;
+    }
+
     const listBranchId = checkBooking.map((booking) => booking.branchId);
     if (!listBranchId.includes(selectedBranch)) {
       setShowRequestBooking(true);
       return;
     }
 
-    if (checkBooking.length == 0) {
-      setShowRequestBooking(true);
+    const starValidation = valueValidation(highlightedStars);
+    const remarkValidation = reviewTextValidation(reviewText);
+
+    if (!starValidation.isValid || !remarkValidation.isValid) {
+      setModalIsOpen(true);
       return;
     }
 
@@ -458,17 +475,17 @@ const BookByDay = () => {
     const fetchPrices = async () => {
       try {
         console.log("isUserVip:", isUserVip);
-        const prices = await fetchPrice(isUserVip,selectedBranch);
+        const prices = await fetchPrice(isUserVip, selectedBranch);
         setWeekdayPrice(prices.weekdayPrice);
         setWeekendPrice(prices.weekendPrice);
-        console.log("prices:", prices); 
+        console.log("prices:", prices);
       } catch (error) {
         console.error("Error fetching prices", error);
       }
     };
 
     fetchPrices();
-  }, [selectedBranch,isUserVip]);
+  }, [selectedBranch, isUserVip]);
 
   useEffect(() => {
     const fetchNumberOfCourts = async () => {
@@ -709,6 +726,10 @@ const BookByDay = () => {
     };
     fetchEachPercentRating();
   }, [selectedBranch]);
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
 
   const days = weekDays;
   const pictures = JSON.parse(branch.branchPicture).slice(0, 5);
@@ -1311,6 +1332,18 @@ const BookByDay = () => {
           >
             <RequestBooking />
           </Box>
+        )}
+
+        {/* Review request */}
+        {modalIsOpen && (
+          <Modal
+            isOpen={modalIsOpen}
+            onRequestClose={closeModal}
+            className="review-modal"
+            overlayClassName="review-modal-overlay"
+          >
+            <RequestForReviewing />
+          </Modal>
         )}
       </div>
     </>
