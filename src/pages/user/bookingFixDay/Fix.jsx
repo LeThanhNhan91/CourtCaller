@@ -560,7 +560,7 @@ const FixedBooking = () => {
                   <span style={{ fontWeight: 700 }}>{branch.branchPhone} </span>
                 </div>
               </div>
-              <div className="services-info">
+              <div style={{marginTop: 60}} className="services-info">
                 <div className="service-title">Convenient Service</div>
                 <div className="service-list">
                   <span className="service-item">

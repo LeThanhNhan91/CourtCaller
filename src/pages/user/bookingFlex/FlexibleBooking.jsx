@@ -163,20 +163,6 @@ const FlexibleBooking = () => {
   }, [branchId]);
 
   useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        const prices = await fetchPrice(branchId);
-        setWeekdayPrice(prices.weekdayPrice);
-        setWeekendPrice(prices.weekendPrice);
-      } catch (error) {
-        console.error("Error fetching prices", error);
-      }
-    };
-
-    fetchPrices();
-  }, [branchId]);
-
-  useEffect(() => {
     const fetchNumberOfCourts = async () => {
       try {
         const response = await fetch(
@@ -596,21 +582,13 @@ const FlexibleBooking = () => {
                   <span style={{ fontWeight: 700 }}>{numberOfCourt}</span>
                 </div>
                 <div className="item">
-                  <span>Weekday Price :</span>
-                  <span style={{ fontWeight: 700 }}>{weekdayPrice} VND</span>
-                </div>
-                <div className="item">
-                  <span>Weekend Price :</span>
-                  <span style={{ fontWeight: 700 }}>{weekendPrice} VND</span>
-                </div>
-                <div className="item">
                   <span>Phone:</span>
                   <span style={{ fontWeight: 700 }}>
                     {branchResponse.branchPhone}{" "}
                   </span>
                 </div>
               </div>
-              <div className="services-info">
+              <div style={{marginTop: 100}} className="services-info">
                 <div className="service-title">Convenient Service</div>
                 <div className="service-list">
                   <span className="service-item">

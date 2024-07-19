@@ -850,15 +850,13 @@ const BookByDay = () => {
             </FormControl>
 
             {/* Khung ngày */}
-            <>  
+            <>
               {branch.branchId && (
-                
                 <Box
                   display="flex"
                   alignItems="center"
                   sx={{ backgroundColor: "#E0E0E0", p: 1, borderRadius: 2 }}
                 >
-                  
                   <IconButton onClick={handlePreviousWeek} size="small">
                     <ArrowBackIosIcon fontSize="inherit" />
                   </IconButton>
@@ -873,44 +871,39 @@ const BookByDay = () => {
               )}
             </>
             <>
-            {branch.branchId && (
-  <Box>
-    <Button
-      variant="contained"
-      sx={{
-        backgroundColor: showAfternoon ? "#FFFFFF" : "#0D1B34",
-        color: showAfternoon ? "#0D1B34" : "white",
-        mr: 1,
-        textTransform: "none",
-        marginBottom: "0",
-      }}
-      onClick={handleToggleMorning}
-    >
-      Morning
-    </Button>
-    <Button
-      variant="contained"
-      sx={{
-        backgroundColor: showAfternoon ? "#0D1B34" : "#FFFFFF",
-        color: showAfternoon ? "white" : "#0D1B34",
-        textTransform: "none",
-        marginBottom: "5",
-      }}
-      onClick={handleToggleAfternoon}
-    >
-      Afternoon
-    </Button>
-    {/* <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
-    1K = 1000 VND (104k = 104.000 VND)
-    </Typography> */}
-  </Box>
-)}
-</>
-</Box>
-  
-          
+              {branch.branchId && (
+                <Box>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: showAfternoon ? "#FFFFFF" : "#0D1B34",
+                      color: showAfternoon ? "#0D1B34" : "white",
+                      mr: 1,
+                      textTransform: "none",
+                      marginBottom: "0",
+                    }}
+                    onClick={handleToggleMorning}
+                  >
+                    Morning
+                  </Button>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: showAfternoon ? "#0D1B34" : "#FFFFFF",
+                      color: showAfternoon ? "white" : "#0D1B34",
+                      textTransform: "none",
+                      marginBottom: "5",
+                    }}
+                    onClick={handleToggleAfternoon}
+                  >
+                    Afternoon
+                  </Button>
+                </Box>
+              )}
+            </>
+          </Box>
+
           {days.map((day, dayIndex) => (
-            
             <Grid container spacing={2} key={dayIndex} alignItems="center">
               <Grid item xs={1} padding="8px">
                 <Box
@@ -935,9 +928,7 @@ const BookByDay = () => {
                   </Typography>
                 </Box>
               </Grid>
-             
-              
-     
+
               {(showAfternoon ? afternoonTimeSlots : morningTimeSlots).map(
                 (slot, slotIndex) => {
                   const price =
@@ -951,11 +942,9 @@ const BookByDay = () => {
                   const slotCount = selectedSlots.filter(
                     (selectedSlot) => selectedSlot.slotId === slotId
                   ).length;
-                 
+
                   return (
-                   
                     <Grid item xs key={slotIndex}>
-                      
                       <Button
                         onClick={() => handleSlotClick(slot, day, price)}
                         sx={{
@@ -1053,21 +1042,26 @@ const BookByDay = () => {
                         </Box>
                       </Button>
                     </Grid>
-                  
                   );
                 }
               )}
             </Grid>
-           
           ))}
           <>
             {branch.branchId && (
               <Box
                 display="flex"
-                justifyContent="end"
+                justifyContent="space-between"
                 mt={1}
                 marginRight={"12px"}
               >
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ mt: 2, color: "red", fontWeight: "bold" }}
+                >
+                  1K = 1000 VND (104k = 104.000 VND)
+                </Typography>
                 <Button
                   variant="contained"
                   sx={{
