@@ -3,7 +3,7 @@ import { Box, Typography, Button, TextField, FormControl } from "@mui/material";
 import { validateRequired, validateNumber } from "../Validations/formValidation";
 import { fetchBranches, fetchBranchById } from 'api/branchApi';
 import { checkBookingTypeFlex } from "api/bookingApi";
-import axios from "axios";
+import api from "api/api";
 import {jwtDecode} from "jwt-decode";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import RequestLogin from "../requestUserLogin";
@@ -38,48 +38,41 @@ const Flexible = () => {
     message: "",
 });
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const decodedToken = jwtDecode(token);
+useEffect(() => {
+  const token = localStorage.getItem("token");
 
-      const fetchUserData = async (id, isGoogle) => {
-        try {
-          if (isGoogle) {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
-            );
-            setUserData(response.data);
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
-            );
-            setUser(userResponse.data);
-          } else {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
-            );
-            setUserData(response.data);
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/${id}`
-            );
-            setUser(userResponse.data);
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
+  if (token) {
+    const decoded = jwtDecode(token);
+
+    const fetchUserData = async (id, isGoogle) => {
+      try {
+        if (isGoogle) {
+          const response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
+          setUserData(response.data);
+          const userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
+          setUser(userResponse.data);
+        } else {
+          const response = await api.get(`/UserDetails/${id}`);
+          setUserData(response.data);
+          const userResponse = await api.get(`/Users/${id}`);
+          setUser(userResponse.data);
         }
-      };      
-
-      if (decodedToken.iss !== "https://accounts.google.com") {
-        const id = decodedToken.Id;
-        setUserId(id);
-        fetchUserData(id, false);
-      } else {
-        const id = decodedToken.email;
-        setUserId(id);
-        fetchUserData(id, true);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
       }
+    };
+
+    if (decoded.iss !== "https://accounts.google.com") {
+      const userId = decoded.Id;
+      setUserId(userId);
+      fetchUserData(userId, false);
+    } else {
+      const userId = decoded.email;
+      setUserId(userId);
+      fetchUserData(userId, true);
     }
-  }, []);
+  }
+}, []);
 
   useEffect(() => {
     const fetchingFlexSlot = async () => {

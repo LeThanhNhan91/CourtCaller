@@ -3,7 +3,6 @@ import Modal from "react-modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import {
   Box,
@@ -30,6 +29,7 @@ import { CiEdit } from "react-icons/ci";
 import CalendarView from "./CalendarView";
 import { fetchPriceByBranchIDType } from "api/priceApi";
 import { fetchBookingByUserId } from "api/bookingApi";
+import api from "api/api";
 import {
   fetchPercentRatingByBranch,
   fetchEachPercentRatingByBranch,
@@ -89,27 +89,30 @@ const getOccurrencesOfDayInMonth = (year, month, day) => {
   return count;
 };
 
+const getOccurrencesOfDayInPeriod = (startDate, totalDays, day) => {
+  let count = 0;
+  for (let i = 0; i < totalDays; i++) {
+    const currentDay = new Date(startDate);
+    currentDay.setDate(startDate.getDate() + i);
+    const dayOfWeek = currentDay.toLocaleDateString('en-US', { weekday: 'long' });
+    if (dayOfWeek === day) {
+      count++;
+    }
+  }
+  return count;
+};
+
 const getTotalDaysForWeekdays = (daysOfWeek, numberOfMonths, startDate) => {
   const totalDays = {};
-  const startMonth = startDate.getMonth() + 1;
-  const startYear = startDate.getFullYear();
+  const daysInPeriod = numberOfMonths * 30;  // Tính tổng số ngày
 
-  daysOfWeek.forEach((day) => (totalDays[day] = 0));
-
-  for (let i = 0; i < numberOfMonths; i++) {
-    const currentMonth = ((startMonth + i - 1) % 12) + 1;
-    const currentYear = startYear + Math.floor((startMonth + i - 1) / 12);
-    daysOfWeek.forEach((day) => {
-      totalDays[day] += getOccurrencesOfDayInMonth(
-        currentYear,
-        currentMonth,
-        day
-      );
-    });
-  }
+  //array.forEach(function(currentValue, index, arr), thisValue)
+  daysOfWeek.forEach(day => {
+    totalDays[day] = getOccurrencesOfDayInPeriod(startDate, daysInPeriod, day);
+  });
 
   return totalDays;
-};
+}; 
 
 const FixedBooking = () => {
   const [numberOfMonths, setNumberOfMonths] = useState("");
@@ -156,29 +159,21 @@ const FixedBooking = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (token) {
-      const decodedToken = jwtDecode(token);
-      setUserId(decodedToken.Id);
+      const decoded = jwtDecode(token);
 
       const fetchUserData = async (id, isGoogle) => {
         try {
           if (isGoogle) {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
-            );
+            const response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
             setUserData(response.data);
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
-            );
+            const userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
             setUser(userResponse.data);
           } else {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
-            );
+            const response = await api.get(`/UserDetails/${id}`);
             setUserData(response.data);
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/${id}`
-            );
+            const userResponse = await api.get(`/Users/${id}`);
             setUser(userResponse.data);
           }
         } catch (error) {
@@ -186,12 +181,12 @@ const FixedBooking = () => {
         }
       };
 
-      if (decodedToken.iss !== "https://accounts.google.com") {
-        const userId = decodedToken.Id;
+      if (decoded.iss !== "https://accounts.google.com") {
+        const userId = decoded.Id;
         setUserId(userId);
         fetchUserData(userId, false);
       } else {
-        const userId = decodedToken.email;
+        const userId = decoded.email;
         setUserId(userId);
         fetchUserData(userId, true);
       }
@@ -252,8 +247,8 @@ const FixedBooking = () => {
       };
 
       try {
-        await axios.post(
-          "https://courtcaller.azurewebsites.net/api/Reviews",
+        await api.post(
+          "/Reviews",
           reviewData
         );
         setReviewFormVisible(false);
@@ -273,8 +268,8 @@ const FixedBooking = () => {
 
   const handleViewReviews = async () => {
     try {
-      const response = await axios.get(
-        `https://courtcaller.azurewebsites.net/api/Reviews/GetReviewsByBranch/${selectedBranch}`,
+      const response = await api.get(
+        `/Reviews/GetReviewsByBranch/${selectedBranch}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -288,8 +283,8 @@ const FixedBooking = () => {
           let userFullName = "Unknown User";
           if (review.id) {
             try {
-              const userDetailsResponse = await axios.get(
-                `https://courtcaller.azurewebsites.net/api/UserDetails/${review.id}`,
+              const userDetailsResponse = await api.get(
+                `/UserDetails/${review.id}`,
                 {
                   headers: {
                     "Content-Type": "application/json",
@@ -337,8 +332,8 @@ const FixedBooking = () => {
 
       console.log("editingReview", editingReview);
 
-      const response = await axios.put(
-        `https://courtcaller.azurewebsites.net/api/Reviews/${editingReview.reviewId}`,
+      const response = await api.put(
+        `/Reviews/${editingReview.reviewId}`,
         updatedReviewData,
         {
           headers: {

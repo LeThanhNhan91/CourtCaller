@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from "./api";
 
 const url = 'https://courtcaller.azurewebsites.net/api';
 
@@ -16,7 +16,7 @@ export const fetchAvailableCourts = async (branchId, slotDate, slotStartTime, sl
       },
     };
 
-    const response = await axios.post(`${url}/Courts/AvailableCourts`, requestBody);
+    const response = await api.post(`${url}/Courts/AvailableCourts`, requestBody);
     return response.data;
   } catch (error) {
     console.error('Error fetching available courts:', error.response ? error.response.data : error.message);
@@ -27,7 +27,7 @@ export const fetchAvailableCourts = async (branchId, slotDate, slotStartTime, sl
 export const fetchCourtByBranchId = async (branchId, pageNumber = 1, pageSize = 10, searchQuery = '') => {
   try {
     const params = { pageNumber, pageSize, searchQuery, branchId };
-    const response = await axios.get(`${url}/Courts/GetCourtsByBranchId`, { params });
+    const response = await api.get(`${url}/Courts/GetCourtsByBranchId`, { params });
 
     if (response.data && Array.isArray(response.data.data)) {
       

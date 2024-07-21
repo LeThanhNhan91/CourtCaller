@@ -122,14 +122,3 @@ export const validateTime = (time) => {
   if (timeRegex.test(time)) return { isValid: true, message: "" };
   return { isValid: false, message: "Invalid time format! (hh:mm:ss)" };
 };
-
-export const validateRequired = (value) => {
-  if (value.trim() !== "") return { isValid: true, message: "" };
-  return { isValid: false, message: "This field is required" };
-};
-
-export const validateNumber = (value) => {
-  if (!isNaN(value) && value.trim() !== "")
-    return { isValid: true, message: "" };
-  return { isValid: false, message: "Must be a number" };
-};

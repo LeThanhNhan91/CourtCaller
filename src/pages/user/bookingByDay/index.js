@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaWifi, FaMotorcycle, FaBowlFood } from "react-icons/fa6";
 import { FaCar, FaStar } from "react-icons/fa";
 import { RiDrinks2Fill } from "react-icons/ri";
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { MdOutlineLocalDrink } from "react-icons/md";
 import pic1 from "assets/users/images/byday/pic1.webp";
@@ -40,6 +39,7 @@ import {
   LogLevel,
 } from "@microsoft/signalr";
 import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
+import api from "api/api";
 import RequestLogin from "../requestUserLogin";
 import RequestBooking from "../requestUserBooking";
 import {
@@ -182,28 +182,17 @@ const BookByDay = () => {
 
       const fetchUserData = async (id, isGoogle) => {
         try {
+          let response, userResponse;
           if (isGoogle) {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
-            );
-            setUserData(response.data);
-
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
-            );
-            setUser(userResponse.data);
+            response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
+            userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
           } else {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
-            );
-            setUserData(response.data);
-            console.log("response nè:", response.data.isVip);
-            setUserVip(response.data.isVip);
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/${id}`
-            );
-            setUser(userResponse.data);
+            response = await api.get(`/UserDetails/${id}`);
+            userResponse = await api.get(`/Users/${id}`);
           }
+          setUserData(response.data);
+          setUserVip(response.data.isVip);
+          setUser(userResponse.data);
         } catch (error) {
           console.error("Error fetching user data:", error);
         }
@@ -370,8 +359,8 @@ const BookByDay = () => {
       };
 
       try {
-        await axios.post(
-          "https://courtcaller.azurewebsites.net/api/Reviews",
+        await api.post(
+          "/Reviews",
           reviewData
         );
         setReviewFormVisible(false);
@@ -387,8 +376,8 @@ const BookByDay = () => {
 
   const handleViewReviews = async () => {
     try {
-      const response = await axios.get(
-        `https://courtcaller.azurewebsites.net/api/Reviews/GetReviewsByBranch/${selectedBranch}`,
+      const response = await api.get(
+        `/Reviews/GetReviewsByBranch/${selectedBranch}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -402,8 +391,8 @@ const BookByDay = () => {
           let userFullName = "Unknown User";
           if (review.id) {
             try {
-              const userDetailsResponse = await axios.get(
-                `https://courtcaller.azurewebsites.net/api/UserDetails/${review.id}`,
+              const userDetailsResponse = await api.get(
+                `/UserDetails/${review.id}`,
                 {
                   headers: {
                     "Content-Type": "application/json",
@@ -448,8 +437,8 @@ const BookByDay = () => {
 
       console.log("editingReview", editingReview);
 
-      const response = await axios.put(
-        `https://courtcaller.azurewebsites.net/api/Reviews/${editingReview.reviewId}`,
+      const response = await api.put(
+        `/Reviews/${editingReview.reviewId}`,
         updatedReviewData,
         {
           headers: {

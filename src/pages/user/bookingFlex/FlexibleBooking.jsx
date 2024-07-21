@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import pic1 from "assets/users/images/byday/pic1.webp";
 import pic2 from "assets/users/images/byday/pic2.webp";
@@ -16,6 +15,7 @@ import { Box, Button, Grid, Typography, IconButton } from "@mui/material";
 import { fetchBranchById } from "api/branchApi";
 import { fetchPrice } from "api/priceApi";
 import { fetchBookingByUserId } from "api/bookingApi";
+import api from "api/api";
 import dayjs from "dayjs";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -181,29 +181,21 @@ const FlexibleBooking = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (token) {
-      const decodedToken = jwtDecode(token);
-      setCurrentUserId(decodedToken.Id);
+      const decoded = jwtDecode(token);
 
       const fetchUserData = async (id, isGoogle) => {
         try {
           if (isGoogle) {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
-            );
+            const response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
             setUserData(response.data);
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
-            );
+            const userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
             setUser(userResponse.data);
           } else {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
-            );
+            const response = await api.get(`/UserDetails/${id}`);
             setUserData(response.data);
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/${id}`
-            );
+            const userResponse = await api.get(`/Users/${id}`);
             setUser(userResponse.data);
           }
         } catch (error) {
@@ -211,12 +203,12 @@ const FlexibleBooking = () => {
         }
       };
 
-      if (decodedToken.iss !== "https://accounts.google.com") {
-        const userId = decodedToken.Id;
+      if (decoded.iss !== "https://accounts.google.com") {
+        const userId = decoded.Id;
         setCurrentUserId(userId);
         fetchUserData(userId, false);
       } else {
-        const userId = decodedToken.email;
+        const userId = decoded.email;
         setCurrentUserId(userId);
         fetchUserData(userId, true);
       }
@@ -273,8 +265,8 @@ const FlexibleBooking = () => {
       };
 
       try {
-        await axios.post(
-          "https://courtcaller.azurewebsites.net/api/Reviews",
+        await api.post(
+          "/Reviews",
           reviewData
         );
         setReviewFormVisible(false);
@@ -294,8 +286,8 @@ const FlexibleBooking = () => {
 
   const handleViewReviews = async () => {
     try {
-      const response = await axios.get(
-        `https://courtcaller.azurewebsites.net/api/Reviews/GetReviewsByBranch/${branchResponse.branchId}`,
+      const response = await api.get(
+        `/Reviews/GetReviewsByBranch/${branchResponse.branchId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -309,8 +301,8 @@ const FlexibleBooking = () => {
           let userFullName = "Unknown User";
           if (review.id) {
             try {
-              const userDetailsResponse = await axios.get(
-                `https://courtcaller.azurewebsites.net/api/UserDetails/${review.id}`,
+              const userDetailsResponse = await api.get(
+                `/UserDetails/${review.id}`,
                 {
                   headers: {
                     "Content-Type": "application/json",
@@ -384,8 +376,8 @@ const FlexibleBooking = () => {
 
       console.log("editingReview", editingReview);
 
-      const response = await axios.put(
-        `https://courtcaller.azurewebsites.net/api/Reviews/${editingReview.reviewId}`,
+      const response = await api.put(
+        `/Reviews/${editingReview.reviewId}`,
         updatedReviewData,
         {
           headers: {

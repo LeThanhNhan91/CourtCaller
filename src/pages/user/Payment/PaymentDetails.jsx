@@ -32,7 +32,7 @@ import {
 } from "api/bookingApi";
 import { addTimeSlotIfExistBooking } from "api/timeSlotApi";
 import { fetchAvailableCourts, fetchCourtByBranchId } from "api/courtApi";
-import axios from "axios";
+import api from "api/api";
 import { jwtDecode } from "jwt-decode";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import * as signalR from "@microsoft/signalr";
@@ -99,31 +99,19 @@ const PaymentDetail = () => {
 
     if (token) {
       const decoded = jwtDecode(token);
-      console.log(decoded);
       setUserEmail(decoded.email);
 
       const fetchUserData = async (id, isGoogle) => {
         try {
           if (isGoogle) {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
-            );
+            const response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
             setUserData(response.data);
-            setUserName(response.data.fullName);
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
-            );
+            const userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
             setUser(userResponse.data);
           } else {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
-            );
+            const response = await api.get(`/UserDetails/${id}`);
             setUserData(response.data);
-            setUserName(response.data.fullName);
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/${id}`
-            );
-            console.log("userResponse", userResponse.data);
+            const userResponse = await api.get(`/Users/${id}`);
             setUser(userResponse.data);
           }
         } catch (error) {

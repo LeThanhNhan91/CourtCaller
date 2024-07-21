@@ -9,6 +9,7 @@ import { generatePaymentToken, processPayment } from 'api/paymentApi';
 import { createFixedBooking } from 'api/bookingApi';
 import LoadingPage from './LoadingPage';
 import { processBalancePayment } from 'api/paymentApi';
+import api from 'api/api';
 
 const theme = createTheme({
   components: {
@@ -56,30 +57,19 @@ const PaymentDetailFixed = () => {
 
     if (token) {
       const decoded = jwtDecode(token);
-      setUserEmail(decoded.email)
+      setUserEmail(decoded.email);
 
       const fetchUserData = async (id, isGoogle) => {
         try {
           if (isGoogle) {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
-            );
+            const response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
             setUserData(response.data);
-            setUserName(response.data.fullName)
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
-            );
+            const userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
             setUser(userResponse.data);
-
           } else {
-            const response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
-            );
+            const response = await api.get(`/UserDetails/${id}`);
             setUserData(response.data);
-            setUserName(response.data.fullName)
-            const userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/${id}`
-            );
+            const userResponse = await api.get(`/Users/${id}`);
             setUser(userResponse.data);
           }
         } catch (error) {

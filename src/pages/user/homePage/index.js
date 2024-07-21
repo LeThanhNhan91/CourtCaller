@@ -15,7 +15,7 @@ import { animateScroll as scroll } from 'react-scroll';
 import SlideShowHomePage from "./SlideShow/SlideShow";
 import getUserLocation from "map/Geolocation";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+import api from "api/api";
 
 Modal.setAppElement('#root'); // Add this to avoid screen readers issues
 
@@ -54,19 +54,11 @@ const HomePage = () => {
         try {
           let response, userResponse;
           if (isGoogle) {
-            response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/GetUserDetailByUserEmail/${id}`
-            );
-            userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
-            );
+            response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
+            userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
           } else {
-            response = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/UserDetails/${id}`
-            );
-            userResponse = await axios.get(
-              `https://courtcaller.azurewebsites.net/api/Users/${id}`
-            );
+            response = await api.get(`/UserDetails/${id}`);
+            userResponse = await api.get(`/Users/${id}`);
           }
           setUserData(response.data);
           setUserVip(response.data.isVip);
