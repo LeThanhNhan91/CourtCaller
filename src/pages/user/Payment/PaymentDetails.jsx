@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   FormControl,
@@ -7,15 +7,13 @@ import {
   FormControlLabel,
   Radio,
   Button,
-  TextField,
   Stepper,
   Step,
   StepLabel,
   Typography,
+  Select,
+  MenuItem,
   Divider,
-  Card,
-  CardContent,
-  CardHeader,
   Grid,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -33,6 +31,7 @@ import {
   deleteBookingInFlex,
 } from "api/bookingApi";
 import { addTimeSlotIfExistBooking } from "api/timeSlotApi";
+import { fetchAvailableCourts, fetchCourtByBranchId } from "api/courtApi";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
@@ -88,6 +87,12 @@ const PaymentDetail = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [showFlexPayment, setShowFlexPayment] = useState(false);
+  const [courts, setCourts] = useState([]);
+  const [availableCourts, setAvailableCourts] = useState({});
+  const [selectedCourts, setSelectedCourts] = useState({});
+  const [eventCourt, setEventCourt] = useState(0);
+  //fetch chỉ 1 lần
+  const isFetchCourt = useRef(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -221,14 +226,53 @@ const PaymentDetail = () => {
       alert("No connection to server yet.");
     }
   };
+  useEffect(() => {
+    if (branchId) {
+      const loadCourts = async () => {
+        const data = await fetchCourtByBranchId(branchId, 1, 100);
+        setCourts(data.items);
+      };
+      loadCourts();
+    }
+  }, [branchId]);
+
+  const handleCourtChange = async (index, slotDate, slotStartTime, slotEndTime) => {
+    try {
+      const availableCourtsData = await fetchAvailableCourts(branchId, slotDate, slotStartTime, slotEndTime);
+      setAvailableCourts((prevState) => ({
+        ...prevState,
+        [index]: availableCourtsData
+      }));
+    } catch (error) {
+      console.error('Error fetching available courts:', error);
+    }
+  };
+
+  const handleCourtSelection = (index, courtId) => {
+    setSelectedCourts((prevState) => ({
+      ...prevState,
+      [index]: courtId
+    }));
+  };
+
+  useEffect(() => {
+    if (branchId && sortedBookingRequests.length > 0 && !isFetchCourt.current) {
+      sortedBookingRequests.forEach((request, index) => {
+        handleCourtChange(index, request.slotDate, request.timeSlot.slotStartTime, request.timeSlot.slotEndTime);
+        console.log ("branch", branchId , "sort là ", sortedBookingRequests);
+      });
+      isFetchCourt.current = true;
+    }
+  }, [eventCourt]);
+
 
   const handleNext = async (paymentMethod) => {
     try {
       await sendUnavailableSlotCheck();
 
       if (type === "flexible" && availableSlot !== 0 && bookingId) {
-        const bookingForm = bookingRequests.map((request) => ({
-          courtId: null,
+        const bookingForm = bookingRequests.map((request, index) => ({
+          courtId: selectedCourts[index] || null,
           branchId: branchId,
           slotDate: request.slotDate,
           timeSlot: {
@@ -249,8 +293,8 @@ const PaymentDetail = () => {
         let id = null;
         try {
           setIsLoading(true);
-          const bookingForm = bookingRequests.map((request) => ({
-            courtId: null,
+          const bookingForm = bookingRequests.map((request, index) => ({
+            courtId: selectedCourts[index] || null,
             branchId: branchId,
             slotDate: request.slotDate,
             timeSlot: {
@@ -304,17 +348,20 @@ const PaymentDetail = () => {
       if (activeStep === 0) {
         setIsLoading(true);
         try {
-          const bookingForm = bookingRequests.map((request) => {
+          const bookingForm = bookingRequests.map((request, index) => {
             return {
-              courtId: null,
+              courtId: selectedCourts[index] || null,
               branchId: branchId,
               slotDate: request.slotDate,
               timeSlot: {
+                slotDate: request.slotDate,
                 slotStartTime: request.timeSlot.slotStartTime,
                 slotEndTime: request.timeSlot.slotEndTime,
               },
             };
           });
+
+          console.log('bookingForm',bookingForm);
 
           const booking = await reserveSlots(userData.userId, bookingForm);
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -535,6 +582,21 @@ const PaymentDetail = () => {
                           <Typography variant="body1" color="black">
                             <strong>Price:</strong> {request.price} VND
                           </Typography>
+                          <FormControl fullWidth>
+                          <Select
+                            value={selectedCourts[index] || ''}
+                            displayEmpty
+                            onChange={(e) => handleCourtSelection(index, e.target.value)}
+                          >
+                            <MenuItem value="">
+                              <em>Choose Court</em>
+                            </MenuItem>
+                            {availableCourts[index] && availableCourts[index].map(court => (
+                              <MenuItem key={court.courtId} value={court.courtId}>{court.courtName}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+
                         </Box>
                       ))}
                     <Divider sx={{ marginY: "10px" }} />
@@ -681,4 +743,4 @@ const PaymentDetail = () => {
 
 export default PaymentDetail;
 
-//hãy chỉnh cho tôi nếu
+

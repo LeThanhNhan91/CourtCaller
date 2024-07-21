@@ -46,7 +46,7 @@ export const validateYob = (yob) => {
     return { isValid: false, message: "Yob must be a number with 4 digits" };
   }
 
-  if (yob > currentYear) {
+  if (yob > currentYear - 1) {
     return {
       isValid: false,
       message: "Year of birth must be less than current year!",
