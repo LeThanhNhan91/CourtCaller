@@ -66,11 +66,13 @@ const PaymentDetailFixed = () => {
             setUserData(response.data);
             const userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
             setUser(userResponse.data);
+            setUserName(userResponse.data.userName)
           } else {
             const response = await api.get(`/UserDetails/${id}`);
             setUserData(response.data);
             const userResponse = await api.get(`/Users/${id}`);
             setUser(userResponse.data);
+            setUserName(userResponse.data.userName)
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -88,6 +90,7 @@ const PaymentDetailFixed = () => {
       }
     }
   }, []);
+  console.log(user);
   
   const handleNext = async (paymentMethod) => {
     if (activeStep === 0) {
