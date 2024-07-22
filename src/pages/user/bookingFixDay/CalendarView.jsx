@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState , useRef } from "react";
 import {
   Box,
   Typography,
@@ -15,6 +15,9 @@ import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { fetchBranches, fetchBranchById } from "api/branchApi";
 import { fetchPriceByBranchIDType } from "api/priceApi"; // Updated import
+import { HubConnectionBuilder, HttpTransportType, LogLevel } from '@microsoft/signalr';
+import * as signalR from '@microsoft/signalr';
+import { fetchUnavailableSlots } from '../../../api/timeSlotApi';
 
 dayjs.extend(isSameOrBefore);
 
@@ -84,6 +87,7 @@ const timeStringToDecimal = (timeString) => {
 };
 
 const CalendarView = ({ selectedBranch, setSelectedBranch, onSlotSelect }) => {
+  const [loading, setLoading] = useState(false);
   const [branches, setBranches] = useState([]);
   const [startOfWeek, setStartOfWeek] = useState(dayjs().startOf("week"));
   const [weekDays, setWeekDays] = useState([]);
@@ -94,6 +98,78 @@ const CalendarView = ({ selectedBranch, setSelectedBranch, onSlotSelect }) => {
   const [afternoonTimeSlots, setAfternoonTimeSlots] = useState([]);
   const [showAfternoon, setShowAfternoon] = useState(false);
   const [price, setPrice] = useState(0); // Combined price state
+  //unavailableslot
+  const [unavailableSlots, setUnavailableSlot] = useState([]);
+  const [newWeekStart, setNewWeekStart] =  useState(dayjs().startOf('week'));
+  const newWeekStartRef = useRef(newWeekStart);
+  const currentDate = dayjs();
+  //khai signalR
+  const [isConnected, setIsConnected] = useState(false);
+  const [connection, setConnection] = useState(null);
+  
+  const selectBranchRef = useRef(selectedBranch);
+  useEffect(() => {
+    selectBranchRef.current = selectedBranch;
+  }, [selectedBranch]);
+
+
+  useEffect(() => {
+    const newConnection = new HubConnectionBuilder()
+        .withUrl("https://courtcaller.azurewebsites.net/timeslothub", {
+          transport: signalR.HttpTransportType.ServerSentEvents 
+        })
+        .withAutomaticReconnect()
+        .configureLogging(signalR.LogLevel.Information) 
+        .build();
+  
+    newConnection.onreconnecting((error) => {
+        console.log(`Connection lost due to error "${error}". Reconnecting.`);
+        setIsConnected(false);
+    });
+  
+    newConnection.onreconnected((connectionId) => {
+        console.log(`Connection reestablished. Connected with connectionId "${connectionId}".`);
+        setIsConnected(true);
+    });
+  
+    newConnection.onclose((error) => {
+        console.log(`Connection closed due to error "${error}". Try refreshing this page to restart the connection.`);
+        setIsConnected(false);
+    });
+  
+    newConnection.on("DisableSlot", (slotCheckModel) => {
+        console.log('Received DisableSlot:', slotCheckModel);
+  
+        //check nếu mà slot trả về có branch và date trùng với branch và date mà mình đang chọn thì set lại unavailable slot
+        const startOfWeekDayjs = dayjs(newWeekStartRef.current); //lấy ra đúng cái ngày đầu tiên của tuần user chọn
+        console.log('startOfWeekDayjs:', startOfWeekDayjs.format('YYYY-MM-DD'));
+        
+        const fromDate = startOfWeekDayjs.add(1, 'day').startOf('day');
+        const toDate = startOfWeekDayjs.add(7, 'day').endOf('day');
+        const slotDate = dayjs(slotCheckModel.slotDate, 'YYYY-MM-DD');
+        
+        console.log('fromDate :', fromDate.format('YYYY-MM-DD'), 'toDate ', toDate.format('YYYY-MM-DD'), 'slotDate:', slotDate.format('YYYY-MM-DD'));
+        
+        //check lẻ dkien 
+        const isBranchMatch = slotCheckModel.branchId === selectBranchRef.current;
+        console.log('branch của signalR:', slotCheckModel.branchId, 'branch mình chọn:', selectBranchRef.current, 'check thử cái này ', selectBranchRef)
+        const isDateMatch = slotDate.isBetween(fromDate, toDate, 'day', '[]');
+        console.log('isBranchMatch:', isBranchMatch, 'isDateMatch:', isDateMatch);
+        if(isBranchMatch && isDateMatch) {
+          console.log('điều kiện là true' );
+          const { slotDate, timeSlot: { slotStartTime, slotEndTime } } = slotCheckModel;
+        const newSlot = { slotDate, slotStartTime, slotEndTime };
+  
+        setUnavailableSlot((prev) => [...prev, newSlot]);
+       }
+    });
+  
+    setConnection(newConnection);
+  }, []);
+  //check unavailable slot
+  useEffect(() => {
+    console.log('UnavailableSlot:', unavailableSlots);
+  }, [unavailableSlots]);
 
   useEffect(() => {
     const fetchBranchesData = async () => {
@@ -171,24 +247,45 @@ const CalendarView = ({ selectedBranch, setSelectedBranch, onSlotSelect }) => {
   }, [selectedBranch]);
 
   const handlePreviousWeek = async () => {
-    const oneWeekBeforeCurrentWeek = dayjs()
-      .startOf("week")
-      .subtract(1, "week");
-    const oneWeekBeforeStartOfWeek = dayjs(startOfWeek).subtract(1, "week");
-
-    if (
-      !dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week") &&
-      oneWeekBeforeStartOfWeek.isAfter(oneWeekBeforeCurrentWeek)
-    ) {
+    setLoading(true);
+    const currentWeekStart = dayjs().startOf('week');
+    const oneWeekBeforeCurrentWeek = dayjs().startOf('week').subtract(1, 'week');
+    const oneWeekBeforeStartOfWeek = dayjs(startOfWeek).subtract(1, 'week');
+    // Không cho phép quay về tuần trước tuần hiện tại
+    if (oneWeekBeforeStartOfWeek.isBefore(currentWeekStart, 'week')) {
+      setLoading(false);
+      return; 
+    }
+    if (!dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week') && oneWeekBeforeStartOfWeek.isAfter(oneWeekBeforeCurrentWeek)) {
       setStartOfWeek(oneWeekBeforeStartOfWeek);
-    } else if (dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week")) {
+    } else if (dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week')) {
       setStartOfWeek(oneWeekBeforeCurrentWeek);
     }
+
+    const newWeekStart = oneWeekBeforeStartOfWeek.format('YYYY-MM-DD');
+    setNewWeekStart(newWeekStart);
+    const newWeekStartPlus = oneWeekBeforeStartOfWeek.add(1, 'day').format('YYYY-MM-DD');
+    const unavailableSlot = await fetchUnavailableSlots(newWeekStartPlus, selectedBranch);
+    const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+    setUnavailableSlot(slots);
+
+    setLoading(false);
   };
 
-  const handleNextWeek = () => {
-    setStartOfWeek(dayjs(startOfWeek).add(1, "week"));
+  const handleNextWeek = async () => {
+    setLoading(true);
+    const newWeekStart = dayjs(startOfWeek).add(1, 'week').format('YYYY-MM-DD');
+    console.log ('newWeekStart:', newWeekStart);
+    setNewWeekStart(newWeekStart);
+    setStartOfWeek(dayjs(startOfWeek).add(1, 'week'));
+   
+    const unavailableSlot = await fetchUnavailableSlots(newWeekStart, selectedBranch);
+    const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+    setUnavailableSlot(slots);
+
+    setLoading(false);
   };
+
 
   const handleToggleMorning = () => {
     setShowAfternoon(false);
@@ -197,6 +294,32 @@ const CalendarView = ({ selectedBranch, setSelectedBranch, onSlotSelect }) => {
   const handleToggleAfternoon = () => {
     setShowAfternoon(true);
   };
+
+  const isSlotUnavailable = (day, slot) => {
+    const formattedDay = day.format('YYYY-MM-DD'); 
+    const slotStartTime = slot.split(' - ')[0]; 
+    return unavailableSlots.some(unavailableSlot => {
+      return (
+         unavailableSlot.slotDate === formattedDay &&
+            unavailableSlot.slotStartTime === `${slotStartTime}:00`
+      );
+    });
+  };
+// fetch unavailable slot lần đầu
+  useEffect(() => {
+    const fetchInitialUnavailableSlots = async () => {
+      setLoading(true);
+      const currentWeekStart = dayjs(startOfWeek).format('YYYY-MM-DD');
+      const unavailableSlot = await fetchUnavailableSlots(currentWeekStart, selectedBranch);
+      const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+      setUnavailableSlot(slots);
+      setLoading(false);
+    };
+
+    if (selectedBranch) {
+      fetchInitialUnavailableSlots();
+    }
+  }, [selectedBranch, startOfWeek]);
 
   return (
     <Box
@@ -300,7 +423,8 @@ const CalendarView = ({ selectedBranch, setSelectedBranch, onSlotSelect }) => {
               const slotStartTime = dayjs(
                 `${day.format("YYYY-MM-DD")}T${start}`
               );
-              const isPast = dayjs().isAfter(slotStartTime);
+              const isPast = day.isBefore(currentDate, 'day') || (day.isSame(currentDate, 'day') &&
+              timeStringToDecimal(currentDate.format('HH:mm:ss')) > timeStringToDecimal(slot.split(' - ')[0]) + 0.25) || isSlotUnavailable(day, slot);
 
               return (
                 <Grid item xs key={slotIndex}>

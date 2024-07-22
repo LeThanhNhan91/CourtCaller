@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,useRef } from "react";
 import Modal from "react-modal";
 import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
@@ -21,6 +21,9 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import DisplayMap from "map/DisplayMap";
 import RequestBooking from "../requestUserBooking";
+import { HubConnectionBuilder, HttpTransportType, LogLevel } from '@microsoft/signalr';
+import * as signalR from '@microsoft/signalr';
+import { fetchUnavailableSlots } from '../../../api/timeSlotApi';
 import {
   fetchEachPercentRatingByBranch,
   fetchPercentRatingByBranch,
@@ -142,6 +145,79 @@ const FlexibleBooking = () => {
   const [AverageRating, setAverageRating] = useState(null);
   const [listRating, setListRating] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [newWeekStart, setNewWeekStart] =  useState(dayjs().startOf('week'));
+  const [selectedBranch, setSelectedBranch] = useState('');
+  const [loading, setLoading] = useState(false);
+  //khai signalR
+  
+  const [isConnected, setIsConnected] = useState(false);
+  const [connection, setConnection] = useState(null);
+  const newWeekStartRef = useRef(newWeekStart);
+  
+  const selectBranchRef = useRef(selectedBranch);
+  useEffect(() => {
+    selectBranchRef.current = selectedBranch;
+  }, [selectedBranch]);
+
+
+  //phần signalR
+  useEffect(() => {
+    const newConnection = new HubConnectionBuilder()
+        .withUrl("https://courtcaller.azurewebsites.net/timeslothub", {
+          transport: signalR.HttpTransportType.ServerSentEvents 
+        })
+        .withAutomaticReconnect()
+        .configureLogging(signalR.LogLevel.Information) 
+        .build();
+  
+    newConnection.onreconnecting((error) => {
+        console.log(`Connection lost due to error "${error}". Reconnecting.`);
+        setIsConnected(false);
+    });
+  
+    newConnection.onreconnected((connectionId) => {
+        console.log(`Connection reestablished. Connected with connectionId "${connectionId}".`);
+        setIsConnected(true);
+    });
+  
+    newConnection.onclose((error) => {
+        console.log(`Connection closed due to error "${error}". Try refreshing this page to restart the connection.`);
+        setIsConnected(false);
+    });
+  
+    newConnection.on("DisableSlot", (slotCheckModel) => {
+        console.log('Received DisableSlot:', slotCheckModel);
+  
+        //check nếu mà slot trả về có branch và date trùng với branch và date mà mình đang chọn thì set lại unavailable slot
+        const startOfWeekDayjs = dayjs(newWeekStartRef.current); //lấy ra đúng cái ngày đầu tiên của tuần user chọn
+        console.log('startOfWeekDayjs:', startOfWeekDayjs.format('YYYY-MM-DD'));
+        
+        const fromDate = startOfWeekDayjs.add(1, 'day').startOf('day');
+        const toDate = startOfWeekDayjs.add(7, 'day').endOf('day');
+        const slotDate = dayjs(slotCheckModel.slotDate, 'YYYY-MM-DD');
+        
+        console.log('fromDate :', fromDate.format('YYYY-MM-DD'), 'toDate ', toDate.format('YYYY-MM-DD'), 'slotDate:', slotDate.format('YYYY-MM-DD'));
+        
+        //check lẻ dkien 
+        const isBranchMatch = slotCheckModel.branchId === selectBranchRef.current;
+        console.log('branch của signalR:', slotCheckModel.branchId, 'branch mình chọn:', selectBranchRef.current, 'check thử cái này ', selectBranchRef)
+        const isDateMatch = slotDate.isBetween(fromDate, toDate, 'day', '[]');
+        console.log('isBranchMatch:', isBranchMatch, 'isDateMatch:', isDateMatch);
+        if(isBranchMatch && isDateMatch) {
+          console.log('điều kiện là true' );
+          const { slotDate, timeSlot: { slotStartTime, slotEndTime } } = slotCheckModel;
+        const newSlot = { slotDate, slotStartTime, slotEndTime };
+  
+        setUnavailableSlot((prev) => [...prev, newSlot]);
+       }
+    });
+  
+    setConnection(newConnection);
+  }, []);
+  //check unavailable slot
+  useEffect(() => {
+    console.log('UnavailableSlot:', unavailableSlots);
+  }, [unavailableSlots]);
 
   useEffect(() => {
     const fetchBranchResponses = async () => {
@@ -149,6 +225,7 @@ const FlexibleBooking = () => {
         const branchResponses = await fetchBranchById(branchId);
         if (branchResponses) {
           setBranch(branchResponses);
+          setSelectedBranch(branchResponses.branchId);
         } else {
           console.error("Invalid branch details");
         }
@@ -439,37 +516,60 @@ const FlexibleBooking = () => {
   };
 
   const handlePreviousWeek = async () => {
-    const currentWeekStart = dayjs().startOf("week");
-    const oneWeekBeforeCurrentWeek = dayjs()
-      .startOf("week")
-      .subtract(1, "week");
-    const oneWeekBeforeStartOfWeek = dayjs(startOfWeek).subtract(1, "week");
+    setLoading(true);
+    const currentWeekStart = dayjs().startOf('week');
+    const oneWeekBeforeCurrentWeek = dayjs().startOf('week').subtract(1, 'week');
+    const oneWeekBeforeStartOfWeek = dayjs(startOfWeek).subtract(1, 'week');
     // Không cho phép quay về tuần trước tuần hiện tại
-    if (oneWeekBeforeStartOfWeek.isBefore(currentWeekStart, "week")) {
-      return;
+    if (oneWeekBeforeStartOfWeek.isBefore(currentWeekStart, 'week')) {
+      setLoading(false);
+      return; 
     }
-    if (
-      !dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week") &&
-      oneWeekBeforeStartOfWeek.isAfter(oneWeekBeforeCurrentWeek)
-    ) {
+    if (!dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week') && oneWeekBeforeStartOfWeek.isAfter(oneWeekBeforeCurrentWeek)) {
       setStartOfWeek(oneWeekBeforeStartOfWeek);
-    } else if (dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, "week")) {
+    } else if (dayjs(startOfWeek).isSame(oneWeekBeforeCurrentWeek, 'week')) {
       setStartOfWeek(oneWeekBeforeCurrentWeek);
     }
 
-    const newWeekStart = oneWeekBeforeStartOfWeek.format("YYYY-MM-DD");
-    // setNewWeekStart(newWeekStart);
-    // const unavailableSlot = await fetchUnavailableSlots(
-    //   newWeekStart,
-    //   selectedBranch
-    // );
-    // const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
-    // setUnavailableSlot(slots);
+    const newWeekStart = oneWeekBeforeStartOfWeek.format('YYYY-MM-DD');
+    setNewWeekStart(newWeekStart);
+    const newWeekStartPlus = oneWeekBeforeStartOfWeek.add(1, 'day').format('YYYY-MM-DD');
+    const unavailableSlot = await fetchUnavailableSlots(newWeekStartPlus, selectedBranch);
+    const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+    setUnavailableSlot(slots);
+
+    setLoading(false);
   };
 
-  const handleNextWeek = () => {
-    setStartOfWeek(dayjs(startOfWeek).add(1, "week"));
+  const handleNextWeek = async () => {
+    setLoading(true);
+    const newWeekStart = dayjs(startOfWeek).add(1, 'week').format('YYYY-MM-DD');
+    console.log ('newWeekStart:', newWeekStart);
+    setNewWeekStart(newWeekStart);
+    setStartOfWeek(dayjs(startOfWeek).add(1, 'week'));
+   
+    const unavailableSlot = await fetchUnavailableSlots(newWeekStart, selectedBranch);
+    const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+    setUnavailableSlot(slots);
+
+    setLoading(false);
   };
+
+  //fetch unavailable slot lần đầu
+  useEffect(() => {
+    const fetchInitialUnavailableSlots = async () => {
+      setLoading(true);
+      const currentWeekStart = dayjs(startOfWeek).format('YYYY-MM-DD');
+      const unavailableSlot = await fetchUnavailableSlots(currentWeekStart, selectedBranch);
+      const slots = Array.isArray(unavailableSlot) ? unavailableSlot : [];
+      setUnavailableSlot(slots);
+      setLoading(false);
+    };
+
+    if (selectedBranch) {
+      fetchInitialUnavailableSlots();
+    }
+  }, [selectedBranch, startOfWeek]);
 
   const handleContinue = () => {
     if(selectedSlots == 0){
@@ -702,9 +802,7 @@ const FlexibleBooking = () => {
                   const slotCount = selectedSlots.filter(
                     (selectedSlot) => selectedSlot.slotId === slotId
                   ).length;
-                  const isSelected = selectedSlots.some(
-                    (selectedSlot) => selectedSlot.slotId === slotId
-                  );
+                  const isSelected = selectedSlots.some(selectedSlot => selectedSlot.slotId === slotId);
                   const isPast =
                     day.isBefore(currentDate, "day") ||
                     (day.isSame(currentDate, "day") &&
@@ -722,7 +820,7 @@ const FlexibleBooking = () => {
                             : isSelected
                             ? "#1976d2"
                             : "#D9E9FF",
-                          color: isSelected ? "#FFFFFF" : "#0D1B34",
+                          color: isPast ? "#E0E0E0" : isSelected ? "#1976d2" : "#D9E9FF",
                           p: 2,
                           borderRadius: 2,
                           width: "100%",
