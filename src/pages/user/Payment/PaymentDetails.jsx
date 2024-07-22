@@ -407,28 +407,9 @@ const PaymentDetail = () => {
                         <FormLabel component="legend" sx={{ color: "black" }}>
                           <strong>
                             You don't need to select payment method because you
-                            have {availableSlot} slot(s) now !
+                            have {availableSlot} remaining slot(s) now !
                           </strong>
                         </FormLabel>
-                        {/* <RadioGroup
-                        aria-label="payment method"
-                        name="paymentMethod"
-                        value={selectedPaymentMethod}
-                        onChange={handlePaymentMethodChange}
-                      >
-                        <FormControlLabel
-                          value="creditCard"
-                          control={<Radio />}
-                          label="Credit Card"
-                          sx={{ color: "black" }}
-                        />
-                        <FormControlLabel
-                          value="Balance"
-                          control={<Radio />}
-                          label="Balance"
-                          sx={{ color: "black" }}
-                        />
-                      </RadioGroup> */}
                       </FormControl>
                     </Box>
                   </Grid>
@@ -526,7 +507,7 @@ const PaymentDetail = () => {
                             {request.timeSlot.slotEndTime}
                           </Typography>
                           <Typography variant="body1" color="black">
-                            <strong>Price:</strong> {request.price} VND
+                            <strong>Price:</strong> {request.price}K VND
                           </Typography>
                           <FormControl fullWidth>
                           <Select
@@ -547,7 +528,7 @@ const PaymentDetail = () => {
                       ))}
                     <Divider sx={{ marginY: "10px" }} />
                     <Typography variant="h6" color="black">
-                      <strong>Total Price:</strong> {totalPrice} VND
+                      <strong>Total Price:</strong> {totalPrice}K VND
                     </Typography>
                   </Box>
                 </Grid>

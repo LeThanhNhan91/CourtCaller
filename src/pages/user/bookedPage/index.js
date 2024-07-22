@@ -273,7 +273,7 @@ const BookedPage = () => {
                         <td>{formatDate(booked.bookingDate)}</td>
                         <td>{booked.numberOfSlot}</td>
                         <td>{booked.bookingType}</td>
-                        <td>{booked.totalPrice} VND</td>
+                        <td>{booked.totalPrice}K VND</td>
                         <td>{booked.status}</td>
                         <td>
                           {booked.status !== "Canceled" && (

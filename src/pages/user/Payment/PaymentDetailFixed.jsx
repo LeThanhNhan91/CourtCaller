@@ -172,7 +172,7 @@ const PaymentDetailFixed = () => {
                     </Typography>
                     <Divider sx={{ marginY: '10px' }} />
                     <Typography variant="h6" color="black">
-                      <strong>Total Price:</strong> {totalPrice} VND
+                      <strong>Total Price:</strong> {totalPrice}K VND
                     </Typography>
                   </Box>
                 </Grid>
