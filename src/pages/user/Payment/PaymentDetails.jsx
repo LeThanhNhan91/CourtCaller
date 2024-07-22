@@ -35,6 +35,7 @@ import { fetchAvailableCourts, fetchCourtByBranchId } from "api/courtApi";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import * as signalR from "@microsoft/signalr";
 
+
 const theme = createTheme({
   components: {
     MuiRadio: {
@@ -291,13 +292,16 @@ const PaymentDetail = () => {
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
           const tokenResponse = await generatePaymentToken(booking.bookingId);
           const token = tokenResponse.token;
+          
           if (paymentMethod === "Balance") {
             try {
               await processBalancePayment(token);
               navigate("/confirm");
             } catch (error) {
               console.error("Balance payment failed:", error);
-              navigate("/reject");
+             navigate("/reject");
+             
+
             }
           } else {
             const paymentResponse = await processPayment(token);
@@ -344,7 +348,7 @@ const PaymentDetail = () => {
 
           const tokenResponse = await generatePaymentToken(booking.bookingId);
           const token = tokenResponse.token;
-
+    
           if (paymentMethod === "Balance") {
             try {
               await processBalancePayment(token);
@@ -352,6 +356,7 @@ const PaymentDetail = () => {
             } catch (error) {
               console.error("Balance payment failed:", error);
               navigate("/reject");
+              
             }
           } else {
             const paymentResponse = await processPayment(token);

@@ -61,7 +61,7 @@ const HomePage = () => {
             userResponse = await api.get(`/Users/${id}`);
           }
           setUserData(response.data);
-          setUserVip(response.data.isVip);
+         
           setUser(userResponse.data);
         } catch (error) {
           console.error("Error fetching user data:", error);

@@ -16,6 +16,7 @@ import {
   Paper,
   ThemeProvider,
   createTheme,
+  MenuItem  ,
 } from "@mui/material";
 import { MdOutlineLocalDrink } from "react-icons/md";
 import pic1 from "assets/users/images/byday/pic1.webp";
@@ -505,6 +506,23 @@ const FixedBooking = () => {
     fetchEachPercentRating();
   }, [selectedBranch]);
 
+  const handleStartTimeChange = (e) => {
+    const value = e.target.value;
+    const [hour] = value.split(':');
+    setSlotStartTime(value);
+  
+    const startHour = parseInt(hour, 10);
+    if (isNaN(startHour) || startHour < 0 || startHour > 23) {
+      setStartTimeValidation({ message: 'Please select a valid hour (0-23).' });
+      setSlotEndTime('');
+    } else {
+      setStartTimeValidation({ message: '' });
+      const endHour = (startHour + 1) % 24;
+      setSlotEndTime(`${endHour.toString().padStart(2, '0')}:00:00`);
+    }
+  };
+  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+
   const pictures = JSON.parse(branch.branchPicture).slice(0, 5);
 
   return (
@@ -692,41 +710,46 @@ const FixedBooking = () => {
                         />
                       </Grid>
                       <Grid item xs={12}>
-                        <FormControl fullWidth>
-                          <TextField
-                            label="Slot Start Time"
-                            type="text"
-                            value={slotStartTime}
-                            onChange={(e) => setSlotStartTime(e.target.value)}
-                            required
-                            InputLabelProps={{ style: { color: "black" } }}
-                            InputProps={{ style: { color: "black" } }}
-                          />
-                          {startTimeValidation.message && (
-                            <p className="errorVal">
-                              {startTimeValidation.message}
-                            </p>
-                          )}
-                        </FormControl>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <FormControl fullWidth>
-                          <TextField
-                            label="Slot End Time"
-                            type="text"
-                            value={slotEndTime}
-                            onChange={(e) => setSlotEndTime(e.target.value)}
-                            required
-                            InputLabelProps={{ style: { color: "black" } }}
-                            InputProps={{ style: { color: "black" } }}
-                          />
-                          {endTimeValidation.message && (
-                            <p className="errorVal">
-                              {endTimeValidation.message}
-                            </p>
-                          )}
-                        </FormControl>
-                      </Grid>
+                      <FormControl fullWidth>
+          <TextField
+            select
+            label="Slot Start Time"
+            value={slotStartTime}
+            onChange={handleStartTimeChange}
+            required
+            InputLabelProps={{ style: { color: 'black' } }}
+            InputProps={{ style: { color: 'black' } }}
+          >
+            {hours.map((hour) => (
+              <MenuItem key={hour} value={`${hour}:00:00`}>
+                {hour}:00:00
+              </MenuItem>
+            ))}
+          </TextField>
+          {startTimeValidation.message && (
+            <p className="errorVal">
+              {startTimeValidation.message}
+            </p>
+          )}
+        </FormControl>
+      </Grid>
+      <Grid item xs={12}>
+        <FormControl fullWidth>
+          <TextField
+            label="Slot End Time"
+            type="text"
+            value={slotEndTime}
+            disabled
+            InputLabelProps={{ style: { color: 'black' } }}
+            InputProps={{ style: { color: 'black' } }}
+          />
+          {endTimeValidation.message && (
+            <p className="errorVal">
+              {endTimeValidation.message}
+            </p>
+          )}
+        </FormControl>
+      </Grid>
                       <Grid item xs={12}>
                         <Button
                           variant="contained"
