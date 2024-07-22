@@ -32,8 +32,6 @@ import {
 } from "api/bookingApi";
 import { addTimeSlotIfExistBooking } from "api/timeSlotApi";
 import { fetchAvailableCourts, fetchCourtByBranchId } from "api/courtApi";
-import api from "api/api";
-import { jwtDecode } from "jwt-decode";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import * as signalR from "@microsoft/signalr";
 
@@ -58,6 +56,9 @@ const PaymentDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const {
+    email,
+    userName,
+    userId,
     branchId,
     bookingRequests,
     totalPrice,
@@ -75,14 +76,8 @@ const PaymentDetail = () => {
     : [];
   const [activeStep, setActiveStep] = useState(0);
 
-  const [email, setEmail] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [userId, setUserId] = useState("");
-  const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [userName, setUserName] = useState("");
   const [connection, setConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
@@ -93,45 +88,6 @@ const PaymentDetail = () => {
   const [eventCourt, setEventCourt] = useState(0);
   //fetch chỉ 1 lần
   const isFetchCourt = useRef(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      const decoded = jwtDecode(token);
-      setUserEmail(decoded.email);
-
-      const fetchUserData = async (id, isGoogle) => {
-        try {
-          if (isGoogle) {
-            const response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
-            setUserData(response.data);
-            const userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
-            setUser(userResponse.data);
-            setUserName(userResponse.data.userName)
-          } else {
-            const response = await api.get(`/UserDetails/${id}`);
-            setUserData(response.data);
-            const userResponse = await api.get(`/Users/${id}`);
-            setUser(userResponse.data);
-            setUserName(userResponse.data.userName)
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      };
-
-      if (decoded.iss !== "https://accounts.google.com") {
-        const userId = decoded.Id;
-        setUserId(userId);
-        fetchUserData(userId, false);
-      } else {
-        const userId = decoded.email;
-        setUserId(userId);
-        fetchUserData(userId, true);
-      }
-    }
-  }, []);
 
   //đấm nhau với signalR
   useEffect(() => {
@@ -295,13 +251,13 @@ const PaymentDetail = () => {
           }));
 
           const createBookingTypeFlex = await createBookingFlex(
-            userData.userId,
+            userId,
             numberOfSlot,
             branchId
           );
 
           id = createBookingTypeFlex.bookingId;
-          const booking = await reserveSlots(userData.userId, bookingForm);
+          const booking = await reserveSlots(userId, bookingForm);
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
           const tokenResponse = await generatePaymentToken(booking.bookingId);
           const token = tokenResponse.token;
@@ -353,7 +309,7 @@ const PaymentDetail = () => {
 
           console.log('bookingForm',bookingForm);
 
-          const booking = await reserveSlots(userData.userId, bookingForm);
+          const booking = await reserveSlots(userId, bookingForm);
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
           const tokenResponse = await generatePaymentToken(booking.bookingId);
@@ -411,7 +367,7 @@ const PaymentDetail = () => {
                 <strong>{userName}</strong>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                {userEmail}
+                {email}
               </Box>
             </Box>
 

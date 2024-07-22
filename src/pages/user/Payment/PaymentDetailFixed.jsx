@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button, Stepper, Step, StepLabel, Typography, Divider, Grid, TextField } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import PaymentIcon from '@mui/icons-material/Payment';
 import { generatePaymentToken, processPayment } from 'api/paymentApi';
 import { createFixedBooking } from 'api/bookingApi';
 import LoadingPage from './LoadingPage';
 import { processBalancePayment } from 'api/paymentApi';
-import api from 'api/api';
 
 const theme = createTheme({
   components: {
@@ -39,58 +36,14 @@ const formatDate = (dateString) => {
 const PaymentDetailFixed = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { branchId, bookingRequests, totalPrice, numberOfMonths, daysOfWeek, startDate, slotStartTime, slotEndTime } = location.state || {};
-  const [userId, setUserId] = useState('');
-  const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState(null);
-  const [userName, setUserName] = useState('');
+  const { email, userName, userId, branchId, bookingRequests, totalPrice, numberOfMonths, daysOfWeek, startDate, slotStartTime, slotEndTime } = location.state || {};
   const [userEmail, setUserEmail] = useState('');
   const [activeStep, setActiveStep] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
-  console.log('bookdata: ', branchId, bookingRequests, totalPrice, numberOfMonths, daysOfWeek, startDate, bookingRequests[0].slotDate, slotStartTime, slotEndTime)
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      const decoded = jwtDecode(token);
-      setUserEmail(decoded.email);
-
-      const fetchUserData = async (id, isGoogle) => {
-        try {
-          if (isGoogle) {
-            const response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
-            setUserData(response.data);
-            const userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
-            setUser(userResponse.data);
-            setUserName(userResponse.data.userName)
-          } else {
-            const response = await api.get(`/UserDetails/${id}`);
-            setUserData(response.data);
-            const userResponse = await api.get(`/Users/${id}`);
-            setUser(userResponse.data);
-            setUserName(userResponse.data.userName)
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      };
-
-      if (decoded.iss !== "https://accounts.google.com") {
-        const userId = decoded.Id;
-        setUserId(userId);
-        fetchUserData(userId, false);
-      } else {
-        const userId = decoded.email;
-        setUserId(userId);
-        fetchUserData(userId, true);
-      }
-    }
-  }, []);
-  console.log(user);
+  console.log('bookdata: ', branchId, bookingRequests, totalPrice, numberOfMonths, daysOfWeek, startDate, bookingRequests[0].slotDate, slotStartTime, slotEndTime);
   
   const handleNext = async (paymentMethod) => {
     if (activeStep === 0) {
@@ -102,7 +55,7 @@ const PaymentDetailFixed = () => {
           numberOfMonths,
           daysOfWeek,
           formattedStartDate,
-          userData.userId,
+          userId,
           branchId,
           bookingRequests[0].slotDate,
           slotStartTime,
@@ -159,7 +112,7 @@ const PaymentDetailFixed = () => {
                 <strong>{userName}</strong>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {userEmail}
+                {email}
               </Box>
             </Box>
 

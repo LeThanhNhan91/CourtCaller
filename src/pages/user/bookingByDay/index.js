@@ -14,8 +14,6 @@ import {
   Button,
   Grid,
   Typography,
-  Select,
-  MenuItem,
   FormControl,
   IconButton,
 } from "@mui/material";
@@ -640,6 +638,9 @@ const BookByDay = () => {
 
     navigate("/payment-detail", {
       state: {
+        email: user.email,
+        userName: user.userName,
+        userId: userData.userId,
         branchId: selectedBranch,
         bookingRequests,
         totalPrice: bookingRequests.reduce(

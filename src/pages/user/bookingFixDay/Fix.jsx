@@ -452,6 +452,7 @@ const FixedBooking = () => {
       totalPrice,
       userId: userData.userId, // Truyền cả userId
       email: user.email, // và email
+      userName: user.userName,
       numberOfMonths,
       daysOfWeek,
       startDate: formattedStartDate,

@@ -13,7 +13,6 @@ import { IoLocationOutline } from "react-icons/io5";
 import { CiEdit } from "react-icons/ci";
 import { Box, Button, Grid, Typography, IconButton } from "@mui/material";
 import { fetchBranchById } from "api/branchApi";
-import { fetchPrice } from "api/priceApi";
 import { fetchBookingByUserId } from "api/bookingApi";
 import api from "api/api";
 import dayjs from "dayjs";
@@ -22,7 +21,6 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import DisplayMap from "map/DisplayMap";
 import RequestBooking from "../requestUserBooking";
-import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
 import {
   fetchEachPercentRatingByBranch,
   fetchPercentRatingByBranch,
@@ -488,6 +486,7 @@ const FlexibleBooking = () => {
 
     navigate("/payment-detail", {
       state: {
+        email,
         userName,
         branchId,
         bookingRequests,
