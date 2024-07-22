@@ -37,6 +37,7 @@ import {
   LogLevel,
 } from "@microsoft/signalr";
 import { fetchUnavailableSlots } from "../../../api/timeSlotApi";
+import { checkBookingTypeFlex } from "api/bookingApi";
 import api from "api/api";
 import RequestLogin from "../requestUserLogin";
 import RequestBooking from "../requestUserBooking";
@@ -49,6 +50,7 @@ import {
   valueValidation,
 } from "../Validations/reviewValidation";
 import RequestForReviewing from "../requestForReviewing";
+import "../NavigateToFlex/styleNavigateFlex.css";
 
 Modal.setAppElement("#root");
 
@@ -152,6 +154,8 @@ const BookByDay = () => {
   const [isUserVip, setUserVip] = useState(false);
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
+  const [availableSlot, setAvailableSlot] = useState(null);
+  const [bookingId, setBookingId] = useState(null);
   const [connection, setConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [AverageRating, setAverageRating] = useState(null);
@@ -162,6 +166,7 @@ const BookByDay = () => {
   const selectBranchRef = useRef(selectedBranch);
   const [showLogin, setShowLogin] = useState(false); // State to manage visibility of RequestLogin component
   const [showRequestBooking, setShowRequestBooking] = useState(false);
+  const [showNavigateFlex, setShowNavigateFlex] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   useEffect(() => {
@@ -182,8 +187,12 @@ const BookByDay = () => {
         try {
           let response, userResponse;
           if (isGoogle) {
-            response = await api.get(`/UserDetails/GetUserDetailByUserEmail/${id}`);
-            userResponse = await api.get(`/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`);
+            response = await api.get(
+              `/UserDetails/GetUserDetailByUserEmail/${id}`
+            );
+            userResponse = await api.get(
+              `/Users/GetUserDetailByUserEmail/${id}?searchValue=${id}`
+            );
           } else {
             response = await api.get(`/UserDetails/${id}`);
             userResponse = await api.get(`/Users/${id}`);
@@ -357,10 +366,7 @@ const BookByDay = () => {
       };
 
       try {
-        await api.post(
-          "/Reviews",
-          reviewData
-        );
+        await api.post("/Reviews", reviewData);
         setReviewFormVisible(false);
         // Xử lý sau khi gửi đánh giá thành công (ví dụ: thông báo cho người dùng, cập nhật danh sách đánh giá, v.v.)
       } catch (error) {
@@ -523,8 +529,37 @@ const BookByDay = () => {
     }
   }, [closeTime]);
 
+  useEffect(() => {
+    const fetchingFlexSlot = async () => {
+      if (!user) {
+        console.error("User is null");
+        return;
+      }
+
+      try {
+        const availableSlot = await checkBookingTypeFlex(
+          userData.userId,
+          selectedBranch
+        );
+        console.log("availableSlot:", availableSlot);
+
+        setAvailableSlot(availableSlot.numberOfSlot); // Update the state
+        setBookingId(availableSlot.bookingId);
+      } catch (error) {
+        console.error("error fetching available Slot", error);
+      }
+    };
+
+    fetchingFlexSlot();
+  }, [user, selectedBranch]);
+
   // xử lý khi click vào slot
   const handleSlotClick = (slot, day, price) => {
+    if (availableSlot != 0) {
+      setShowNavigateFlex(true);
+      return;
+    }
+
     const slotId = `${day.format("YYYY-MM-DD")}_${slot}_${price}`;
 
     // Tìm tất cả các slot cùng thời gian đã được chọn
@@ -622,10 +657,10 @@ const BookByDay = () => {
       return;
     }
 
-    if(selectedSlots == 0){
-      alert('You need to choose slot(s) first');
+    if (selectedSlots == 0) {
+      alert("You need to choose slot(s) first");
       return;
-    } 
+    }
 
     const bookingRequests = selectedSlots.map((slot) => {
       const { day, slot: timeSlot, price } = slot;
@@ -726,8 +761,26 @@ const BookByDay = () => {
     setModalIsOpen(false);
   };
 
+  const closeNavigateToFlex = () => {
+    setShowNavigateFlex(false);
+  };
+
   const days = weekDays;
   const pictures = JSON.parse(branch.branchPicture).slice(0, 5);
+
+  const handleNavigate = () => {
+    navigate("/flexible", {
+      state: {
+        userId,
+        selectedBranchByDay: selectedBranch,
+        branch,
+      },
+    });
+  };
+
+  const currentDay = new Date().getDate();
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
 
   return (
     <>
@@ -1345,6 +1398,42 @@ const BookByDay = () => {
             overlayClassName="review-modal-overlay"
           >
             <RequestForReviewing />
+          </Modal>
+        )}
+
+        {/* Navigate to Flex */}
+        {showNavigateFlex && (
+          <Modal
+            isOpen={showNavigateFlex}
+            onRequestClose={closeNavigateToFlex}
+            className="review-modal"
+            overlayClassName="review-modal-overlay"
+          >
+            <div className="card">
+              <h3 className="card__title">Notification!</h3>
+              <p className="card__content">
+                You now already have some remaining slots in booking type flex,
+                we will navigate you. Please click the arrow button above.{" "}
+              </p>
+              <div className="card__date">
+                {currentMonth + " " + currentDay + ", " + currentYear}
+              </div>
+              <div className="card__arrow">
+                <svg
+                  onClick={handleNavigate}
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  height="15"
+                  width="15"
+                >
+                  <path
+                    fill="#fff"
+                    d="M13.4697 17.9697C13.1768 18.2626 13.1768 18.7374 13.4697 19.0303C13.7626 19.3232 14.2374 19.3232 14.5303 19.0303L20.3232 13.2374C21.0066 12.554 21.0066 11.446 20.3232 10.7626L14.5303 4.96967C14.2374 4.67678 13.7626 4.67678 13.4697 4.96967C13.1768 5.26256 13.1768 5.73744 13.4697 6.03033L18.6893 11.25H4C3.58579 11.25 3.25 11.5858 3.25 12C3.25 12.4142 3.58579 12.75 4 12.75H18.6893L13.4697 17.9697Z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
           </Modal>
         )}
       </div>
