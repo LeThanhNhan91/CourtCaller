@@ -143,7 +143,7 @@ const BookedPage = () => {
   const handleCancelBooking = async () => {
     try {
       await api.delete(
-        `/Bookings/cancelBooking/${bookingIdToCancel}`
+        `/Bookings/cancel/${bookingIdToCancel}`
       );
       setBookings((prevBookings) =>
         prevBookings.map((booking) =>

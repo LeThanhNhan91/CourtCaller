@@ -182,35 +182,65 @@ const PaymentDetail = () => {
     }
   }, [branchId]);
 
-  const handleCourtChange = async (index, slotDate, slotStartTime, slotEndTime) => {
+  const handleCourtChange = async (
+    index,
+    slotDate,
+    slotStartTime,
+    slotEndTime
+  ) => {
     try {
-      const availableCourtsData = await fetchAvailableCourts(branchId, slotDate, slotStartTime, slotEndTime);
+      const availableCourtsData = await fetchAvailableCourts(
+        branchId,
+        slotDate,
+        slotStartTime,
+        slotEndTime
+      );
       setAvailableCourts((prevState) => ({
         ...prevState,
-        [index]: availableCourtsData
+        [index]: availableCourtsData,
       }));
     } catch (error) {
-      console.error('Error fetching available courts:', error);
+      console.error("Error fetching available courts:", error);
     }
   };
 
   const handleCourtSelection = (index, courtId) => {
+    const currentSlot = sortedBookingRequests[index];
+    const isDuplicate = sortedBookingRequests.some((request, idx) => {
+      return (
+        idx !== index &&
+        request.slotDate === currentSlot.slotDate &&
+        request.timeSlot.slotStartTime === currentSlot.timeSlot.slotStartTime &&
+        request.timeSlot.slotEndTime === currentSlot.timeSlot.slotEndTime &&
+        selectedCourts[idx] === courtId
+      );
+    });
+
+    if (isDuplicate) {
+      alert("You now have some same booking slot, please choose another court");
+      return;
+    }
+
     setSelectedCourts((prevState) => ({
       ...prevState,
-      [index]: courtId
+      [index]: courtId,
     }));
   };
 
   useEffect(() => {
     if (branchId && sortedBookingRequests.length > 0 && !isFetchCourt.current) {
       sortedBookingRequests.forEach((request, index) => {
-        handleCourtChange(index, request.slotDate, request.timeSlot.slotStartTime, request.timeSlot.slotEndTime);
-        console.log ("branch", branchId , "sort là ", sortedBookingRequests);
+        handleCourtChange(
+          index,
+          request.slotDate,
+          request.timeSlot.slotStartTime,
+          request.timeSlot.slotEndTime
+        );
+        console.log("branch", branchId, "sort là ", sortedBookingRequests);
       });
       isFetchCourt.current = true;
     }
   }, [eventCourt]);
-
 
   const handleNext = async (paymentMethod) => {
     try {
@@ -307,7 +337,7 @@ const PaymentDetail = () => {
             };
           });
 
-          console.log('bookingForm',bookingForm);
+          console.log("bookingForm", bookingForm);
 
           const booking = await reserveSlots(userId, bookingForm);
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -366,9 +396,7 @@ const PaymentDetail = () => {
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <strong>{userName}</strong>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                {email}
-              </Box>
+              <Box sx={{ display: "flex", alignItems: "center" }}>{email}</Box>
             </Box>
 
             {/* box này là thông tin payment method */}
@@ -407,7 +435,7 @@ const PaymentDetail = () => {
                         <FormLabel component="legend" sx={{ color: "black" }}>
                           <strong>
                             You don't need to select payment method because you
-                            have {availableSlot} remaining slot(s) now !
+                            have {availableSlot} remaining slot(s) now
                           </strong>
                         </FormLabel>
                       </FormControl>
@@ -510,20 +538,29 @@ const PaymentDetail = () => {
                             <strong>Price:</strong> {request.price}K VND
                           </Typography>
                           <FormControl fullWidth>
-                          <Select
-                            value={selectedCourts[index] || ''}
-                            displayEmpty
-                            onChange={(e) => handleCourtSelection(index, e.target.value)}
-                          >
-                            <MenuItem value="">
-                              <em>Choose Court</em>
-                            </MenuItem>
-                            {availableCourts[index] && availableCourts[index].map(court => (
-                              <MenuItem key={court.courtId} value={court.courtId}>{court.courtName}</MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-
+                            <Select
+                              value={selectedCourts[index] || ""}
+                              onChange={(event) =>
+                                handleCourtSelection(index, event.target.value)
+                              }
+                            >
+                              {availableCourts[index] &&
+                              availableCourts[index].length > 0 ? (
+                                availableCourts[index].map((court) => (
+                                  <MenuItem
+                                    key={court.courtId}
+                                    value={court.courtId}
+                                  >
+                                    {court.courtName}
+                                  </MenuItem>
+                                ))
+                              ) : (
+                                <MenuItem disabled>
+                                  No courts available
+                                </MenuItem>
+                              )}
+                            </Select>
+                          </FormControl>
                         </Box>
                       ))}
                     <Divider sx={{ marginY: "10px" }} />
@@ -669,5 +706,3 @@ const PaymentDetail = () => {
 };
 
 export default PaymentDetail;
-
-
