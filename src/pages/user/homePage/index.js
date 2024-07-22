@@ -2,7 +2,7 @@ import { memo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import "react-multi-carousel/lib/styles.css";
-import feature1Img from "assets/users/images/featured/images.jpg";
+import { ScaleLoader } from "react-spinners";
 import hero from "assets/users/images/categories/image.png";
 import cat1Img from "assets/users/images/categories/cat-1.png";
 import cat2Img from "assets/users/images/categories/cat-2.png";
@@ -289,12 +289,12 @@ const HomePage = () => {
                 <p>
                   {prices[branch.branchId]
                     ? `Weekday: ${prices[branch.branchId].weekdayPrice} VND`
-                    : 'Loading...'}
+                    : <ScaleLoader size={5} color="green"/>}
                 </p>
                 <p>
                   {prices[branch.branchId]
                     ? `Weekend: ${prices[branch.branchId].weekendPrice} VND`
-                    : 'Loading...'}
+                    : <ScaleLoader size={5} color="green"/>}
                 </p>
                 <button onClick={() => handleBookNow(branch)}>Book now</button>
               </div>
