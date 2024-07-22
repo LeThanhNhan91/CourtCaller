@@ -41,6 +41,7 @@ import {
   fixMonthValidation,
   fixStartTimeValidation,
   fixEndTimeValidation,
+  fixDayOfWeekValidation
 } from "../Validations/bookingValidation";
 import {
   reviewTextValidation,
@@ -153,6 +154,10 @@ const FixedBooking = () => {
     message: "",
   });
   const [endTimeValidation, setEndTimeValidation] = useState({
+    isValid: true,
+    message: "",
+  });
+  const [dayOfWeekValidation, setDayOfWeekValidation] = useState({
     isValid: true,
     message: "",
   });
@@ -411,14 +416,17 @@ const FixedBooking = () => {
     const monthValidation = fixMonthValidation(numberOfMonths);
     const startTimeValidation = fixStartTimeValidation(slotStartTime);
     const endTimeValidation = fixEndTimeValidation(slotStartTime, slotEndTime);
+    const dayOfWeekValidation = fixDayOfWeekValidation(daysOfWeek);
     setMonthValidation(monthValidation);
     setStartTimeValidation(startTimeValidation);
     setEndTimeValidation(endTimeValidation);
+    setDayOfWeekValidation(dayOfWeekValidation);
 
     if (
       !monthValidation.isValid ||
       !startTimeValidation.isValid ||
-      !endTimeValidation.isValid
+      !endTimeValidation.isValid ||
+      !dayOfWeekValidation.isValid
     ) {
       setMessage("Please try again");
       setMessageType("error");
@@ -663,6 +671,11 @@ const FixedBooking = () => {
                             sx={{ color: "black" }}
                           />
                         ))}
+                        {dayOfWeekValidation.message && (
+                            <p className="errorVal">
+                              {dayOfWeekValidation.message}
+                            </p>
+                          )}
                       </Grid>
                       <Grid item xs={12}>
                         <Typography sx={{ color: "black" }}>
