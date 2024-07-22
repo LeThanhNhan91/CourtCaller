@@ -175,7 +175,6 @@ const Flexible = () => {
     }
   };
 
-  console.log("detail", branchDetail);
 
   return (
     <Box sx={{ backgroundColor: "rgb(234, 236, 238)" }}>

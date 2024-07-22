@@ -1413,7 +1413,7 @@ const BookByDay = () => {
               <h3 className="card__title">Notification!</h3>
               <p className="card__content">
                 You now already have some remaining slots in booking type flex,
-                we will navigate you. Please click the arrow button above.{" "}
+                we will navigate you. Please click the arrow button under.
               </p>
               <div className="card__date">
                 {currentMonth + " " + currentDay + ", " + currentYear}
