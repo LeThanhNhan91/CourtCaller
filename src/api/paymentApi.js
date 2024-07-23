@@ -46,9 +46,9 @@ export const generatePaymentToken = async (bookingId) => {
   }
 };
 
-export const processPayment = async (token) => {
+export const processPayment = async (role, token) => {
   try {
-    const response = await api.post(`${url}/Payments/ProcessPayment?role=Customer&token=${token}`);
+    const response = await api.post(`${url}/Payments/ProcessPayment?role=${role}&token=${token}`);
     return response.data;
   } catch (error) {
     console.error('Error processing payment:', error.response ? error.response.data : error.message);

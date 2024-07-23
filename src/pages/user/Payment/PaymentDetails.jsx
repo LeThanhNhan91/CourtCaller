@@ -290,7 +290,7 @@ const PaymentDetail = () => {
           id = createBookingTypeFlex.bookingId;
           const booking = await reserveSlots(userId, bookingForm);
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
-          const tokenResponse = await generatePaymentToken(booking.bookingId);
+          const tokenResponse = await generatePaymentToken(id);
           const token = tokenResponse.token;
           
           if (paymentMethod === "Balance") {
@@ -304,7 +304,7 @@ const PaymentDetail = () => {
 
             }
           } else {
-            const paymentResponse = await processPayment(token);
+            const paymentResponse = await processPayment("Customer", token);
             const paymentUrl = paymentResponse;
             window.location.href = paymentUrl;
             return;
