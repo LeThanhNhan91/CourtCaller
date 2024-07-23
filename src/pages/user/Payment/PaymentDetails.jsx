@@ -359,7 +359,7 @@ const PaymentDetail = () => {
               
             }
           } else {
-            const paymentResponse = await processPayment(token);
+            const paymentResponse = await processPayment("Customer", token);
             const paymentUrl = paymentResponse;
             window.location.href = paymentUrl;
             return;
