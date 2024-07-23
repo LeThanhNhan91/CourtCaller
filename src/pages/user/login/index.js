@@ -278,14 +278,14 @@ const Login = () => {
                     toast.error("Google login failed");
                   }}
                 />
-                <a
+                {/* <a
                   onClick={loginFacebook}
                   className="icon"
                   style={{ color: "white" }}
                 >
                   <FaFacebookF />{" "}
                   <span style={{ marginLeft: 5 }}> With Facebook</span>
-                </a>
+                </a> */}
               </div>
               <span>or use your account for login</span>
               <input
