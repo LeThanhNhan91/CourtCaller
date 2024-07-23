@@ -91,7 +91,7 @@ const BookedPage = () => {
           (booking) => booking !== null
         );
 
-        const currentDate = new Date();
+        const currentDate = new Date().getDate();
         const scheduledBookings = [];
         const overdueBookingsList = [];
         const canceledBookingsList = [];
